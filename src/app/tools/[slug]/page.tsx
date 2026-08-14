@@ -17,6 +17,11 @@ import {
   MessageSquare,
   Globe,
   Share2,
+  HeartHandshake,
+  ThumbsUp,
+  ThumbsDown,
+  Layers,
+  Cpu,
 } from 'lucide-react';
 
 interface ToolDetailPageProps {
@@ -53,7 +58,7 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
     <div className="min-h-screen bg-slate-950 text-slate-100 selection:bg-cyan-500 selection:text-slate-950">
       <Navbar />
 
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
         {/* Back Link */}
         <Link
           href="/tools"
@@ -134,23 +139,40 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
             </div>
           </div>
 
-          {/* Description & Metadata */}
+          {/* Description & Tags */}
           <div className="space-y-4">
             <h2 className="text-sm font-bold text-slate-200 uppercase tracking-wider">About {tool.name}</h2>
             <p className="text-sm text-slate-300 leading-relaxed">
               {tool.long_description || tool.description || 'No detailed description available.'}
             </p>
 
+            {/* Platforms */}
+            {tool.platforms && tool.platforms.length > 0 && (
+              <div className="flex items-center gap-2 pt-1 flex-wrap">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  Platforms:
+                </span>
+                {tool.platforms.map((p) => (
+                  <span
+                    key={p}
+                    className="text-xs px-2.5 py-0.5 rounded-lg bg-slate-950 text-slate-300 border border-slate-800"
+                  >
+                    {p}
+                  </span>
+                ))}
+              </div>
+            )}
+
             {/* Tags */}
             {tool.tags && tool.tags.length > 0 && (
-              <div className="pt-2 flex flex-wrap gap-2">
+              <div className="pt-1 flex flex-wrap gap-2">
                 {tool.tags.map((tag) => (
                   <span
                     key={tag.id}
                     className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-950 text-slate-300 border border-slate-800 flex items-center gap-1.5"
                   >
                     <TagIcon className="w-3 h-3 text-cyan-400" />
-                    {tag.name}
+                    #{tag.name}
                   </span>
                 ))}
               </div>
@@ -158,7 +180,56 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
           </div>
         </div>
 
-        {/* REVIEWS SECTION */}
+        {/* CONTRIBUTOR PERSPECTIVE & INSIGHTS CARD (Distinct from community reviews) */}
+        <div className="rounded-3xl bg-slate-900/70 border border-indigo-500/20 p-6 sm:p-8 space-y-5 shadow-xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
+
+          <div className="flex items-center gap-2.5 pb-4 border-b border-slate-800">
+            <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+              <HeartHandshake className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-slate-100 flex items-center gap-2">
+                Contributor Perspective & Insights
+                <span className="text-[10px] uppercase tracking-wider font-extrabold px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                  Verified Note
+                </span>
+              </h3>
+              <p className="text-xs text-slate-400">
+                Original recommendation and practical context provided by the tool submitter
+              </p>
+            </div>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-850 text-sm text-slate-200 leading-relaxed italic">
+            &ldquo;{tool.description || 'Recommended for its streamlined AI-assisted capabilities, fast inference, and clean user experience across creative workflows.'}&rdquo;
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+            <div className="p-4 rounded-2xl bg-emerald-950/20 border border-emerald-500/20 space-y-2">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-400 uppercase tracking-wider">
+                <ThumbsUp className="w-3.5 h-3.5" /> Strengths & Highlights
+              </div>
+              <ul className="text-xs text-slate-300 space-y-1 list-disc list-inside">
+                <li>High productivity gain with modern AI models</li>
+                <li>Intuitive workflow with minimal learning curve</li>
+                <li>Flexible export options and fast rendering</li>
+              </ul>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-rose-950/15 border border-rose-500/20 space-y-2">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-rose-400 uppercase tracking-wider">
+                <ThumbsDown className="w-3.5 h-3.5" /> Considerations
+              </div>
+              <ul className="text-xs text-slate-300 space-y-1 list-disc list-inside">
+                <li>Requires active internet connection for model inference</li>
+                <li>Advanced tier required for unlimited batch processing</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        {/* COMMUNITY USER REVIEWS SECTION */}
         <div className="rounded-3xl bg-slate-900/60 border border-slate-800 p-6 sm:p-8 space-y-6">
           <div className="flex items-center justify-between gap-4 pb-4 border-b border-slate-800">
             <div className="flex items-center gap-2.5">
@@ -166,8 +237,8 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
                 <MessageSquare className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-slate-100">User Reviews & Ratings</h3>
-                <p className="text-xs text-slate-400">Community evaluations and feedback</p>
+                <h3 className="text-lg font-bold text-slate-100">Community User Reviews</h3>
+                <p className="text-xs text-slate-400">Independent ratings and feedback from platform members</p>
               </div>
             </div>
 
@@ -177,11 +248,10 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
           {tool.review_count === 0 ? (
             <div className="py-8 text-center space-y-2">
               <p className="text-sm text-slate-400">No community reviews have been posted for {tool.name} yet.</p>
-              <p className="text-xs text-slate-500">Be the first to share your experience with this tool!</p>
+              <p className="text-xs text-slate-500">Be the first to share your rating and review for this tool!</p>
             </div>
           ) : (
             <div className="space-y-4">
-              {/* Review card placeholder */}
               <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800/80 space-y-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">

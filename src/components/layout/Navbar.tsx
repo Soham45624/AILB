@@ -13,16 +13,15 @@ import {
   Compass,
   User,
   LayoutDashboard,
+  Send,
 } from 'lucide-react';
 import { ThemeToggle } from '../ui/ThemeToggle';
-import { AddToolModal } from '../home/AddToolModal';
 import { AuthModal } from '../auth/AuthModal';
 import { getCurrentUserAction, signOutAction } from '@/app/actions/auth';
 
 export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [user, setUser] = useState<any>(null);
@@ -51,6 +50,7 @@ export function Navbar() {
   const navLinks = [
     { name: 'AI Tools', href: '/tools', icon: Compass },
     { name: 'Categories', href: '/#categories', icon: Layers },
+    { name: 'Submit Tool', href: '/submit', icon: Send },
   ];
 
   return (
@@ -111,14 +111,14 @@ export function Navbar() {
 
             <ThemeToggle />
 
-            {/* Add Tool Button */}
-            <button
-              onClick={() => setIsAddModalOpen(true)}
+            {/* + Add AI Tool Button */}
+            <Link
+              href="/submit"
               className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-xs sm:text-sm shadow-md shadow-cyan-500/20 hover:shadow-cyan-500/30 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
             >
               <Plus className="w-4 h-4" />
-              <span className="hidden xs:inline">Add AI Tool</span>
-            </button>
+              <span className="hidden xs:inline">+ Add AI Tool</span>
+            </Link>
 
             {/* User Auth Profile / Login Button */}
             {user ? (
@@ -126,7 +126,7 @@ export function Navbar() {
                 <Link
                   href="/dashboard"
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all ${
-                    pathname === '/dashboard'
+                    pathname.startsWith('/dashboard')
                       ? 'bg-cyan-500/15 border-cyan-500/40 text-cyan-300'
                       : 'bg-slate-900 border-slate-800 text-slate-200 hover:border-slate-700 hover:bg-slate-850'
                   }`}
@@ -159,9 +159,6 @@ export function Navbar() {
           </div>
         </div>
       </header>
-
-      {/* Add Tool Modal */}
-      <AddToolModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />
 
       {/* Auth Modal */}
       <AuthModal
