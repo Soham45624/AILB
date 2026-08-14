@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
+import { Suspense } from "react";
+import { NavigationProgressBar } from "@/components/ui/NavigationProgressBar";
 import "./globals.css";
 
 const geist = Geist({
@@ -81,7 +83,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className="min-h-full flex flex-col bg-slate-950 text-slate-100">
+      <body className="min-h-full flex flex-col bg-zinc-950 text-zinc-100">
+        <Suspense fallback={null}>
+          <NavigationProgressBar />
+        </Suspense>
         {children}
       </body>
     </html>
