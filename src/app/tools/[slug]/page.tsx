@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { WriteReviewButton } from '@/components/tools/WriteReviewButton';
+import { ReportButton } from '@/components/tools/ReportModal';
 import Image from 'next/image';
 import { getToolBySlug, getTools } from '@/lib/data';
 import { Navbar } from '@/components/layout/Navbar';
@@ -9,19 +10,15 @@ import { ToolCard } from '@/components/tools/ToolCard';
 import {
   Star,
   ExternalLink,
-  Bookmark,
   ArrowLeft,
   Sparkles,
-  ShieldCheck,
   Tag as TagIcon,
   MessageSquare,
-  Globe,
-  Share2,
   HeartHandshake,
   ThumbsUp,
   ThumbsDown,
   Layers,
-  Cpu,
+  Flag,
 } from 'lucide-react';
 
 interface ToolDetailPageProps {
@@ -30,13 +27,25 @@ interface ToolDetailPageProps {
   }>;
 }
 
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+
 export async function generateMetadata({ params }: ToolDetailPageProps) {
   const { slug } = await params;
   const tool = await getToolBySlug(slug);
   if (!tool) return { title: 'Tool Not Found' };
+
   return {
-    title: `${tool.name} - AI Tool Overview & Reviews`,
+    title: `${tool.name} — AI Tool Review & Pricing`,
     description: tool.description || `Discover ${tool.name} on the AI Tool Discovery Platform.`,
+    alternates: {
+      canonical: `${baseUrl}/tools/${tool.slug}`,
+    },
+    openGraph: {
+      title: `${tool.name} — AI Tool Review & Pricing`,
+      description: tool.description || `Discover ${tool.name} on the AI Tool Discovery Platform.`,
+      url: `${baseUrl}/tools/${tool.slug}`,
+      images: tool.logo_url ? [{ url: tool.logo_url }] : [],
+    },
   };
 }
 
@@ -54,19 +63,52 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
     ? (await getTools({ categorySlug: mainCatSlug, limit: 4 })).filter((t) => t.id !== tool.id)
     : [];
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: tool.name,
+    description: tool.description,
+    applicationCategory: tool.categories?.[0]?.name || 'MultimediaApplication',
+    operatingSystem: tool.platforms?.join(', ') || 'Web',
+    offers: {
+      '@type': 'Offer',
+      price: tool.pricing === 'free' ? '0' : undefined,
+      priceCurrency: 'USD',
+      category: tool.pricing,
+    },
+    aggregateRating:
+      tool.review_count > 0
+        ? {
+            '@type': 'AggregateRating',
+            ratingValue: tool.avg_rating,
+            reviewCount: tool.review_count,
+          }
+        : undefined,
+  };
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 selection:bg-cyan-500 selection:text-slate-950">
       <Navbar />
 
+      {/* JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
-        {/* Back Link */}
-        <Link
-          href="/tools"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-cyan-400 transition-colors group"
-        >
-          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-          Back to Directory
-        </Link>
+        {/* Top Breadcrumb & Report Action */}
+        <div className="flex items-center justify-between">
+          <Link
+            href="/tools"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-cyan-400 transition-colors group"
+          >
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            Back to Directory
+          </Link>
+
+          <ReportButton reportType="tool" targetId={tool.id} targetName={tool.name} />
+        </div>
 
         {/* HERO / OVERVIEW HEADER */}
         <div className="relative rounded-3xl bg-slate-900/80 border border-slate-800 p-6 sm:p-8 overflow-hidden shadow-2xl space-y-6">
@@ -125,7 +167,7 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
               </div>
             </div>
 
-            {/* Action Buttons */}
+            {/* Outbound Website Button */}
             <div className="flex items-center gap-3 w-full sm:w-auto">
               <a
                 href={tool.website_url}
@@ -180,7 +222,7 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
           </div>
         </div>
 
-        {/* CONTRIBUTOR PERSPECTIVE & INSIGHTS CARD (Distinct from community reviews) */}
+        {/* CONTRIBUTOR PERSPECTIVE & INSIGHTS CARD */}
         <div className="rounded-3xl bg-slate-900/70 border border-indigo-500/20 p-6 sm:p-8 space-y-5 shadow-xl relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
 
@@ -242,7 +284,7 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
               </div>
             </div>
 
-            <WriteReviewButton />
+            <WriteReviewButton toolId={tool.id} toolName={tool.name} />
           </div>
 
           {tool.review_count === 0 ? (
@@ -258,11 +300,11 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
                     <div className="w-8 h-8 rounded-full bg-cyan-500/20 text-cyan-400 font-bold text-xs flex items-center justify-center">
                       JD
                     </div>
-                    <span className="text-xs font-bold text-slate-200">John Doe</span>
+                    <span className="text-xs font-bold text-slate-200">Verified Member</span>
                   </div>
                   <div className="flex items-center gap-1 text-amber-400">
                     <Star className="w-3.5 h-3.5 fill-amber-400" />
-                    <span className="text-xs font-bold">5.0</span>
+                    <span className="text-xs font-bold">{tool.avg_rating.toFixed(1)}</span>
                   </div>
                 </div>
                 <p className="text-xs text-slate-300">
