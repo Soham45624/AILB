@@ -3,7 +3,6 @@ import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { ToolGrid } from '@/components/tools/ToolGrid';
 import { ToolFilterBar } from '@/components/tools/ToolFilterBar';
-import { Sparkles, Database, Search, Cpu } from 'lucide-react';
 import { SortOption } from '@/lib/types';
 
 interface ToolsPageProps {
@@ -18,7 +17,7 @@ interface ToolsPageProps {
   }>;
 }
 
-export const revalidate = 0; // Dynamic server rendering for realtime search & filters
+export const revalidate = 0;
 
 export default async function ToolsPage({ searchParams }: ToolsPageProps) {
   const params = await searchParams;
@@ -52,32 +51,27 @@ export default async function ToolsPage({ searchParams }: ToolsPageProps) {
   const activeCategoryObj = categories.find((c) => c.slug === category);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 selection:bg-cyan-500 selection:text-slate-950">
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 selection:bg-zinc-100 selection:text-zinc-950 flex flex-col justify-between">
       <Navbar />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-10 flex-1 w-full">
         {/* Header */}
-        <div className="mb-8 space-y-2">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-bold uppercase tracking-wider">
-            <Database className="w-3.5 h-3.5" />
-            Supabase Live AI Library
-          </div>
-
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-100 tracking-tight">
+        <div className="mb-6 space-y-1.5">
+          <h1 className="text-2xl sm:text-3xl font-black text-zinc-100 tracking-tight">
             {search ? (
               <span>
-                Search Results for &ldquo;<span className="text-cyan-400">{search}</span>&rdquo;
+                Search results for &ldquo;{search}&rdquo;
               </span>
             ) : activeCategoryObj ? (
-              `${activeCategoryObj.name} AI Tools`
+              `${activeCategoryObj.name} Tools`
             ) : (
-              'Discover & Filter AI Tools'
+              'Explore AI Tools'
             )}
           </h1>
 
-          <p className="text-sm text-slate-400 max-w-2xl">
+          <p className="text-xs sm:text-sm text-zinc-400 max-w-xl">
             {activeCategoryObj?.description ||
-              'Search across tool names, categories, tags, features, pricing models, platforms, and verified user ratings.'}
+              'Filter by capability, pricing, user evaluation, and supported platforms.'}
           </p>
         </div>
 
@@ -94,23 +88,17 @@ export default async function ToolsPage({ searchParams }: ToolsPageProps) {
           initialSort={sort}
         />
 
-        {/* Results Counter & Live Indicator */}
-        <div className="flex items-center justify-between pb-4 mb-6 border-b border-slate-900 text-xs font-medium text-slate-400">
+        {/* Results Counter */}
+        <div className="flex items-center justify-between pb-3 mb-6 border-b border-zinc-900 text-xs font-medium text-zinc-400">
           <div className="flex items-center gap-2">
             <span>
-              Showing <strong className="text-slate-100 font-bold">{tools.length}</strong>{' '}
+              Showing <strong className="text-zinc-200">{tools.length}</strong>{' '}
               {tools.length === 1 ? 'tool' : 'tools'}
-              {totalCount > tools.length && ` of ${totalCount} matching`}
+              {totalCount > tools.length && ` of ${totalCount}`}
             </span>
-            {search && (
-              <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-300 text-[11px]">
-                Ranked by relevance
-              </span>
-            )}
           </div>
-          <span className="flex items-center gap-1.5 text-emerald-400 font-semibold bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            Live Supabase Search
+          <span className="text-[11px] text-zinc-500 font-mono">
+            Fast Index
           </span>
         </div>
 

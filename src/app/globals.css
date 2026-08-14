@@ -2,41 +2,43 @@
 
 @theme inline {
   --font-sans: var(--font-geist-sans);
-  --color-background: #020817;
-  --color-foreground: #f1f5f9;
+  --color-background: #09090b;
+  --color-foreground: #fafafa;
 }
 
-/* Base reset */
+/* Hardware-accelerated smooth scrolling & base resets */
 *, *::before, *::after {
   box-sizing: border-box;
 }
 
 html {
   scroll-behavior: smooth;
+  color-scheme: dark;
 }
 
 body {
-  background-color: #020817;
-  color: #f1f5f9;
-  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  background-color: #09090b;
+  color: #fafafa;
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
-/* Scrollbar Styling */
+/* Minimalist Ultra-Thin Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: #0f172a;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: #27272a;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+  background: #3f3f46;
 }
 
 /* Hide scrollbar utility */
@@ -48,17 +50,23 @@ body {
   display: none;
 }
 
-/* Fade-in animation */
-@keyframes fade-in {
-  from { opacity: 0; transform: translateY(6px); }
+/* Performance-Optimized Lightweight Micro-Interactions */
+@keyframes subtle-fade {
+  from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 .animate-fade-in {
-  animation: fade-in 0.3s ease-out both;
+  animation: subtle-fade 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 /* Line-clamp utilities */
 .line-clamp-1 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 1; }
 .line-clamp-2 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 .line-clamp-3 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+
+/* Subtle dot grid for clean background depth without GPU strain */
+.bg-grid-pattern {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+  background-size: 24px 24px;
+}

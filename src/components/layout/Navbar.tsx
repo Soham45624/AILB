@@ -9,20 +9,16 @@ import {
   Search,
   LogIn,
   LogOut,
-  Layers,
   Compass,
-  User,
   LayoutDashboard,
+  ShieldCheck,
   Send,
 } from 'lucide-react';
-import { ThemeToggle } from '../ui/ThemeToggle';
-import { AuthModal } from '../auth/AuthModal';
 import { getCurrentUserAction, signOutAction } from '@/app/actions/auth';
 
 export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [user, setUser] = useState<any>(null);
 
@@ -48,124 +44,114 @@ export function Navbar() {
   };
 
   const navLinks = [
-    { name: 'AI Tools', href: '/tools', icon: Compass },
-    { name: 'Categories', href: '/#categories', icon: Layers },
-    { name: 'Submit Tool', href: '/submit', icon: Send },
+    { name: 'Directory', href: '/tools', icon: Compass },
+    { name: 'Categories', href: '/#categories' },
+    { name: 'Submit AI Tool', href: '/submit' },
   ];
 
   return (
-    <>
-      <header className="sticky top-0 z-50 backdrop-blur-xl bg-slate-950/80 border-b border-slate-800/60 transition-colors">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2.5 group shrink-0">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 via-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform duration-300">
-              <Sparkles className="w-5 h-5 text-white animate-pulse" />
-            </div>
-            <div className="flex flex-col">
-              <span className="font-bold text-lg text-slate-100 tracking-tight flex items-center gap-1.5">
-                AI Discovery
-                <span className="text-[10px] uppercase tracking-wider font-extrabold px-1.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-                  PRO
-                </span>
-              </span>
-            </div>
+    <header className="sticky top-0 z-50 bg-zinc-950/90 backdrop-blur-md border-b border-zinc-800/80 transition-colors">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-15 flex items-center justify-between gap-4">
+        {/* Brand Logo */}
+        <Link href="/" className="flex items-center gap-2.5 group shrink-0">
+          <div className="w-8 h-8 rounded-lg bg-zinc-100 text-zinc-950 flex items-center justify-center font-black text-sm tracking-tighter group-hover:bg-white transition-colors">
+            AI
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="font-bold text-sm tracking-tight text-zinc-100">
+              Discovery
+            </span>
+          </div>
+        </Link>
+
+        {/* Center Nav Links */}
+        <nav className="hidden md:flex items-center gap-1">
+          {navLinks.map((link) => {
+            const isActive = pathname === link.href;
+            return (
+              <Link
+                key={link.name}
+                href={link.href}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                  isActive
+                    ? 'text-white bg-zinc-800/90'
+                    : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900'
+                }`}
+              >
+                {link.name}
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Right Actions */}
+        <div className="flex items-center gap-2.5">
+          {/* Quick Search */}
+          <form action="/tools" method="GET" className="hidden sm:flex items-center relative">
+            <input
+              type="text"
+              name="search"
+              placeholder="Search tools..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-36 lg:w-48 pl-8 pr-2.5 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-xs text-zinc-200 placeholder:text-zinc-500 focus:outline-none focus:border-zinc-600 transition-colors"
+            />
+            <Search className="w-3.5 h-3.5 text-zinc-500 absolute left-2.5 pointer-events-none" />
+          </form>
+
+          {/* + Submit Button */}
+          <Link
+            href="/submit"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-100 hover:bg-white text-zinc-950 font-semibold text-xs transition-colors shrink-0"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span className="hidden xs:inline">Submit</span>
           </Link>
 
-          {/* Nav Links */}
-          <nav className="hidden md:flex items-center gap-1">
-            {navLinks.map((link) => {
-              const Icon = link.icon;
-              const isActive = pathname === link.href;
-              return (
+          {/* User Profile / Admin Link / Login */}
+          {user ? (
+            <div className="flex items-center gap-1.5">
+              {user.role === 'admin' && (
                 <Link
-                  key={link.name}
-                  href={link.href}
-                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                    isActive
-                      ? 'text-cyan-400 bg-cyan-500/10 border border-cyan-500/20'
-                      : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
-                  }`}
+                  href="/admin"
+                  className="p-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 text-xs font-medium flex items-center gap-1"
+                  title="Admin Portal"
                 >
-                  <Icon className="w-4 h-4 text-slate-400 group-hover:text-cyan-400" />
-                  {link.name}
+                  <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
                 </Link>
-              );
-            })}
-          </nav>
+              )}
 
-          {/* Right Actions */}
-          <div className="flex items-center gap-2.5">
-            {/* Quick Search */}
-            <form action="/tools" method="GET" className="hidden sm:flex items-center relative">
-              <input
-                type="text"
-                name="search"
-                placeholder="Search AI tools..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-40 lg:w-56 pl-9 pr-3 py-1.5 rounded-xl bg-slate-900/90 border border-slate-800 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all"
-              />
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 pointer-events-none" />
-            </form>
+              <Link
+                href="/dashboard"
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-medium transition-colors ${
+                  pathname.startsWith('/dashboard')
+                    ? 'bg-zinc-800 border-zinc-700 text-white'
+                    : 'bg-zinc-900 border-zinc-800 text-zinc-300 hover:bg-zinc-850 hover:text-white'
+                }`}
+              >
+                <LayoutDashboard className="w-3.5 h-3.5 text-zinc-400" />
+                <span className="max-w-[90px] truncate">{user.username || user.email?.split('@')[0]}</span>
+              </Link>
 
-            <ThemeToggle />
-
-            {/* + Add AI Tool Button */}
+              <button
+                onClick={handleSignOut}
+                className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900 transition-colors"
+                title="Sign Out"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ) : (
             <Link
-              href="/submit"
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-xs sm:text-sm shadow-md shadow-cyan-500/20 hover:shadow-cyan-500/30 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
+              href="/login"
+              className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-zinc-200 text-xs font-medium transition-colors"
             >
-              <Plus className="w-4 h-4" />
-              <span className="hidden xs:inline">+ Add AI Tool</span>
+              <LogIn className="w-3.5 h-3.5 text-zinc-400" />
+              <span>Sign In</span>
             </Link>
-
-            {/* User Auth Profile / Login Button */}
-            {user ? (
-              <div className="flex items-center gap-2">
-                <Link
-                  href="/dashboard"
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all ${
-                    pathname.startsWith('/dashboard')
-                      ? 'bg-cyan-500/15 border-cyan-500/40 text-cyan-300'
-                      : 'bg-slate-900 border-slate-800 text-slate-200 hover:border-slate-700 hover:bg-slate-850'
-                  }`}
-                  title="Go to Dashboard"
-                >
-                  <LayoutDashboard className="w-3.5 h-3.5 text-cyan-400" />
-                  <span className="max-w-[110px] truncate">{user.username || user.email?.split('@')[0]}</span>
-                </Link>
-
-                <button
-                  onClick={handleSignOut}
-                  className="flex items-center gap-1 p-2 sm:px-2.5 sm:py-1.5 rounded-xl bg-slate-900 hover:bg-rose-950/40 hover:text-rose-400 border border-slate-800 hover:border-rose-500/30 text-slate-400 text-xs font-medium transition-colors"
-                  title="Sign Out"
-                >
-                  <LogOut className="w-3.5 h-3.5" />
-                  <span className="hidden lg:inline">Sign Out</span>
-                </button>
-              </div>
-            ) : (
-              <div className="flex items-center gap-1.5">
-                <Link
-                  href="/login"
-                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 text-xs sm:text-sm font-semibold transition-colors"
-                >
-                  <LogIn className="w-4 h-4 text-cyan-400" />
-                  <span>Sign In</span>
-                </Link>
-              </div>
-            )}
-          </div>
+          )}
         </div>
-      </header>
-
-      {/* Auth Modal */}
-      <AuthModal
-        isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-        onSuccess={fetchUser}
-      />
-    </>
+      </div>
+    </header>
   );
 }

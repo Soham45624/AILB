@@ -6,9 +6,8 @@ import Image from 'next/image';
 import {
   Star,
   Bookmark,
-  ArrowRight,
+  ArrowUpRight,
   Sparkles,
-  Tag as TagIcon,
 } from 'lucide-react';
 import { Tool } from '@/lib/types';
 import { toggleSaveToolAction } from '@/app/actions/userActions';
@@ -24,14 +23,16 @@ export function ToolCard({ tool }: ToolCardProps) {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [imageError, setImageError] = useState(false);
 
-  const handleToggleSave = async () => {
+  const handleToggleSave = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
     const nextSaved = !isSaved;
     setIsSaved(nextSaved);
     setSavedCount((prev) => (nextSaved ? prev + 1 : Math.max(0, prev - 1)));
 
     const res = await toggleSaveToolAction(tool.id);
     if (!res.success) {
-      // Revert optimistic update
       setIsSaved(!nextSaved);
       setSavedCount((prev) => (!nextSaved ? prev + 1 : Math.max(0, prev - 1)));
       if (res.error?.includes('sign in')) {
@@ -45,183 +46,134 @@ export function ToolCard({ tool }: ToolCardProps) {
   const getPricingBadge = (pricing: string) => {
     switch (pricing) {
       case 'free':
-        return {
-          label: 'Free',
-          classes: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-        };
+        return 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20';
       case 'freemium':
-        return {
-          label: 'Freemium',
-          classes: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
-        };
+        return 'text-zinc-300 bg-zinc-800/80 border-zinc-700/60';
       case 'free_trial':
-        return {
-          label: 'Free Trial',
-          classes: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
-        };
+        return 'text-sky-400 bg-sky-500/10 border-sky-500/20';
       case 'paid':
-        return {
-          label: 'Paid',
-          classes: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-        };
+        return 'text-amber-400 bg-amber-500/10 border-amber-500/20';
       case 'contact':
-        return {
-          label: 'Enterprise',
-          classes: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-        };
+        return 'text-purple-400 bg-purple-500/10 border-purple-500/20';
       default:
-        return {
-          label: pricing,
-          classes: 'bg-slate-800 text-slate-400 border-slate-700',
-        };
+        return 'text-zinc-400 bg-zinc-900 border-zinc-800';
     }
   };
 
-  const pricingInfo = getPricingBadge(tool.pricing);
   const mainCategory = tool.categories && tool.categories.length > 0 ? tool.categories[0] : null;
 
   return (
     <>
-      <div className="group relative flex flex-col justify-between rounded-2xl bg-slate-900/80 hover:bg-slate-900 border border-slate-800/80 hover:border-cyan-500/40 p-5 transition-all duration-300 hover:shadow-xl hover:shadow-cyan-500/5 hover:-translate-y-1 overflow-hidden">
-        {/* Background Accent Glow */}
-        <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 rounded-full blur-2xl group-hover:bg-cyan-500/10 transition-colors pointer-events-none" />
-
+      <div className="group relative flex flex-col justify-between rounded-2xl bg-zinc-900/60 hover:bg-zinc-900 border border-zinc-800/70 hover:border-zinc-700 p-5 transition-all duration-200 hover:-translate-y-0.5">
         <div>
-          {/* Header: Logo, Badges & Save Action */}
-          <div className="flex items-start justify-between gap-3 mb-4">
-            <div className="flex items-center gap-3">
-              <div className="relative w-12 h-12 rounded-xl bg-slate-800 border border-slate-700/60 overflow-hidden flex items-center justify-center shrink-0 shadow-inner">
+          {/* Top Row: Logo, Title, Category, Bookmark */}
+          <div className="flex items-start justify-between gap-3 mb-3.5">
+            <div className="flex items-center gap-3 min-w-0">
+              {/* Logo / Monogram */}
+              <div className="w-11 h-11 rounded-xl bg-zinc-800 border border-zinc-700/60 overflow-hidden flex items-center justify-center shrink-0">
                 {tool.logo_url && !imageError ? (
                   <Image
                     src={tool.logo_url}
                     alt={tool.name}
-                    width={48}
-                    height={48}
-                    className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
+                    width={44}
+                    height={44}
+                    className="object-cover w-full h-full"
                     onError={() => setImageError(true)}
                   />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-tr from-slate-800 to-slate-700 flex items-center justify-center text-cyan-400 font-bold text-lg">
+                  <span className="text-zinc-200 font-bold text-sm">
                     {tool.name.substring(0, 2).toUpperCase()}
-                  </div>
+                  </span>
                 )}
               </div>
 
-              <div className="flex flex-col">
-                <div className="flex items-center gap-2 flex-wrap">
+              {/* Title & Category */}
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5">
                   <Link
                     href={`/tools/${tool.slug}`}
-                    className="font-bold text-slate-100 text-base group-hover:text-cyan-400 transition-colors line-clamp-1"
+                    className="font-bold text-zinc-100 text-sm hover:text-white truncate"
                   >
                     {tool.name}
                   </Link>
                   {tool.featured && (
-                    <span className="flex items-center gap-1 text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 shrink-0">
-                      <Sparkles className="w-2.5 h-2.5" />
-                      Featured
+                    <span className="p-0.5 rounded text-amber-400 bg-amber-400/10 shrink-0" title="Featured Tool">
+                      <Sparkles className="w-3 h-3" />
                     </span>
                   )}
                 </div>
 
                 {mainCategory && (
-                  <span className="text-xs font-medium text-slate-400 hover:text-slate-300 transition-colors">
+                  <span className="text-xs text-zinc-400 font-medium block truncate">
                     {mainCategory.name}
                   </span>
                 )}
               </div>
             </div>
 
-            {/* Bookmark Button */}
+            {/* Bookmark Action */}
             <button
               onClick={handleToggleSave}
-              className={`p-2 rounded-xl border transition-all flex items-center gap-1.5 ${
+              className={`p-2 rounded-xl transition-colors shrink-0 ${
                 isSaved
-                  ? 'bg-cyan-500/15 border-cyan-500/40 text-cyan-400'
-                  : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                  ? 'text-white bg-zinc-800'
+                  : 'text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800/50'
               }`}
               title={isSaved ? 'Saved to Favorites' : 'Save Tool'}
               aria-label="Save Tool"
             >
-              <Bookmark className={`w-4 h-4 ${isSaved ? 'fill-cyan-400' : ''}`} />
-              {savedCount > 0 && (
-                <span className="text-[11px] font-semibold">{savedCount}</span>
-              )}
+              <Bookmark className={`w-4 h-4 ${isSaved ? 'fill-current' : ''}`} />
             </button>
           </div>
 
           {/* Description */}
-          <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed mb-4">
-            {tool.description || 'No description available for this AI tool.'}
+          <p className="text-xs text-zinc-400 line-clamp-2 leading-relaxed mb-4">
+            {tool.description || 'No description provided.'}
           </p>
 
-          {/* Platforms & Tags Bar */}
-          <div className="flex flex-wrap items-center gap-1.5 mb-4">
-            {/* Platforms */}
-            {tool.platforms && tool.platforms.length > 0 && (
-              <div className="flex items-center gap-1 mr-1">
-                {tool.platforms.slice(0, 3).map((plat) => (
-                  <span
-                    key={plat}
-                    className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-slate-800/80 text-slate-300 border border-slate-700/60"
-                    title={`Supported platform: ${plat}`}
-                  >
-                    {plat}
-                  </span>
-                ))}
-                {tool.platforms.length > 3 && (
-                  <span className="text-[10px] text-slate-500">
-                    +{tool.platforms.length - 3}
-                  </span>
-                )}
-              </div>
-            )}
-
-            {/* Tags */}
-            {tool.tags && tool.tags.length > 0 && (
-              <div className="flex flex-wrap gap-1">
-                {tool.tags.slice(0, 2).map((tag) => (
-                  <span
-                    key={tag.id}
-                    className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-slate-950/80 text-slate-400 border border-slate-800/80 flex items-center gap-1"
-                  >
-                    <TagIcon className="w-2.5 h-2.5 text-slate-500" />
-                    {tag.name}
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
+          {/* Tags Pills */}
+          {tool.tags && tool.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1 mb-4">
+              {tool.tags.slice(0, 3).map((tag) => (
+                <span
+                  key={tag.id}
+                  className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-zinc-950 text-zinc-400 border border-zinc-800/80"
+                >
+                  #{tag.name}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Footer Info & Actions */}
-        <div className="pt-3 border-t border-slate-800/60 flex items-center justify-between gap-2 mt-auto">
-          <div className="flex items-center gap-2.5">
+        {/* Bottom Bar: Rating, Pricing, View link */}
+        <div className="pt-3 border-t border-zinc-800/60 flex items-center justify-between gap-2 mt-auto text-xs">
+          <div className="flex items-center gap-2">
             {/* Rating */}
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 text-zinc-300 font-medium">
               <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-              <span className="text-xs font-bold text-slate-200">
-                {tool.avg_rating > 0 ? tool.avg_rating.toFixed(1) : 'New'}
-              </span>
-              <span className="text-[11px] text-slate-500">
-                ({tool.review_count})
-              </span>
+              <span>{tool.avg_rating > 0 ? tool.avg_rating.toFixed(1) : 'New'}</span>
+              {tool.review_count > 0 && (
+                <span className="text-zinc-500 text-[11px]">({tool.review_count})</span>
+              )}
             </div>
 
-            {/* Pricing Badge */}
+            {/* Pricing Pill */}
             <span
-              className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${pricingInfo.classes}`}
+              className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border ${getPricingBadge(
+                tool.pricing
+              )}`}
             >
-              {pricingInfo.label}
+              {tool.pricing.replace('_', ' ')}
             </span>
           </div>
 
-          {/* View Overview Button */}
           <Link
             href={`/tools/${tool.slug}`}
-            className="flex items-center gap-1 text-xs font-semibold text-cyan-400 group-hover:text-cyan-300 hover:underline transition-all"
+            className="flex items-center gap-0.5 text-zinc-300 group-hover:text-white font-semibold transition-colors"
           >
-            View Overview
-            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+            <span>Overview</span>
+            <ArrowUpRight className="w-3.5 h-3.5 text-zinc-400 group-hover:text-white transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </Link>
         </div>
       </div>
@@ -229,7 +181,7 @@ export function ToolCard({ tool }: ToolCardProps) {
       <AuthModal
         isOpen={isAuthOpen}
         onClose={() => setIsAuthOpen(false)}
-        onSuccess={() => handleToggleSave()}
+        onSuccess={() => handleToggleSave({ preventDefault: () => {}, stopPropagation: () => {} } as any)}
       />
     </>
   );
