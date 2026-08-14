@@ -70,3 +70,137 @@ body {
   background-image: radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px);
   background-size: 24px 24px;
 }
+
+/* =====================================================================
+   AILIB SIGNATURE INTERACTION SYSTEM
+   All animations use transform/opacity only — no layout shifts.
+   ===================================================================== */
+
+/*
+ * .card-interactive — signature zoom-out hover for interactive cards
+ * scale(0.975) with premium easing. Subtle but perceptible.
+ */
+.card-interactive {
+  cursor: pointer;
+  transform: scale(1);
+  transition:
+    transform 200ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 200ms ease,
+    box-shadow 200ms ease,
+    background-color 150ms ease;
+  will-change: transform;
+}
+
+.card-interactive:hover {
+  transform: scale(0.975);
+}
+
+.card-interactive:active {
+  transform: scale(0.96);
+  transition-duration: 80ms;
+}
+
+/*
+ * .btn-interactive — tactile button feel
+ * Primary and secondary buttons scale down slightly on hover/press.
+ */
+.btn-interactive {
+  transform: scale(1);
+  transition:
+    transform 160ms cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 150ms ease,
+    color 150ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+  will-change: transform;
+}
+
+.btn-interactive:hover {
+  transform: scale(0.985);
+}
+
+.btn-interactive:active {
+  transform: scale(0.97);
+  transition-duration: 60ms;
+}
+
+/*
+ * .chip-interactive — smaller clickable chips, tags, prompt pills
+ */
+.chip-interactive {
+  transform: scale(1);
+  transition:
+    transform 160ms cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease;
+  will-change: transform;
+}
+
+.chip-interactive:hover {
+  transform: scale(0.97);
+}
+
+.chip-interactive:active {
+  transform: scale(0.94);
+  transition-duration: 60ms;
+}
+
+/*
+ * .input-interactive — focus-enhanced inputs and textareas
+ */
+.input-interactive {
+  transition:
+    border-color 200ms ease,
+    box-shadow 200ms ease,
+    background-color 150ms ease;
+}
+
+.input-interactive:focus {
+  border-color: #6b7280; /* zinc-500 — subtle, not harsh */
+  box-shadow: 0 0 0 2px rgba(113, 113, 122, 0.15);
+  outline: none;
+}
+
+/*
+ * Bookmark / save button — tactile pulse on activation
+ */
+@keyframes bookmark-save {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.25); }
+  65%  { transform: scale(0.92); }
+  100% { transform: scale(1); }
+}
+
+.bookmark-saved {
+  animation: bookmark-save 320ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/*
+ * prefers-reduced-motion: disable scale transforms,
+ * preserve colour / border / opacity changes.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .card-interactive,
+  .btn-interactive,
+  .chip-interactive {
+    transform: none !important;
+    transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+    will-change: auto;
+  }
+
+  .bookmark-saved {
+    animation: none;
+  }
+}
+
+/*
+ * Keyboard focus — equivalent visual cue via :focus-visible
+ * Never hidden; replaces lost hover state for keyboard users.
+ */
+.card-interactive:focus-visible,
+.btn-interactive:focus-visible,
+.chip-interactive:focus-visible {
+  outline: 2px solid #a1a1aa; /* zinc-400 */
+  outline-offset: 2px;
+}

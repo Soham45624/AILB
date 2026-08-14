@@ -9,22 +9,18 @@ import {
   ArrowRight,
   TrendingUp,
   Star,
-  Sparkles,
   Zap,
-  Clock,
   Plus,
-  Compass,
 } from 'lucide-react';
 
 export const revalidate = 60;
 
 export default async function HomePage() {
-  const [categories, trendingTools, topRatedTools, freeTools, recentTools] = await Promise.all([
+  const [categories, trendingTools, topRatedTools, freeTools] = await Promise.all([
     getCategories(),
     getTools({ trendingOnly: true, limit: 3 }),
     getTools({ sortBy: 'highest_rated', limit: 3 }),
     getTools({ pricing: 'free', limit: 3 }),
-    getTools({ sortBy: 'newest', limit: 3 }),
   ]);
 
   const quickTags = ['writing', 'image generator', 'coding', 'video', 'productivity', 'free'];
@@ -54,32 +50,32 @@ export default async function HomePage() {
               </p>
             </div>
 
-            {/* Search Box */}
+            {/* Search Box — input-interactive focus enhancement */}
             <div className="max-w-xl mx-auto">
-              <form action="/tools" method="GET" className="relative">
+              <form action="/tools" method="GET" className="relative group/searchbox">
                 <input
                   type="text"
                   name="search"
                   placeholder="Search by keyword, use case, or tag..."
-                  className="w-full pl-11 pr-24 py-3.5 rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 shadow-lg transition-colors"
+                  className="input-interactive w-full pl-11 pr-24 py-3.5 rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-zinc-100 placeholder:text-zinc-500 shadow-lg"
                 />
-                <Search className="w-4 h-4 text-zinc-500 absolute left-4 top-1/2 -translate-y-1/2" />
+                <Search className="w-4 h-4 text-zinc-500 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <button
                   type="submit"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 px-3.5 py-1.5 rounded-lg bg-zinc-100 hover:bg-white text-zinc-950 font-bold text-xs transition-colors"
+                  className="btn-interactive absolute right-2 top-1/2 -translate-y-1/2 px-3.5 py-1.5 rounded-lg bg-zinc-100 hover:bg-white text-zinc-950 font-bold text-xs"
                 >
                   Search
                 </button>
               </form>
 
-              {/* Quick Tags */}
+              {/* Quick Tags — chip-interactive */}
               <div className="flex flex-wrap items-center justify-center gap-1.5 pt-3 text-xs">
                 <span className="text-zinc-500 text-[11px] font-medium mr-1">Popular:</span>
                 {quickTags.map((tag) => (
                   <Link
                     key={tag}
                     href={`/tools?search=${encodeURIComponent(tag)}`}
-                    className="px-2.5 py-0.5 rounded-md bg-zinc-900/80 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-zinc-800/80 text-[11px] transition-colors"
+                    className="chip-interactive px-2.5 py-0.5 rounded-md bg-zinc-900/80 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-zinc-800/80 text-[11px]"
                   >
                     #{tag}
                   </Link>
@@ -100,23 +96,24 @@ export default async function HomePage() {
             </div>
             <Link
               href="/tools"
-              className="text-xs font-semibold text-zinc-400 hover:text-white flex items-center gap-1 transition-colors"
+              className="btn-interactive text-xs font-semibold text-zinc-400 hover:text-white flex items-center gap-1"
             >
               Browse All <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
 
+          {/* Category compact grid — chip-interactive feel */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
             {categories.slice(0, 12).map((category) => (
               <Link
                 key={category.id}
                 href={`/tools?category=${category.slug}`}
-                className="p-3.5 rounded-xl bg-zinc-900/50 hover:bg-zinc-900 border border-zinc-800/70 hover:border-zinc-700 transition-all text-left space-y-1.5 group"
+                className="chip-interactive p-3.5 rounded-xl bg-zinc-900/50 hover:bg-zinc-900 border border-zinc-800/70 hover:border-zinc-700 text-left space-y-1.5 group"
               >
-                <div className="font-semibold text-xs text-zinc-200 group-hover:text-white truncate">
+                <div className="font-semibold text-xs text-zinc-200 group-hover:text-white truncate transition-colors">
                   {category.name}
                 </div>
-                <div className="text-[10px] text-zinc-500 font-mono">
+                <div className="text-[10px] text-zinc-500 font-mono group-hover:text-zinc-300 transition-colors">
                   Explore →
                 </div>
               </Link>
@@ -134,12 +131,13 @@ export default async function HomePage() {
               </div>
               <Link
                 href="/tools?sort=trending"
-                className="text-xs font-semibold text-zinc-400 hover:text-white flex items-center gap-1 transition-colors"
+                className="btn-interactive text-xs font-semibold text-zinc-400 hover:text-white flex items-center gap-1"
               >
                 View Trending <ArrowRight className="w-3 h-3" />
               </Link>
             </div>
 
+            {/* ToolCards use card-interactive internally */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {trendingTools.map((tool) => (
                 <ToolCard key={tool.id} tool={tool} />
@@ -159,7 +157,7 @@ export default async function HomePage() {
               </div>
               <Link
                 href="/tools?sort=highest_rated"
-                className="text-xs font-semibold text-zinc-400 hover:text-white flex items-center gap-1 transition-colors"
+                className="btn-interactive text-xs font-semibold text-zinc-400 hover:text-white flex items-center gap-1"
               >
                 See All Top Rated <ArrowRight className="w-3 h-3" />
               </Link>
@@ -181,7 +179,7 @@ export default async function HomePage() {
               </div>
               <Link
                 href="/tools?pricing=free"
-                className="text-xs font-semibold text-zinc-400 hover:text-white flex items-center gap-1 transition-colors"
+                className="btn-interactive text-xs font-semibold text-zinc-400 hover:text-white flex items-center gap-1"
               >
                 View Free Tools <ArrowRight className="w-3 h-3" />
               </Link>
@@ -207,7 +205,7 @@ export default async function HomePage() {
             <div className="pt-2">
               <Link
                 href="/submit"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-zinc-100 hover:bg-white text-zinc-950 font-bold text-xs shadow-md transition-colors"
+                className="btn-interactive inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-zinc-100 hover:bg-white text-zinc-950 font-bold text-xs shadow-md"
               >
                 <Plus className="w-4 h-4" />
                 <span>Submit AI Tool</span>

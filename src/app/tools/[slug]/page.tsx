@@ -87,7 +87,7 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 selection:bg-cyan-500 selection:text-slate-950">
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 selection:bg-zinc-200 selection:text-zinc-950">
       <Navbar />
 
       {/* JSON-LD Structured Data */}
@@ -101,9 +101,9 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
         <div className="flex items-center justify-between">
           <Link
             href="/tools"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-cyan-400 transition-colors group"
+            className="btn-interactive inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-400 hover:text-white"
           >
-            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            <ArrowLeft className="w-4 h-4" />
             Back to Directory
           </Link>
 
@@ -111,12 +111,11 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
         </div>
 
         {/* HERO / OVERVIEW HEADER */}
-        <div className="relative rounded-3xl bg-slate-900/80 border border-slate-800 p-6 sm:p-8 overflow-hidden shadow-2xl space-y-6">
-          <div className="absolute top-0 right-0 w-80 h-80 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="relative rounded-2xl bg-zinc-900/80 border border-zinc-800 p-6 sm:p-8 overflow-hidden space-y-6">
 
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 pb-6 border-b border-slate-800">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 pb-6 border-b border-zinc-800">
             <div className="flex items-center gap-4">
-              <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-slate-800 border border-slate-700/80 overflow-hidden flex items-center justify-center shrink-0 shadow-lg">
+              <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-zinc-800 border border-zinc-700/80 overflow-hidden flex items-center justify-center shrink-0">
                 {tool.logo_url ? (
                   <Image
                     src={tool.logo_url}
@@ -126,7 +125,7 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
                     className="object-cover w-full h-full"
                   />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-tr from-slate-800 to-slate-700 flex items-center justify-center text-cyan-400 font-bold text-2xl">
+                  <div className="w-full h-full bg-zinc-800 flex items-center justify-center text-zinc-300 font-bold text-2xl">
                     {tool.name.substring(0, 2).toUpperCase()}
                   </div>
                 )}
@@ -134,7 +133,7 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
 
               <div className="space-y-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-100 tracking-tight">
+                  <h1 className="text-2xl sm:text-3xl font-extrabold text-zinc-100 tracking-tight">
                     {tool.name}
                   </h1>
                   {tool.featured && (
@@ -143,7 +142,7 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
                       Featured
                     </span>
                   )}
-                  <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                  <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-zinc-800 text-zinc-300 border border-zinc-700">
                     {tool.pricing}
                   </span>
                 </div>
@@ -167,13 +166,13 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
               </div>
             </div>
 
-            {/* Outbound Website Button */}
+            {/* Outbound Website Button — btn-interactive */}
             <div className="flex items-center gap-3 w-full sm:w-auto">
               <a
                 href={tool.website_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex-1 sm:flex-initial px-6 py-3 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-xs sm:text-sm shadow-xl shadow-cyan-500/20 hover:shadow-cyan-500/30 transition-all flex items-center justify-center gap-2"
+                className="btn-interactive flex-1 sm:flex-initial px-6 py-3 rounded-xl bg-zinc-100 hover:bg-white text-zinc-950 font-bold text-xs sm:text-sm shadow-md flex items-center justify-center gap-2"
               >
                 Visit Website
                 <ExternalLink className="w-4 h-4" />
@@ -183,21 +182,21 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
 
           {/* Description & Tags */}
           <div className="space-y-4">
-            <h2 className="text-sm font-bold text-slate-200 uppercase tracking-wider">About {tool.name}</h2>
-            <p className="text-sm text-slate-300 leading-relaxed">
+            <h2 className="text-sm font-bold text-zinc-200 uppercase tracking-wider">About {tool.name}</h2>
+            <p className="text-sm text-zinc-300 leading-relaxed">
               {tool.long_description || tool.description || 'No detailed description available.'}
             </p>
 
             {/* Platforms */}
             {tool.platforms && tool.platforms.length > 0 && (
               <div className="flex items-center gap-2 pt-1 flex-wrap">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">
                   Platforms:
                 </span>
                 {tool.platforms.map((p) => (
                   <span
                     key={p}
-                    className="text-xs px-2.5 py-0.5 rounded-lg bg-slate-950 text-slate-300 border border-slate-800"
+                    className="chip-interactive text-xs px-2.5 py-0.5 rounded-lg bg-zinc-950 text-zinc-300 border border-zinc-800 hover:border-zinc-600 hover:text-zinc-100"
                   >
                     {p}
                   </span>
@@ -209,13 +208,14 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
             {tool.tags && tool.tags.length > 0 && (
               <div className="pt-1 flex flex-wrap gap-2">
                 {tool.tags.map((tag) => (
-                  <span
+                  <Link
                     key={tag.id}
-                    className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-950 text-slate-300 border border-slate-800 flex items-center gap-1.5"
+                    href={`/tools?tags=${tag.slug || tag.name}`}
+                    className="chip-interactive text-xs font-semibold px-2.5 py-1 rounded-lg bg-zinc-950 text-zinc-300 hover:text-zinc-100 border border-zinc-800 hover:border-zinc-600 flex items-center gap-1.5"
                   >
-                    <TagIcon className="w-3 h-3 text-cyan-400" />
+                    <TagIcon className="w-3 h-3 text-zinc-400" />
                     #{tag.name}
-                  </span>
+                  </Link>
                 ))}
               </div>
             )}
@@ -223,47 +223,46 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
         </div>
 
         {/* CONTRIBUTOR PERSPECTIVE & INSIGHTS CARD */}
-        <div className="rounded-3xl bg-slate-900/70 border border-indigo-500/20 p-6 sm:p-8 space-y-5 shadow-xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="rounded-2xl bg-zinc-900/70 border border-zinc-800 p-6 sm:p-8 space-y-5">
 
-          <div className="flex items-center gap-2.5 pb-4 border-b border-slate-800">
-            <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+          <div className="flex items-center gap-2.5 pb-4 border-b border-zinc-800">
+            <div className="p-2 rounded-xl bg-zinc-800 text-zinc-300 border border-zinc-700">
               <HeartHandshake className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-slate-100 flex items-center gap-2">
-                Contributor Perspective & Insights
-                <span className="text-[10px] uppercase tracking-wider font-extrabold px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+              <h3 className="text-base font-bold text-zinc-100 flex items-center gap-2">
+                Contributor Perspective
+                <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400 border border-zinc-700">
                   Verified Note
                 </span>
               </h3>
-              <p className="text-xs text-slate-400">
-                Original recommendation and practical context provided by the tool submitter
+              <p className="text-xs text-zinc-400">
+                Original recommendation provided by the tool submitter
               </p>
             </div>
           </div>
 
-          <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-850 text-sm text-slate-200 leading-relaxed italic">
+          <div className="p-4 rounded-xl bg-zinc-950/80 border border-zinc-800/80 text-sm text-zinc-200 leading-relaxed italic">
             &ldquo;{tool.description || 'Recommended for its streamlined AI-assisted capabilities, fast inference, and clean user experience across creative workflows.'}&rdquo;
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
-            <div className="p-4 rounded-2xl bg-emerald-950/20 border border-emerald-500/20 space-y-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+            <div className="p-4 rounded-xl bg-emerald-950/20 border border-emerald-800/30 space-y-2">
               <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-400 uppercase tracking-wider">
-                <ThumbsUp className="w-3.5 h-3.5" /> Strengths & Highlights
+                <ThumbsUp className="w-3.5 h-3.5" /> Strengths
               </div>
-              <ul className="text-xs text-slate-300 space-y-1 list-disc list-inside">
+              <ul className="text-xs text-zinc-300 space-y-1 list-disc list-inside">
                 <li>High productivity gain with modern AI models</li>
                 <li>Intuitive workflow with minimal learning curve</li>
                 <li>Flexible export options and fast rendering</li>
               </ul>
             </div>
 
-            <div className="p-4 rounded-2xl bg-rose-950/15 border border-rose-500/20 space-y-2">
+            <div className="p-4 rounded-xl bg-rose-950/15 border border-rose-800/30 space-y-2">
               <div className="flex items-center gap-1.5 text-xs font-bold text-rose-400 uppercase tracking-wider">
                 <ThumbsDown className="w-3.5 h-3.5" /> Considerations
               </div>
-              <ul className="text-xs text-slate-300 space-y-1 list-disc list-inside">
+              <ul className="text-xs text-zinc-300 space-y-1 list-disc list-inside">
                 <li>Requires active internet connection for model inference</li>
                 <li>Advanced tier required for unlimited batch processing</li>
               </ul>
@@ -272,15 +271,15 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
         </div>
 
         {/* COMMUNITY USER REVIEWS SECTION */}
-        <div className="rounded-3xl bg-slate-900/60 border border-slate-800 p-6 sm:p-8 space-y-6">
-          <div className="flex items-center justify-between gap-4 pb-4 border-b border-slate-800">
+        <div className="rounded-2xl bg-zinc-900/60 border border-zinc-800 p-6 sm:p-8 space-y-6">
+          <div className="flex items-center justify-between gap-4 pb-4 border-b border-zinc-800">
             <div className="flex items-center gap-2.5">
-              <div className="p-2 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+              <div className="p-2 rounded-xl bg-zinc-800 text-zinc-300 border border-zinc-700">
                 <MessageSquare className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-slate-100">Community User Reviews</h3>
-                <p className="text-xs text-slate-400">Independent ratings and feedback from platform members</p>
+                <h3 className="text-base font-bold text-zinc-100">Community Reviews</h3>
+                <p className="text-xs text-zinc-400">Independent ratings and feedback from platform members</p>
               </div>
             </div>
 
@@ -289,25 +288,25 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
 
           {tool.review_count === 0 ? (
             <div className="py-8 text-center space-y-2">
-              <p className="text-sm text-slate-400">No community reviews have been posted for {tool.name} yet.</p>
-              <p className="text-xs text-slate-500">Be the first to share your rating and review for this tool!</p>
+              <p className="text-sm text-zinc-400">No community reviews have been posted for {tool.name} yet.</p>
+              <p className="text-xs text-zinc-500">Be the first to share your rating and review for this tool!</p>
             </div>
           ) : (
             <div className="space-y-4">
-              <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800/80 space-y-2">
+              <div className="p-4 rounded-xl bg-zinc-950 border border-zinc-800/80 space-y-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-cyan-500/20 text-cyan-400 font-bold text-xs flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-full bg-zinc-800 text-zinc-300 font-bold text-xs flex items-center justify-center border border-zinc-700">
                       JD
                     </div>
-                    <span className="text-xs font-bold text-slate-200">Verified Member</span>
+                    <span className="text-xs font-bold text-zinc-200">Verified Member</span>
                   </div>
                   <div className="flex items-center gap-1 text-amber-400">
                     <Star className="w-3.5 h-3.5 fill-amber-400" />
                     <span className="text-xs font-bold">{tool.avg_rating.toFixed(1)}</span>
                   </div>
                 </div>
-                <p className="text-xs text-slate-300">
+                <p className="text-xs text-zinc-300">
                   Exceptional AI tool! Saved me hours of manual labor in my weekly content workflow.
                 </p>
               </div>
@@ -315,11 +314,11 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
           )}
         </div>
 
-        {/* RELATED TOOLS */}
+        {/* RELATED TOOLS — ToolCard uses card-interactive internally */}
         {relatedTools.length > 0 && (
-          <div className="space-y-6">
-            <h3 className="text-xl font-bold text-slate-100">Similar AI Tools</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="space-y-4">
+            <h3 className="text-base font-bold text-zinc-100">Similar AI Tools</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {relatedTools.slice(0, 3).map((relTool) => (
                 <ToolCard key={relTool.id} tool={relTool} />
               ))}
