@@ -31,6 +31,7 @@ export async function submitToolAction(formData: FormData): Promise<SubmitToolRe
     const websiteUrl = formData.get('url') as string;
     const description = formData.get('description') as string;
     const pricing = (formData.get('pricing') as string) || 'free';
+    const tagsRaw = formData.get('tags') as string;
 
     if (!toolName || toolName.trim().length < 2) {
       return {
@@ -61,8 +62,27 @@ export async function submitToolAction(formData: FormData): Promise<SubmitToolRe
       };
     }
 
+    // Parse and clean tags (strip leading # and clean whitespace)
+    const cleanedTags: string[] = [];
+    if (tagsRaw) {
+      try {
+        const parsed = JSON.parse(tagsRaw);
+        if (Array.isArray(parsed)) {
+          parsed.forEach((t: string) => {
+            const clean = t.replace(/^#+/, '').trim();
+            if (clean && !cleanedTags.includes(clean)) cleanedTags.push(clean);
+          });
+        }
+      } catch {
+        tagsRaw.split(',').forEach((t) => {
+          const clean = t.replace(/^#+/, '').trim();
+          if (clean && !cleanedTags.includes(clean)) cleanedTags.push(clean);
+        });
+      }
+    }
+
     // 3. Insert into Supabase submissions table
-    console.log(`Submitting tool "${toolName}" for authenticated user ${user.id}...`);
+    console.log(`Submitting tool "${toolName}" with tags [${cleanedTags.join(', ')}] for user ${user.id}...`);
 
     const { data, error } = await supabase
       .from('submissions')
@@ -71,6 +91,7 @@ export async function submitToolAction(formData: FormData): Promise<SubmitToolRe
         website_url: formattedUrl,
         description: description?.trim() || null,
         pricing: pricing.trim() || 'unknown',
+        tags: cleanedTags,
         submitted_by: user.id,
         status: 'pending',
       })
@@ -85,7 +106,7 @@ export async function submitToolAction(formData: FormData): Promise<SubmitToolRe
       };
     }
 
-    console.log('Successfully inserted submission into Supabase:', data.id);
+    console.log('Successfully inserted submission with tags into Supabase:', data.id);
 
     return {
       success: true,

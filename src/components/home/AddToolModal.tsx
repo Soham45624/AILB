@@ -1,14 +1,16 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, KeyboardEvent } from 'react';
 import {
   X,
   Send,
   Sparkles,
   AlertCircle,
   CheckCircle2,
-  LogIn,
   UserCheck,
+  Tag as TagIcon,
+  Plus,
+  Hash,
 } from 'lucide-react';
 import { submitToolAction } from '@/app/actions/submissions';
 import { getCurrentUserAction } from '@/app/actions/auth';
@@ -19,11 +21,26 @@ interface AddToolModalProps {
   onClose: () => void;
 }
 
+const POPULAR_SUGGESTED_TAGS = [
+  'editing',
+  'image generator',
+  'coding ai',
+  'presentation maker',
+  'text-to-video',
+  'video editor',
+  'voice cloning',
+  'open source',
+  'api access',
+  'workflow automation',
+];
+
 export function AddToolModal({ isOpen, onClose }: AddToolModalProps) {
   const [name, setName] = useState('');
   const [url, setUrl] = useState('');
   const [description, setDescription] = useState('');
   const [pricing, setPricing] = useState('free');
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submissionData, setSubmissionData] = useState<any>(null);
@@ -50,6 +67,29 @@ export function AddToolModal({ isOpen, onClose }: AddToolModalProps) {
 
   if (!isOpen) return null;
 
+  const handleAddTag = (tagToAdd?: string) => {
+    const raw = (tagToAdd || tagInput).trim();
+    if (!raw) return;
+
+    // Clean leading # and spaces
+    const cleanTag = raw.replace(/^#+/, '').trim();
+    if (cleanTag && !tags.some((t) => t.toLowerCase() === cleanTag.toLowerCase())) {
+      setTags([...tags, cleanTag]);
+    }
+    setTagInput('');
+  };
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      handleAddTag();
+    }
+  };
+
+  const handleRemoveTag = (tagToRemove: string) => {
+    setTags(tags.filter((t) => t !== tagToRemove));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -60,9 +100,10 @@ export function AddToolModal({ isOpen, onClose }: AddToolModalProps) {
     formData.append('url', url);
     formData.append('description', description);
     formData.append('pricing', pricing);
+    formData.append('tags', JSON.stringify(tags));
 
     try {
-      console.log('Dispatching submitToolAction from AddToolModal...');
+      console.log('Dispatching submitToolAction with tags:', tags);
       const response = await submitToolAction(formData);
 
       if (!response.success) {
@@ -87,6 +128,8 @@ export function AddToolModal({ isOpen, onClose }: AddToolModalProps) {
     setUrl('');
     setDescription('');
     setPricing('free');
+    setTags([]);
+    setTagInput('');
     setError(null);
     setSubmissionData(null);
     onClose();
@@ -94,8 +137,8 @@ export function AddToolModal({ isOpen, onClose }: AddToolModalProps) {
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
-        <div className="relative w-full max-w-lg rounded-2xl bg-slate-900 border border-slate-800 shadow-2xl p-6 overflow-hidden">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in overflow-y-auto">
+        <div className="relative w-full max-w-lg rounded-2xl bg-slate-900 border border-slate-800 shadow-2xl p-6 overflow-hidden my-8">
           {/* Decorative glow */}
           <div className="absolute top-0 right-0 w-48 h-48 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
 
@@ -174,6 +217,18 @@ export function AddToolModal({ isOpen, onClose }: AddToolModalProps) {
               <p className="text-sm text-slate-400 max-w-sm mx-auto">
                 Your submission for <strong className="text-cyan-400">{submissionData.tool_name}</strong> was recorded in the database (Status: <span className="font-semibold text-amber-400">{submissionData.status}</span>).
               </p>
+
+              {/* Tag confirmation chips */}
+              {submissionData.tags && submissionData.tags.length > 0 && (
+                <div className="flex flex-wrap justify-center gap-1.5 pt-1">
+                  {submissionData.tags.map((t: string) => (
+                    <span key={t} className="text-xs px-2.5 py-0.5 rounded-lg bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
+                      #{t}
+                    </span>
+                  ))}
+                </div>
+              )}
+
               <div className="text-xs text-slate-500 bg-slate-950 p-2.5 rounded-xl max-w-xs mx-auto border border-slate-800">
                 Submission ID: {submissionData.id}
               </div>
@@ -236,7 +291,7 @@ export function AddToolModal({ isOpen, onClose }: AddToolModalProps) {
                   Short Description
                 </label>
                 <textarea
-                  rows={3}
+                  rows={2}
                   placeholder="Briefly describe what this AI tool does..."
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
@@ -244,7 +299,90 @@ export function AddToolModal({ isOpen, onClose }: AddToolModalProps) {
                 />
               </div>
 
-              <div className="pt-2 flex items-center justify-end gap-3 border-t border-slate-800/80">
+              {/* CUSTOM #TAGS INPUT SECTION */}
+              <div className="space-y-2 pt-1">
+                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center justify-between">
+                  <span className="flex items-center gap-1">
+                    <Hash className="w-3.5 h-3.5 text-cyan-400" />
+                    Custom Tags & Keywords
+                  </span>
+                  <span className="text-[10px] text-slate-500 font-normal">
+                    Press Enter or comma to add
+                  </span>
+                </label>
+
+                {/* Active Tag Chips */}
+                {tags.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 pb-1">
+                    {tags.map((t) => (
+                      <span
+                        key={t}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 text-xs font-semibold animate-fade-in"
+                      >
+                        #{t}
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveTag(t)}
+                          className="p-0.5 rounded hover:bg-cyan-500/20 text-cyan-400 hover:text-cyan-200 transition-colors"
+                          title="Remove tag"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {/* Input with Add button */}
+                <div className="flex items-center gap-2">
+                  <div className="relative flex-1">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-bold">
+                      #
+                    </span>
+                    <input
+                      type="text"
+                      placeholder="e.g. editing, image generator, copilot..."
+                      value={tagInput}
+                      onChange={(e) => setTagInput(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      className="w-full pl-7 pr-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-cyan-500/60 focus:ring-2 focus:ring-cyan-500/20 transition-all"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleAddTag()}
+                    className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition-colors shrink-0 flex items-center gap-1"
+                  >
+                    <Plus className="w-3.5 h-3.5 text-cyan-400" />
+                    Add Tag
+                  </button>
+                </div>
+
+                {/* Suggested Tags Pill Bar */}
+                <div className="pt-1 flex items-center gap-1.5 flex-wrap">
+                  <span className="text-[10px] text-slate-500 font-medium">Quick suggestions:</span>
+                  {POPULAR_SUGGESTED_TAGS.map((sug) => {
+                    const isAdded = tags.some((t) => t.toLowerCase() === sug.toLowerCase());
+                    return (
+                      <button
+                        type="button"
+                        key={sug}
+                        disabled={isAdded}
+                        onClick={() => handleAddTag(sug)}
+                        className={`text-[11px] px-2 py-0.5 rounded-md border transition-all ${
+                          isAdded
+                            ? 'bg-slate-950 border-slate-850 text-slate-600 cursor-not-allowed'
+                            : 'bg-slate-950/80 border-slate-800 text-slate-400 hover:text-cyan-300 hover:border-cyan-500/40'
+                        }`}
+                      >
+                        #{sug}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="pt-3 flex items-center justify-end gap-3 border-t border-slate-800/80">
                 <button
                   type="button"
                   onClick={onClose}
