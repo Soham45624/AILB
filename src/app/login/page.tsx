@@ -3,7 +3,7 @@
 import { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Sparkles, LogIn, Lock, Mail, AlertCircle, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Sparkles, LogIn, Lock, Mail, AlertCircle, CheckCircle2, Info } from 'lucide-react';
 import { signInAction } from '@/app/actions/auth';
 import { createClient } from '@/lib/supabase/client';
 import { Navbar } from '@/components/layout/Navbar';
@@ -63,7 +63,13 @@ function LoginForm() {
       });
 
       if (error) {
-        setError(error.message);
+        if (error.message.includes('not enabled') || error.message.includes('Unsupported provider')) {
+          setError(
+            'Google Sign-In is not enabled yet in your Supabase project. Please sign in with email/password below, or enable Google Provider in Supabase Dashboard (Authentication -> Providers -> Google).'
+          );
+        } else {
+          setError(error.message);
+        }
         setGoogleLoading(false);
       }
     } catch (err: any) {
@@ -91,7 +97,7 @@ function LoginForm() {
       {error && (
         <div className="mb-5 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-start gap-2.5 animate-fade-in">
           <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-400" />
-          <span>{error}</span>
+          <span className="leading-relaxed">{error}</span>
         </div>
       )}
 
