@@ -152,13 +152,6 @@ export async function submitToolAction(formData: FormData): Promise<SubmitToolRe
       return { success: false, error: 'Please provide a descriptive overview (minimum 10 characters).' };
     }
 
-    if (!contributorFeedback || contributorFeedback.length < 5) {
-      return {
-        success: false,
-        error: 'Contributor feedback is required to help the community understand why you recommend this tool.',
-      };
-    }
-
     // 4. Check for duplicates before insert
     const dupCheck = await checkDuplicateToolAction(normUrl.normalizedUrl, toolName);
     if (dupCheck.isDuplicate && dupCheck.existingTool) {
@@ -209,7 +202,7 @@ export async function submitToolAction(formData: FormData): Promise<SubmitToolRe
         category_id: categoryId || null,
         pricing: pricing,
         tags: tags,
-        contributor_feedback: contributorFeedback,
+        contributor_feedback: contributorFeedback || null,
         logo_url: logoUrl,
         screenshot_url: screenshotUrl,
         platforms: platforms.length > 0 ? platforms : ['Web'],

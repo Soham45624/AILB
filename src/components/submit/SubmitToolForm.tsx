@@ -515,29 +515,28 @@ export function SubmitToolForm({
         )}
       </div>
 
-      {/* SECTION 3: CONTRIBUTOR FEEDBACK */}
+      {/* SECTION 3: CONTRIBUTOR FEEDBACK (OPTIONAL) */}
       <div className="space-y-4 pt-2">
         <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
           <MessageSquareHeart className="w-4 h-4 text-indigo-400" />
           <h2 className="text-sm font-bold text-slate-200 uppercase tracking-wider">
-            3. Contributor Perspective / Feedback <span className="text-rose-400">*</span>
+            3. Contributor Perspective / Review <span className="text-slate-500 font-normal normal-case text-xs">(Optional)</span>
           </h2>
         </div>
 
         <div>
           <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
-            Your Personal Review & Recommendation
+            Your Personal Review & Recommendation (Optional)
           </label>
           <textarea
-            required
             rows={3}
-            placeholder="Share why you're submitting this tool. What makes it standout? What was your real experience using it?"
+            placeholder="Share why you're submitting this tool, what makes it standout, or your real experience using it (optional)..."
             value={contributorFeedback}
             onChange={(e) => setContributorFeedback(e.target.value)}
             className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-cyan-500/60 focus:ring-2 focus:ring-cyan-500/20 transition-all resize-none"
           />
           <p className="text-[11px] text-slate-500 mt-1">
-            This will be featured prominently on the tool overview page under Contributor Insights.
+            If provided, this will be displayed on the tool overview page under Contributor Insights.
           </p>
         </div>
       </div>
