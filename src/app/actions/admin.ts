@@ -289,7 +289,13 @@ export async function getAdminToolsAction(search?: string, categorySlug?: string
       .order('created_at', { ascending: false });
 
     if (search) {
-      query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
+      const cleanSearch = search.trim();
+      const numVal = parseInt(cleanSearch.replace(/^#/, ''), 10);
+      if (!isNaN(numVal)) {
+        query = query.or(`tool_code.eq.${numVal},name.ilike.%${cleanSearch}%,description.ilike.%${cleanSearch}%`);
+      } else {
+        query = query.or(`name.ilike.%${cleanSearch}%,description.ilike.%${cleanSearch}%`);
+      }
     }
 
     const { data: tools, error } = await query;
@@ -614,5 +620,23 @@ export async function resolveReportAction(
     return { success: true };
   } catch (err: any) {
     return { success: false, error: err.message };
+  }
+}
+
+export async function deleteUserAction(userId: string): Promise<{ success: boolean; error?: string }> {
+  const auth = await verifyAdminOrEditor('admin');
+  if (!auth) return { success: false, error: 'Admin privileges required' };
+
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase.rpc('delete_user_by_id', { p_user_id: userId });
+    
+    if (error) throw error;
+
+    revalidatePath('/admin/users');
+    return { success: true };
+  } catch (err: any) {
+    console.error('Error deleting user:', err);
+    return { success: false, error: err.message || 'Failed to delete user' };
   }
 }

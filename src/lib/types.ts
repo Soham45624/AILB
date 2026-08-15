@@ -48,6 +48,7 @@ export interface Tag {
 
 export interface Tool {
   id: string;
+  tool_code?: number;
   name: string;
   slug: string;
   description: string | null;

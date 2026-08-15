@@ -45,10 +45,13 @@ export function AdminToolsClient({
   const [processingId, setProcessingId] = useState<string | null>(null);
 
   const filtered = tools.filter((t) => {
+    const cleanSearch = search.trim().toLowerCase();
+    const numVal = cleanSearch.replace(/^#/, '');
     const matchesSearch =
       !search ||
-      t.name.toLowerCase().includes(search.toLowerCase()) ||
-      (t.description && t.description.toLowerCase().includes(search.toLowerCase()));
+      t.name.toLowerCase().includes(cleanSearch) ||
+      (t.description && t.description.toLowerCase().includes(cleanSearch)) ||
+      (t.tool_code && t.tool_code.toString() === numVal);
     const matchesCat =
       !selectedCat ||
       (t.categories && t.categories.some((c: any) => c.slug === selectedCat || c.id === selectedCat));
@@ -107,7 +110,7 @@ export function AdminToolsClient({
           <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
-            placeholder="Search tools by name, description..."
+            placeholder="Search tools by ID (#1001), name, description..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-cyan-500/60"
@@ -158,7 +161,10 @@ export function AdminToolsClient({
                         {tool.name.substring(0, 2).toUpperCase()}
                       </div>
                       <div>
-                        <div className="font-bold text-slate-100 flex items-center gap-1.5">
+                        <div className="font-bold text-slate-100 flex items-center gap-2">
+                          <span className="text-[10px] font-mono text-cyan-400 font-extrabold bg-cyan-500/10 border border-cyan-500/20 px-1.5 py-0.5 rounded">
+                            #{tool.tool_code || 'N/A'}
+                          </span>
                           <span>{tool.name}</span>
                           <Link
                             href={`/tools/${tool.slug}`}

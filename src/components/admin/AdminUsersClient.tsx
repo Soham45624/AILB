@@ -4,6 +4,7 @@ import { useState } from 'react';
 import {
   updateUserRoleAction,
   toggleUserSuspensionAction,
+  deleteUserAction,
 } from '@/app/actions/admin';
 import { UserRole } from '@/lib/types';
 import {
@@ -15,6 +16,7 @@ import {
   Send,
   Calendar,
   User,
+  Trash2,
 } from 'lucide-react';
 
 interface AdminUsersClientProps {
@@ -64,6 +66,27 @@ export function AdminUsersClient({ initialUsers }: AdminUsersClientProps) {
       );
     } else {
       alert(`Suspension toggle failed: ${res.error}`);
+    }
+    setProcessingId(null);
+  };
+
+  const handleDeleteUser = async (user: any) => {
+    const confirmMessage = `WARNING: Are you sure you want to PERMANENTLY delete user @${user.username} (${user.email || 'no email'})?\n\nThis will remove their profile and login account. This action cannot be undone.`;
+    if (!confirm(confirmMessage)) {
+      return;
+    }
+
+    // Double confirmation for safety
+    if (!confirm(`Please confirm once more to delete @${user.username}.`)) {
+      return;
+    }
+
+    setProcessingId(user.id);
+    const res = await deleteUserAction(user.id);
+    if (res.success) {
+      setUsers((prev) => prev.filter((u) => u.id !== user.id));
+    } else {
+      alert(`User deletion failed: ${res.error}`);
     }
     setProcessingId(null);
   };
@@ -171,26 +194,38 @@ export function AdminUsersClient({ initialUsers }: AdminUsersClientProps) {
 
                     {/* Actions */}
                     <td className="py-4 px-4 text-right">
-                      <button
-                        type="button"
-                        disabled={isProcessing}
-                        onClick={() => handleToggleSuspend(u)}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
-                          u.is_suspended
-                            ? 'bg-slate-950 hover:bg-emerald-950/40 text-emerald-400 border-slate-800 hover:border-emerald-500/30'
-                            : 'bg-slate-950 hover:bg-rose-950/40 text-slate-400 hover:text-rose-400 border border-slate-800 hover:border-rose-500/30'
-                        }`}
-                      >
-                        {u.is_suspended ? (
-                          <span className="flex items-center gap-1">
-                            <UserCheck className="w-3.5 h-3.5" /> Reinstate
-                          </span>
-                        ) : (
-                          <span className="flex items-center gap-1">
-                            <UserX className="w-3.5 h-3.5" /> Suspend
-                          </span>
-                        )}
-                      </button>
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          type="button"
+                          disabled={isProcessing}
+                          onClick={() => handleToggleSuspend(u)}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                            u.is_suspended
+                              ? 'bg-slate-950 hover:bg-emerald-950/40 text-emerald-400 border-slate-800 hover:border-emerald-500/30'
+                              : 'bg-slate-950 hover:bg-rose-950/40 text-slate-400 hover:text-rose-400 border border-slate-800 hover:border-rose-500/30'
+                          }`}
+                        >
+                          {u.is_suspended ? (
+                            <span className="flex items-center gap-1">
+                              <UserCheck className="w-3.5 h-3.5" /> Reinstate
+                            </span>
+                          ) : (
+                            <span className="flex items-center gap-1">
+                              <UserX className="w-3.5 h-3.5" /> Suspend
+                            </span>
+                          )}
+                        </button>
+
+                        <button
+                          type="button"
+                          disabled={isProcessing}
+                          onClick={() => handleDeleteUser(u)}
+                          className="p-1.5 rounded-xl bg-slate-950 hover:bg-rose-950/50 text-rose-500 hover:text-rose-400 border border-slate-800 hover:border-rose-500/30 transition-all flex items-center justify-center"
+                          title="Delete User Account"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );
