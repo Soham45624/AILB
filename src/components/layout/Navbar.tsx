@@ -13,6 +13,7 @@ import {
   LayoutDashboard,
   ShieldCheck,
   Send,
+  Library,
 } from 'lucide-react';
 import { getCurrentUserAction, signOutAction } from '@/app/actions/auth';
 
@@ -90,6 +91,7 @@ export function Navbar() {
     { name: 'Directory', href: '/tools', icon: Compass },
     { name: 'Categories', href: '/#categories' },
     { name: 'Submit AI Tool', href: '/submit' },
+    { name: 'My Library', href: '/dashboard/my-library', icon: Library },
   ];
 
   return (
