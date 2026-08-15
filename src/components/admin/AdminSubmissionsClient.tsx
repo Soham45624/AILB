@@ -242,13 +242,23 @@ export function AdminSubmissionsClient({
                         </a>
                       </div>
 
-                      <div className="flex items-center gap-2 text-xs text-slate-400 mt-1">
+                      <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400 mt-1">
                         <span>Submitted by <strong className="text-slate-300">{sub.submitter_name}</strong></span>
                         <span>•</span>
                         <span>{new Date(sub.created_at).toLocaleDateString()}</span>
                         <span>•</span>
                         <span className="uppercase text-[10px] font-bold px-2 py-0.2 rounded bg-slate-800 text-slate-300">
                           {sub.pricing}
+                        </span>
+                        <span>•</span>
+                        <span
+                          className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                            sub.contributor_feedback?.includes('AI Web Discovery')
+                              ? 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20'
+                              : 'bg-slate-800 text-slate-400 border-slate-700'
+                          }`}
+                        >
+                          Source: {sub.contributor_feedback?.includes('AI Web Discovery') ? 'AI Web Discovery' : 'Direct Submission'}
                         </span>
                       </div>
                     </div>
