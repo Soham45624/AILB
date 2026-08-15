@@ -85,8 +85,8 @@ export async function getAdminMetricsAction() {
       supabase.from('tools').select('view_count, click_count'),
     ]);
 
-    const totalViews = (toolsMetrics || []).reduce((acc, t) => acc + (t.view_count || 0), 0);
-    const totalClicks = (toolsMetrics || []).reduce((acc, t) => acc + (t.click_count || 0), 0);
+    const totalViews = (toolsMetrics || []).reduce((acc: number, t: any) => acc + (t.view_count || 0), 0);
+    const totalClicks = (toolsMetrics || []).reduce((acc: number, t: any) => acc + (t.click_count || 0), 0);
 
     return {
       success: true,
@@ -132,15 +132,15 @@ export async function getAdminSubmissionsAction(statusFilter: string = 'all') {
     if (error) throw error;
 
     // Fetch submitter usernames
-    const userIds = Array.from(new Set(submissions?.map((s) => s.submitted_by) || []));
+    const userIds = Array.from(new Set(submissions?.map((s: any) => s.submitted_by) || []));
     const { data: profiles } = await supabase
       .from('profiles')
       .select('id, username, display_name')
       .in('id', userIds);
 
-    const profileMap = new Map(profiles?.map((p) => [p.id, p.display_name || p.username]));
+    const profileMap = new Map(profiles?.map((p: any) => [p.id, p.display_name || p.username]));
 
-    const enriched = (submissions || []).map((s) => ({
+    const enriched = (submissions || []).map((s: any) => ({
       ...s,
       submitter_name: profileMap.get(s.submitted_by) || 'Community Member',
     }));
@@ -512,11 +512,11 @@ export async function getAdminUsersAction(search?: string) {
     // Get submission counts per user
     const { data: submissions } = await supabase.from('submissions').select('submitted_by');
     const subCountMap = new Map<string, number>();
-    submissions?.forEach((s) => {
+    submissions?.forEach((s: any) => {
       subCountMap.set(s.submitted_by, (subCountMap.get(s.submitted_by) || 0) + 1);
     });
 
-    const enriched = (profiles || []).map((p) => ({
+    const enriched = (profiles || []).map((p: any) => ({
       ...p,
       submission_count: subCountMap.get(p.id) || 0,
     }));

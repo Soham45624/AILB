@@ -10,7 +10,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .select('slug, updated_at')
     .eq('status', 'approved');
 
-  const toolUrls: MetadataRoute.Sitemap = (tools || []).map((t) => ({
+  const toolUrls: MetadataRoute.Sitemap = (tools || []).map((t: any) => ({
     url: `${baseUrl}/tools/${t.slug}`,
     lastModified: new Date(t.updated_at || Date.now()),
     changeFrequency: 'weekly',
@@ -26,6 +26,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     {
       url: `${baseUrl}/tools`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/finder`,
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 0.9,

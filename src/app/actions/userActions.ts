@@ -104,7 +104,7 @@ export async function getUserSavedToolIdsAction(): Promise<string[]> {
       .select('tool_id')
       .eq('user_id', user.id);
 
-    return (data || []).map((f) => f.tool_id);
+    return (data || []).map((f: any) => f.tool_id);
   } catch {
     return [];
   }
@@ -158,7 +158,7 @@ export async function submitReviewAction(
       .eq('is_deleted', false);
 
     if (allReviews && allReviews.length > 0) {
-      const avg = allReviews.reduce((acc, r) => acc + r.rating, 0) / allReviews.length;
+      const avg = allReviews.reduce((acc: number, r: any) => acc + r.rating, 0) / allReviews.length;
       await supabase
         .from('tools')
         .update({

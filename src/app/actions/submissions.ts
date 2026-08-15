@@ -45,7 +45,7 @@ export async function checkDuplicateToolAction(rawUrl: string, toolName?: string
 
     if (liveTools && liveTools.length > 0) {
       const match = liveTools.find(
-        (t) =>
+        (t: any) =>
           normalizeToolUrl(t.website_url).canonicalDomain === norm.canonicalDomain ||
           (toolName && t.name.toLowerCase().trim() === toolName.toLowerCase().trim())
       );
@@ -70,7 +70,7 @@ export async function checkDuplicateToolAction(rawUrl: string, toolName?: string
 
     if (subTools && subTools.length > 0) {
       const match = subTools.find(
-        (t) =>
+        (t: any) =>
           normalizeToolUrl(t.website_url).canonicalDomain === norm.canonicalDomain ||
           (toolName && t.tool_name.toLowerCase().trim() === toolName.toLowerCase().trim())
       );

@@ -19,11 +19,11 @@ export async function getCategories(): Promise<Category[]> {
     .select('category_id');
 
   const countMap: Record<string, number> = {};
-  toolCats?.forEach((tc) => {
+  toolCats?.forEach((tc: any) => {
     countMap[tc.category_id] = (countMap[tc.category_id] || 0) + 1;
   });
 
-  return (categories || []).map((cat) => ({
+  return (categories || []).map((cat: any) => ({
     ...cat,
     tool_count: countMap[cat.id] || 0,
   }));
@@ -47,11 +47,11 @@ export async function getTags(): Promise<Tag[]> {
     .select('tag_id');
 
   const countMap: Record<string, number> = {};
-  toolTags?.forEach((tt) => {
+  toolTags?.forEach((tt: any) => {
     countMap[tt.tag_id] = (countMap[tt.tag_id] || 0) + 1;
   });
 
-  return (tags || []).map((t) => ({
+  return (tags || []).map((t: any) => ({
     ...t,
     tool_count: countMap[t.id] || 0,
   }));
@@ -208,7 +208,7 @@ async function getToolsFallback(options: SearchAiToolsOptions): Promise<Tool[]> 
 
   if (error || !toolsData) return [];
 
-  const toolIds = toolsData.map((t) => t.id);
+  const toolIds = toolsData.map((t: any) => t.id);
   const [allCategories, allTags, toolCatsRes, toolTagsRes] = await Promise.all([
     getCategories(),
     getTags(),
@@ -220,7 +220,7 @@ async function getToolsFallback(options: SearchAiToolsOptions): Promise<Tool[]> 
   const tagById = new Map<string, Tag>(allTags.map((tg) => [tg.id, tg]));
 
   const categoryMap: Record<string, Category[]> = {};
-  toolCatsRes.data?.forEach((r) => {
+  toolCatsRes.data?.forEach((r: any) => {
     const c = catById.get(r.category_id);
     if (c) {
       if (!categoryMap[r.tool_id]) categoryMap[r.tool_id] = [];
@@ -229,7 +229,7 @@ async function getToolsFallback(options: SearchAiToolsOptions): Promise<Tool[]> 
   });
 
   const tagMap: Record<string, Tag[]> = {};
-  toolTagsRes.data?.forEach((r) => {
+  toolTagsRes.data?.forEach((r: any) => {
     const t = tagById.get(r.tag_id);
     if (t) {
       if (!tagMap[r.tool_id]) tagMap[r.tool_id] = [];
@@ -237,7 +237,7 @@ async function getToolsFallback(options: SearchAiToolsOptions): Promise<Tool[]> 
     }
   });
 
-  return toolsData.map((t) => ({
+  return toolsData.map((t: any) => ({
     ...t,
     avg_rating: Number(t.avg_rating || 0),
     review_count: Number(t.review_count || 0),
@@ -275,12 +275,12 @@ export async function getToolBySlug(slug: string): Promise<Tool | null> {
   const tagById = new Map<string, Tag>(allTags.map((tg) => [tg.id, tg]));
 
   const categories = (catRes.data || [])
-    .map((r) => categoryById.get(r.category_id))
-    .filter((c): c is Category => Boolean(c));
+    .map((r: any) => categoryById.get(r.category_id))
+    .filter((c: any): c is Category => Boolean(c));
 
   const tags = (tagRes.data || [])
-    .map((r) => tagById.get(r.tag_id))
-    .filter((t): t is Tag => Boolean(t));
+    .map((r: any) => tagById.get(r.tag_id))
+    .filter((t: any): t is Tag => Boolean(t));
 
   return {
     ...data,

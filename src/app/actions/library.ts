@@ -79,8 +79,8 @@ export async function getMyLibraryAction(): Promise<GetMyLibraryResult> {
 
     // Normalize the nested join structure into flat Tool objects
     const tools: LibraryTool[] = (favorites || [])
-      .filter((fav) => fav.tools)
-      .map((fav) => {
+      .filter((fav: any) => fav.tools)
+      .map((fav: any) => {
         const t = fav.tools as any;
         return {
           ...t,

@@ -89,6 +89,7 @@ export function Navbar() {
 
   const navLinks = [
     { name: 'Directory', href: '/tools', icon: Compass },
+    { name: 'AI Finder', href: '/finder', icon: Sparkles },
     { name: 'Categories', href: '/#categories' },
     { name: 'Submit AI Tool', href: '/submit' },
     { name: 'My Library', href: '/dashboard/my-library', icon: Library },

@@ -194,7 +194,7 @@ export function MyLibraryClient({ initialTools, categories }: MyLibraryClientPro
               Explore AI Tools
             </Link>
             <Link
-              href="/tools?finder=true"
+              href="/finder"
               className="btn-interactive inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 font-semibold text-sm transition-colors"
             >
               <Sparkles className="w-4 h-4" />
