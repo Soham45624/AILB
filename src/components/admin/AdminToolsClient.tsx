@@ -92,8 +92,14 @@ export function AdminToolsClient({
     const res = await updateAdminToolAction(editingTool.id, editingTool);
 
     if (res.success) {
+      const updatedTags = tags.filter((tg) => editingTool.tagIds?.includes(tg.id));
+      const updatedCategories = categories.filter((c) => c.id === editingTool.categoryId);
       setTools((prev) =>
-        prev.map((t) => (t.id === editingTool.id ? { ...t, ...editingTool } : t))
+        prev.map((t) =>
+          t.id === editingTool.id
+            ? { ...t, ...editingTool, tags: updatedTags, categories: updatedCategories }
+            : t
+        )
       );
       setEditingTool(null);
     } else {
@@ -253,6 +259,7 @@ export function AdminToolsClient({
                           setEditingTool({
                             ...tool,
                             categoryId: tool.categories?.[0]?.id || '',
+                            tagIds: tool.tags?.map((t: any) => t.id) || [],
                           })
                         }
                         className="p-1.5 rounded-lg bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-cyan-400 border border-slate-800 transition-colors"
@@ -359,6 +366,37 @@ export function AdminToolsClient({
                   </option>
                 ))}
               </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-300 uppercase mb-1.5">
+                Tags / Capabilities
+              </label>
+              <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto p-3 rounded-xl bg-slate-950 border border-slate-800">
+                {tags.map((tag) => {
+                  const isSelected = editingTool.tagIds?.includes(tag.id);
+                  return (
+                    <button
+                      key={tag.id}
+                      type="button"
+                      onClick={() => {
+                        const currentTags = editingTool.tagIds || [];
+                        const nextTags = isSelected
+                          ? currentTags.filter((id: string) => id !== tag.id)
+                          : [...currentTags, tag.id];
+                        setEditingTool({ ...editingTool, tagIds: nextTags });
+                      }}
+                      className={`px-2.5 py-1 rounded-lg text-[10px] font-semibold border transition-all flex items-center gap-1 ${
+                        isSelected
+                          ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-400 font-bold'
+                          : 'bg-slate-900/40 border-slate-850 text-slate-400 hover:text-slate-200'
+                      }`}
+                    >
+                      <span>#{tag.name}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             <div>

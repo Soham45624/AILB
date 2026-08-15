@@ -344,6 +344,18 @@ export async function updateAdminToolAction(toolId: string, updates: any) {
       await supabase.from('tool_categories').insert({ tool_id: toolId, category_id: updates.categoryId });
     }
 
+    // Update tags if provided
+    if (updates.tagIds) {
+      await supabase.from('tool_tags').delete().eq('tool_id', toolId);
+      if (updates.tagIds.length > 0) {
+        const tagRows = updates.tagIds.map((tagId: string) => ({
+          tool_id: toolId,
+          tag_id: tagId,
+        }));
+        await supabase.from('tool_tags').insert(tagRows);
+      }
+    }
+
     revalidatePath('/tools');
     revalidatePath(`/tools/${updates.slug}`);
     revalidatePath('/admin/tools');
