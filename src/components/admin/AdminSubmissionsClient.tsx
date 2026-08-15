@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   approveSubmissionAction,
   requestChangesSubmissionAction,
@@ -58,6 +59,20 @@ export function AdminSubmissionsClient({
 
   // Edit modal state
   const [editingSub, setEditingSub] = useState<any | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (editingSub || feedbackModal) {
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = '';
+      };
+    }
+  }, [editingSub, feedbackModal]);
 
   const filtered = submissions.filter((s) => {
     if (activeTab === 'all') return true;
@@ -469,91 +484,102 @@ export function AdminSubmissionsClient({
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* EDIT SUBMISSION MODAL */}
-      {editingSub && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in overflow-y-auto">
+      {mounted && editingSub && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
+          <div
+            className="fixed inset-0"
+            onClick={() => setEditingSub(null)}
+          />
+
           <form
             onSubmit={handleSaveEdit}
-            className="w-full max-w-lg p-6 rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl space-y-4 my-8"
+            className="relative z-10 w-full max-w-lg max-h-[85vh] flex flex-col rounded-2xl bg-slate-900 border border-slate-800 shadow-2xl overflow-hidden"
           >
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <h3 className="text-base font-bold text-slate-100">Edit Submission Details</h3>
+            <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-800 shrink-0 bg-slate-900">
+              <h3 className="text-sm sm:text-base font-bold text-slate-100 truncate pr-2">
+                Edit Submission: {editingSub.tool_name}
+              </h3>
               <button
                 type="button"
                 onClick={() => setEditingSub(null)}
-                className="text-slate-400 hover:text-slate-200"
+                className="text-slate-400 hover:text-slate-200 transition-colors p-1 rounded-lg hover:bg-slate-800"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div>
-              <label className="block text-xs font-bold text-slate-300 uppercase mb-1">Tool Name</label>
-              <input
-                type="text"
-                required
-                value={editingSub.tool_name}
-                onChange={(e) => setEditingSub({ ...editingSub, tool_name: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-100"
-              />
+            <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3.5">
+              <div>
+                <label className="block text-xs font-bold text-slate-300 uppercase mb-1">Tool Name</label>
+                <input
+                  type="text"
+                  required
+                  value={editingSub.tool_name}
+                  onChange={(e) => setEditingSub({ ...editingSub, tool_name: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-100 focus:border-cyan-500 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-300 uppercase mb-1">Website URL</label>
+                <input
+                  type="url"
+                  required
+                  value={editingSub.website_url}
+                  onChange={(e) => setEditingSub({ ...editingSub, website_url: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-100 focus:border-cyan-500 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-300 uppercase mb-1">Pricing</label>
+                <select
+                  value={editingSub.pricing}
+                  onChange={(e) => setEditingSub({ ...editingSub, pricing: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-100 focus:border-cyan-500 focus:outline-none"
+                >
+                  <option value="free">Free</option>
+                  <option value="freemium">Freemium</option>
+                  <option value="free_trial">Free Trial</option>
+                  <option value="paid">Paid</option>
+                  <option value="contact">Contact</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-300 uppercase mb-1">Description</label>
+                <textarea
+                  rows={2.5}
+                  value={editingSub.description || ''}
+                  onChange={(e) => setEditingSub({ ...editingSub, description: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-100 resize-none focus:border-cyan-500 focus:outline-none"
+                />
+              </div>
             </div>
 
-            <div>
-              <label className="block text-xs font-bold text-slate-300 uppercase mb-1">Website URL</label>
-              <input
-                type="url"
-                required
-                value={editingSub.website_url}
-                onChange={(e) => setEditingSub({ ...editingSub, website_url: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-100"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-slate-300 uppercase mb-1">Pricing</label>
-              <select
-                value={editingSub.pricing}
-                onChange={(e) => setEditingSub({ ...editingSub, pricing: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-100"
-              >
-                <option value="free">Free</option>
-                <option value="freemium">Freemium</option>
-                <option value="free_trial">Free Trial</option>
-                <option value="paid">Paid</option>
-                <option value="contact">Contact</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-slate-300 uppercase mb-1">Description</label>
-              <textarea
-                rows={3}
-                value={editingSub.description || ''}
-                onChange={(e) => setEditingSub({ ...editingSub, description: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-100 resize-none"
-              />
-            </div>
-
-            <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
+            <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-slate-800 shrink-0 bg-slate-900">
               <button
                 type="button"
                 onClick={() => setEditingSub(null)}
-                className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold"
+                className="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-5 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs shadow-md shadow-cyan-500/20"
+                className="px-4 py-1.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs shadow-md shadow-cyan-500/20 transition-all"
               >
                 Save Changes
               </button>
             </div>
           </form>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

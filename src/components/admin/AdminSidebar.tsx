@@ -59,7 +59,7 @@ export function AdminSidebar({ userRole, username }: AdminSidebarProps) {
   ];
 
   return (
-    <aside className="w-full md:w-64 bg-slate-900/95 border-b md:border-b-0 md:border-r border-slate-800/80 p-4 sm:p-6 flex flex-col justify-between shrink-0">
+    <aside className="w-full md:w-64 md:h-screen md:sticky md:top-0 bg-slate-900/95 border-b md:border-b-0 md:border-r border-slate-800/80 p-4 sm:p-6 flex flex-col justify-between shrink-0 md:overflow-y-auto z-30">
       <div className="space-y-6">
         {/* Brand */}
         <Link href="/admin" className="flex items-center gap-2.5 group">
@@ -90,11 +90,10 @@ export function AdminSidebar({ userRole, username }: AdminSidebarProps) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                  isActive
+                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${isActive
                     ? 'bg-cyan-500/15 border border-cyan-500/40 text-cyan-300 shadow-sm'
                     : 'text-slate-400 hover:text-slate-200 hover:bg-slate-850'
-                }`}
+                  }`}
               >
                 <Icon className={`w-4 h-4 ${isActive ? 'text-cyan-400' : 'text-slate-500'}`} />
                 <span>{item.name}</span>

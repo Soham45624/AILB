@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   updateAdminToolAction,
   deleteAdminToolAction,
@@ -43,6 +44,20 @@ export function AdminToolsClient({
   const [selectedCat, setSelectedCat] = useState('');
   const [editingTool, setEditingTool] = useState<any | null>(null);
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (editingTool) {
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = '';
+      };
+    }
+  }, [editingTool]);
 
   const filtered = tools.filter((t) => {
     const cleanSearch = search.trim().toLowerCase();
@@ -223,11 +238,10 @@ export function AdminToolsClient({
                     <button
                       type="button"
                       onClick={() => handleToggleFeatured(tool)}
-                      className={`p-1.5 rounded-lg border transition-all ${
-                        tool.featured
+                      className={`p-1.5 rounded-lg border transition-all ${tool.featured
                           ? 'bg-amber-500/20 border-amber-500/50 text-amber-400'
                           : 'bg-slate-950 border-slate-800 text-slate-600 hover:text-slate-400'
-                      }`}
+                        }`}
                       title={tool.featured ? 'Featured on homepage' : 'Not featured'}
                     >
                       <Sparkles className="w-4 h-4" />
@@ -239,11 +253,10 @@ export function AdminToolsClient({
                     <button
                       type="button"
                       onClick={() => handleToggleTrending(tool)}
-                      className={`p-1.5 rounded-lg border transition-all ${
-                        tool.trending
+                      className={`p-1.5 rounded-lg border transition-all ${tool.trending
                           ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-400'
                           : 'bg-slate-950 border-slate-800 text-slate-600 hover:text-slate-400'
-                      }`}
+                        }`}
                       title={tool.trending ? 'Trending badge on' : 'Not trending'}
                     >
                       <TrendingUp className="w-4 h-4" />
@@ -287,160 +300,172 @@ export function AdminToolsClient({
       </div>
 
       {/* EDIT TOOL MODAL */}
-      {editingTool && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in overflow-y-auto">
+      {mounted && editingTool && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
+          {/* Backdrop click to close */}
+          <div
+            className="fixed inset-0"
+            onClick={() => setEditingTool(null)}
+          />
+
           <form
             onSubmit={handleSaveToolEdit}
-            className="w-full max-w-lg p-6 sm:p-8 rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl space-y-4 my-8"
+            className="relative z-10 w-full max-w-lg max-h-[85vh] flex flex-col rounded-2xl bg-slate-900 border border-slate-800 shadow-2xl overflow-hidden"
           >
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <h3 className="text-base font-bold text-slate-100">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-800 shrink-0 bg-slate-900">
+              <h3 className="text-sm sm:text-base font-bold text-slate-100 truncate pr-2">
                 Edit Tool: {editingTool.name}
               </h3>
               <button
                 type="button"
                 onClick={() => setEditingTool(null)}
-                className="text-slate-400 hover:text-slate-200"
+                className="text-slate-400 hover:text-slate-200 transition-colors p-1 rounded-lg hover:bg-slate-800"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            {/* Modal Body (Scrolls internally if screen is small) */}
+            <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3.5">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
+                    Tool Name
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={editingTool.name}
+                    onChange={(e) => setEditingTool({ ...editingTool, name: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-100 focus:border-cyan-500 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
+                    Pricing
+                  </label>
+                  <select
+                    value={editingTool.pricing}
+                    onChange={(e) => setEditingTool({ ...editingTool, pricing: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-100 focus:border-cyan-500 focus:outline-none"
+                  >
+                    <option value="free">Free</option>
+                    <option value="freemium">Freemium</option>
+                    <option value="free_trial">Free Trial</option>
+                    <option value="paid">Paid</option>
+                    <option value="contact">Contact</option>
+                  </select>
+                </div>
+              </div>
+
               <div>
                 <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
-                  Tool Name
+                  Website URL
                 </label>
                 <input
-                  type="text"
+                  type="url"
                   required
-                  value={editingTool.name}
-                  onChange={(e) => setEditingTool({ ...editingTool, name: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-100"
+                  value={editingTool.website_url}
+                  onChange={(e) => setEditingTool({ ...editingTool, website_url: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-100 focus:border-cyan-500 focus:outline-none"
                 />
               </div>
 
               <div>
                 <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
-                  Pricing
+                  Primary Category
                 </label>
                 <select
-                  value={editingTool.pricing}
-                  onChange={(e) => setEditingTool({ ...editingTool, pricing: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-100"
+                  value={editingTool.categoryId}
+                  onChange={(e) => setEditingTool({ ...editingTool, categoryId: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-100 focus:border-cyan-500 focus:outline-none"
                 >
-                  <option value="free">Free</option>
-                  <option value="freemium">Freemium</option>
-                  <option value="free_trial">Free Trial</option>
-                  <option value="paid">Paid</option>
-                  <option value="contact">Contact</option>
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
                 </select>
               </div>
-            </div>
 
-            <div>
-              <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
-                Website URL
-              </label>
-              <input
-                type="url"
-                required
-                value={editingTool.website_url}
-                onChange={(e) => setEditingTool({ ...editingTool, website_url: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-100"
-              />
-            </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
+                  Tags / Capabilities
+                </label>
+                <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto p-2.5 rounded-xl bg-slate-950 border border-slate-800">
+                  {tags.map((tag) => {
+                    const isSelected = editingTool.tagIds?.includes(tag.id);
+                    return (
+                      <button
+                        key={tag.id}
+                        type="button"
+                        onClick={() => {
+                          const currentTags = editingTool.tagIds || [];
+                          const nextTags = isSelected
+                            ? currentTags.filter((id: string) => id !== tag.id)
+                            : [...currentTags, tag.id];
+                          setEditingTool({ ...editingTool, tagIds: nextTags });
+                        }}
+                        className={`px-2.5 py-1 rounded-lg text-[10px] font-semibold border transition-all flex items-center gap-1 ${
+                          isSelected
+                            ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-400 font-bold'
+                            : 'bg-slate-900/40 border-slate-850 text-slate-400 hover:text-slate-200'
+                        }`}
+                      >
+                        <span>#{tag.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
 
-            <div>
-              <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
-                Primary Category
-              </label>
-              <select
-                value={editingTool.categoryId}
-                onChange={(e) => setEditingTool({ ...editingTool, categoryId: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-100"
-              >
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
+                  Description
+                </label>
+                <textarea
+                  rows={2}
+                  value={editingTool.description || ''}
+                  onChange={(e) => setEditingTool({ ...editingTool, description: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-100 resize-none focus:border-cyan-500 focus:outline-none"
+                />
+              </div>
 
-            <div>
-              <label className="block text-xs font-bold text-slate-300 uppercase mb-1.5">
-                Tags / Capabilities
-              </label>
-              <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto p-3 rounded-xl bg-slate-950 border border-slate-800">
-                {tags.map((tag) => {
-                  const isSelected = editingTool.tagIds?.includes(tag.id);
-                  return (
-                    <button
-                      key={tag.id}
-                      type="button"
-                      onClick={() => {
-                        const currentTags = editingTool.tagIds || [];
-                        const nextTags = isSelected
-                          ? currentTags.filter((id: string) => id !== tag.id)
-                          : [...currentTags, tag.id];
-                        setEditingTool({ ...editingTool, tagIds: nextTags });
-                      }}
-                      className={`px-2.5 py-1 rounded-lg text-[10px] font-semibold border transition-all flex items-center gap-1 ${
-                        isSelected
-                          ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-400 font-bold'
-                          : 'bg-slate-900/40 border-slate-850 text-slate-400 hover:text-slate-200'
-                      }`}
-                    >
-                      <span>#{tag.name}</span>
-                    </button>
-                  );
-                })}
+              <div>
+                <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
+                  Logo URL (Optional)
+                </label>
+                <input
+                  type="url"
+                  value={editingTool.logo_url || ''}
+                  onChange={(e) => setEditingTool({ ...editingTool, logo_url: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-100 focus:border-cyan-500 focus:outline-none"
+                />
               </div>
             </div>
 
-            <div>
-              <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
-                Description
-              </label>
-              <textarea
-                rows={3}
-                value={editingTool.description || ''}
-                onChange={(e) => setEditingTool({ ...editingTool, description: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-100 resize-none"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
-                Logo URL (Optional)
-              </label>
-              <input
-                type="url"
-                value={editingTool.logo_url || ''}
-                onChange={(e) => setEditingTool({ ...editingTool, logo_url: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-100"
-              />
-            </div>
-
-            <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
+            {/* Modal Footer */}
+            <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-slate-800 shrink-0 bg-slate-900">
               <button
                 type="button"
                 onClick={() => setEditingTool(null)}
-                className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold"
+                className="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={processingId !== null}
-                className="px-5 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs shadow-md shadow-cyan-500/20"
+                className="px-4 py-1.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs shadow-md shadow-cyan-500/20 disabled:opacity-50 transition-all"
               >
                 Save Changes
               </button>
             </div>
           </form>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
