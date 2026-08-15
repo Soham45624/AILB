@@ -439,7 +439,7 @@ export function AdminSubmissionsClient({
       )}
 
       {/* FEEDBACK MODAL (Reject or Request Changes) */}
-      {feedbackModal && (
+      {mounted && feedbackModal && createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
           <div className="w-full max-w-md p-6 rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl space-y-4">
             <h3 className="text-base font-bold text-slate-100">
@@ -554,7 +554,7 @@ export function AdminSubmissionsClient({
               <div>
                 <label className="block text-xs font-bold text-slate-300 uppercase mb-1">Description</label>
                 <textarea
-                  rows={2.5}
+                  rows={3}
                   value={editingSub.description || ''}
                   onChange={(e) => setEditingSub({ ...editingSub, description: e.target.value })}
                   className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-100 resize-none focus:border-cyan-500 focus:outline-none"
