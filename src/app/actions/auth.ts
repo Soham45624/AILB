@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { Profile } from '@/lib/types';
 import { revalidatePath } from 'next/cache';
+import { baseUrl } from '@/lib/config';
 
 export interface AuthResponse {
   success: boolean;
@@ -133,7 +134,7 @@ export async function resetPasswordAction(formData: FormData): Promise<{ success
   try {
     const supabase = await createClient();
     const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/reset-password`,
+      redirectTo: `${baseUrl}/reset-password`,
     });
 
     if (error) {

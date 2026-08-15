@@ -7,6 +7,7 @@ import { getToolBySlug, getTools } from '@/lib/data';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { ToolCard } from '@/components/tools/ToolCard';
+import { baseUrl } from '@/lib/config';
 import {
   Star,
   ExternalLink,
@@ -26,8 +27,6 @@ interface ToolDetailPageProps {
     slug: string;
   }>;
 }
-
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
 export async function generateMetadata({ params }: ToolDetailPageProps) {
   const { slug } = await params;

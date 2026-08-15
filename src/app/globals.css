@@ -6,6 +6,19 @@
   --color-foreground: #fafafa;
 }
 
+/* ===== SOURCE INLINE: Force Tailwind v4 to preserve custom interaction classes ===== */
+@source inline(".card-interactive");
+@source inline(".btn-interactive");
+@source inline(".chip-interactive");
+@source inline(".input-interactive");
+@source inline(".bookmark-saved");
+@source inline(".animate-fade-in");
+@source inline(".scrollbar-none");
+@source inline(".bg-grid-pattern");
+@source inline(".line-clamp-1");
+@source inline(".line-clamp-2");
+@source inline(".line-clamp-3");
+
 /* Hardware-accelerated smooth scrolling & base resets */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -26,181 +39,133 @@ body {
 }
 
 /* Minimalist Ultra-Thin Scrollbar */
-::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: #27272a;
-  border-radius: 9999px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #3f3f46;
-}
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #27272a; border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
 
 /* Hide scrollbar utility */
-.scrollbar-none {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-.scrollbar-none::-webkit-scrollbar {
-  display: none;
-}
-
-/* Performance-Optimized Lightweight Micro-Interactions */
-@keyframes subtle-fade {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.animate-fade-in {
-  animation: subtle-fade 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
+.scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+.scrollbar-none::-webkit-scrollbar { display: none; }
 
 /* Line-clamp utilities */
 .line-clamp-1 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 1; }
 .line-clamp-2 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 .line-clamp-3 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
 
-/* Subtle dot grid for clean background depth without GPU strain */
+/* Subtle dot grid */
 .bg-grid-pattern {
   background-image: radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px);
   background-size: 24px 24px;
 }
 
+/* Animations */
+@keyframes subtle-fade {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: subtle-fade 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes bookmark-save {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.3); }
+  65%  { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+.bookmark-saved {
+  animation: bookmark-save 320ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
 /* =====================================================================
    AILIB SIGNATURE INTERACTION SYSTEM
-   All animations use transform/opacity only — no layout shifts.
    ===================================================================== */
 
-/*
- * .card-interactive — signature zoom-out hover for interactive cards
- * scale(0.975) with premium easing. Subtle but perceptible.
- */
+/* card-interactive: signature scale(0.975) zoom-out hover */
 .card-interactive {
   cursor: pointer;
   transform: scale(1);
+  will-change: transform;
   transition:
     transform 200ms cubic-bezier(0.22, 1, 0.36, 1),
     border-color 200ms ease,
     box-shadow 200ms ease,
     background-color 150ms ease;
-  will-change: transform;
 }
-
 .card-interactive:hover {
   transform: scale(0.975);
 }
-
 .card-interactive:active {
-  transform: scale(0.96);
+  transform: scale(0.960);
   transition-duration: 80ms;
 }
+.card-interactive:focus-visible {
+  outline: 2px solid #a1a1aa;
+  outline-offset: 2px;
+}
 
-/*
- * .btn-interactive — tactile button feel
- * Primary and secondary buttons scale down slightly on hover/press.
- */
+/* btn-interactive: subtle tactile press feel */
 .btn-interactive {
   transform: scale(1);
+  will-change: transform;
   transition:
     transform 160ms cubic-bezier(0.22, 1, 0.36, 1),
     background-color 150ms ease,
     color 150ms ease,
-    border-color 150ms ease,
-    box-shadow 150ms ease;
-  will-change: transform;
+    border-color 150ms ease;
 }
-
 .btn-interactive:hover {
   transform: scale(0.985);
 }
-
 .btn-interactive:active {
-  transform: scale(0.97);
+  transform: scale(0.970);
   transition-duration: 60ms;
 }
+.btn-interactive:focus-visible {
+  outline: 2px solid #a1a1aa;
+  outline-offset: 2px;
+}
 
-/*
- * .chip-interactive — smaller clickable chips, tags, prompt pills
- */
+/* chip-interactive: tag pills, compact chips */
 .chip-interactive {
   transform: scale(1);
+  will-change: transform;
   transition:
     transform 160ms cubic-bezier(0.22, 1, 0.36, 1),
     background-color 150ms ease,
     border-color 150ms ease,
     color 150ms ease;
-  will-change: transform;
 }
-
 .chip-interactive:hover {
-  transform: scale(0.97);
+  transform: scale(0.970);
 }
-
 .chip-interactive:active {
-  transform: scale(0.94);
+  transform: scale(0.940);
   transition-duration: 60ms;
 }
+.chip-interactive:focus-visible {
+  outline: 2px solid #a1a1aa;
+  outline-offset: 2px;
+}
 
-/*
- * .input-interactive — focus-enhanced inputs and textareas
- */
+/* input-interactive: focus ring for inputs/textareas */
 .input-interactive {
-  transition:
-    border-color 200ms ease,
-    box-shadow 200ms ease,
-    background-color 150ms ease;
+  transition: border-color 200ms ease, box-shadow 200ms ease;
 }
-
 .input-interactive:focus {
-  border-color: #6b7280; /* zinc-500 — subtle, not harsh */
-  box-shadow: 0 0 0 2px rgba(113, 113, 122, 0.15);
   outline: none;
+  border-color: #71717a;
+  box-shadow: 0 0 0 2px rgba(113, 113, 122, 0.18);
 }
 
-/*
- * Bookmark / save button — tactile pulse on activation
- */
-@keyframes bookmark-save {
-  0%   { transform: scale(1); }
-  40%  { transform: scale(1.25); }
-  65%  { transform: scale(0.92); }
-  100% { transform: scale(1); }
-}
-
-.bookmark-saved {
-  animation: bookmark-save 320ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
-/*
- * prefers-reduced-motion: disable scale transforms,
- * preserve colour / border / opacity changes.
- */
+/* prefers-reduced-motion: strip scale, keep colour changes */
 @media (prefers-reduced-motion: reduce) {
   .card-interactive,
   .btn-interactive,
   .chip-interactive {
     transform: none !important;
-    transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
     will-change: auto;
+    transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
   }
-
-  .bookmark-saved {
-    animation: none;
-  }
-}
-
-/*
- * Keyboard focus — equivalent visual cue via :focus-visible
- * Never hidden; replaces lost hover state for keyboard users.
- */
-.card-interactive:focus-visible,
-.btn-interactive:focus-visible,
-.chip-interactive:focus-visible {
-  outline: 2px solid #a1a1aa; /* zinc-400 */
-  outline-offset: 2px;
 }

@@ -16,29 +16,72 @@ import {
 } from 'lucide-react';
 import { getCurrentUserAction, signOutAction } from '@/app/actions/auth';
 
+// Client-side in-memory cache to persist user sessions across page transitions
+let cachedUser: any = null;
+let hasFetchedUser = false;
+const authListeners = new Set<(state: { user: any; loading: boolean }) => void>();
+
+function setCachedUser(user: any) {
+  cachedUser = user;
+  hasFetchedUser = true;
+  authListeners.forEach((listener) => listener({ user: cachedUser, loading: false }));
+}
+
+const fetchUserSession = async () => {
+  try {
+    const res = await getCurrentUserAction();
+    if (res.success && res.user) {
+      setCachedUser(res.user);
+    } else {
+      setCachedUser(null);
+    }
+  } catch {
+    setCachedUser(null);
+  }
+};
+
 export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
-  const [user, setUser] = useState<any>(null);
-
-  const fetchUser = () => {
-    getCurrentUserAction().then((res) => {
-      if (res.success && res.user) {
-        setUser(res.user);
-      } else {
-        setUser(null);
-      }
-    });
-  };
+  const [user, setUser] = useState<any>(cachedUser);
+  const [isLoading, setIsLoading] = useState(!hasFetchedUser);
 
   useEffect(() => {
-    fetchUser();
+    const handleAuthChange = (state: { user: any; loading: boolean }) => {
+      setUser(state.user);
+      setIsLoading(state.loading);
+    };
+
+    authListeners.add(handleAuthChange);
+
+    if (!hasFetchedUser) {
+      fetchUserSession();
+    } else {
+      // Sync immediately with cache
+      setUser(cachedUser);
+      setIsLoading(false);
+
+      // Perform a silent background validation to check if the session is still active
+      getCurrentUserAction().then((res) => {
+        if (res.success && res.user) {
+          if (JSON.stringify(res.user) !== JSON.stringify(cachedUser)) {
+            setCachedUser(res.user);
+          }
+        } else if (cachedUser !== null) {
+          setCachedUser(null);
+        }
+      });
+    }
+
+    return () => {
+      authListeners.delete(handleAuthChange);
+    };
   }, [pathname]);
 
   const handleSignOut = async () => {
     await signOutAction();
-    setUser(null);
+    setCachedUser(null);
     router.push('/');
     router.refresh();
   };
@@ -109,7 +152,9 @@ export function Navbar() {
           </Link>
 
           {/* User Profile / Admin Link / Login */}
-          {user ? (
+          {isLoading ? (
+            <div className="h-8 w-24 bg-zinc-900/60 border border-zinc-800/60 rounded-lg animate-pulse" />
+          ) : user ? (
             <div className="flex items-center gap-1.5">
               {user.role === 'admin' && (
                 <Link

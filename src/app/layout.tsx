@@ -3,13 +3,12 @@ import { Geist } from "next/font/google";
 import { Suspense } from "react";
 import { NavigationProgressBar } from "@/components/ui/NavigationProgressBar";
 import "./globals.css";
+import { baseUrl } from "@/lib/config";
 
 const geist = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
 });
-
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
