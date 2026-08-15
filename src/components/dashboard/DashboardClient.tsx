@@ -3,27 +3,23 @@
 import { useState } from 'react';
 import {
   User,
-  Bookmark,
+  Library,
   MessageSquare,
   Send,
   Shield,
   ShieldCheck,
-  Clock,
   CheckCircle2,
-  ExternalLink,
   Plus,
   Compass,
   AlertCircle,
   Save,
   LogOut,
-  SlidersHorizontal,
-  AlertOctagon,
   ArrowRight,
 } from 'lucide-react';
 import { Profile } from '@/lib/types';
 import { updateProfileAction, signOutAction } from '@/app/actions/auth';
 import { AddToolModal } from '../home/AddToolModal';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 
 interface DashboardClientProps {
@@ -46,7 +42,8 @@ export function DashboardClient({
   reviewsCount,
 }: DashboardClientProps) {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'profile' | 'saved' | 'reviews' | 'submissions'>('profile');
+  const pathname = usePathname();
+  const [activeTab, setActiveTab] = useState<'profile' | 'reviews'>('profile');
 
   const isAdminOrEditor = profile?.role === 'admin' || profile?.role === 'editor';
 
@@ -201,14 +198,13 @@ export function DashboardClient({
 
       {/* Navigation Tabs */}
       <div className="flex items-center gap-2 border-b border-zinc-900 pb-2 overflow-x-auto scrollbar-none">
+        {/* In-page tabs */}
         {[
-          { id: 'profile', label: 'Profile Settings', icon: User },
-          { id: 'saved', label: 'Saved Tools', count: savedCount, icon: Bookmark },
+          { id: 'profile', label: 'Dashboard', icon: User },
           { id: 'reviews', label: 'My Reviews', count: reviewsCount, icon: MessageSquare },
-          { id: 'submissions', label: 'My Submissions', count: submissions.length, icon: Send },
         ].map((tab) => {
           const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
+          const isActive = activeTab === tab.id && pathname === '/dashboard';
           return (
             <button
               key={tab.id}
@@ -233,6 +229,53 @@ export function DashboardClient({
             </button>
           );
         })}
+
+        {/* Route-based nav items */}
+        <Link
+          href="/dashboard/my-library"
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors ${
+            pathname === '/dashboard/my-library'
+              ? 'bg-zinc-800 text-white'
+              : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900'
+          }`}
+        >
+          <Library className="w-3.5 h-3.5" />
+          <span>My Library</span>
+          {savedCount > 0 && (
+            <span
+              className={`px-1.5 py-0.2 rounded-full text-[10px] ${
+                pathname === '/dashboard/my-library'
+                  ? 'bg-zinc-100 text-zinc-950 font-bold'
+                  : 'bg-zinc-800 text-zinc-400'
+              }`}
+            >
+              {savedCount}
+            </span>
+          )}
+        </Link>
+
+        <Link
+          href="/dashboard/submissions"
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors ${
+            pathname === '/dashboard/submissions'
+              ? 'bg-zinc-800 text-white'
+              : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900'
+          }`}
+        >
+          <Send className="w-3.5 h-3.5" />
+          <span>My Submissions</span>
+          {submissions.length > 0 && (
+            <span
+              className={`px-1.5 py-0.2 rounded-full text-[10px] ${
+                pathname === '/dashboard/submissions'
+                  ? 'bg-zinc-100 text-zinc-950 font-bold'
+                  : 'bg-zinc-800 text-zinc-400'
+              }`}
+            >
+              {submissions.length}
+            </span>
+          )}
+        </Link>
       </div>
 
       {/* TAB CONTENT: Profile Settings */}
@@ -344,29 +387,10 @@ export function DashboardClient({
         </div>
       )}
 
-      {/* TAB CONTENT: Saved Tools */}
-      {activeTab === 'saved' && (
-        <div className="p-8 rounded-2xl bg-zinc-900/40 border border-zinc-800 text-center space-y-3 max-w-xl mx-auto">
-          <div className="w-12 h-12 mx-auto rounded-xl bg-zinc-800 text-zinc-400 flex items-center justify-center">
-            <Bookmark className="w-6 h-6" />
-          </div>
-          <h3 className="text-base font-bold text-zinc-100">Saved AI Tools</h3>
-          <p className="text-xs text-zinc-400 max-w-sm mx-auto leading-relaxed">
-            Bookmark your favorite tools while exploring the directory to quickly access them here.
-          </p>
-          <div className="pt-2">
-            <Link
-              href="/tools"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-zinc-100 hover:bg-white text-zinc-950 font-bold text-xs transition-colors"
-            >
-              <Compass className="w-3.5 h-3.5" /> Browse Directory
-            </Link>
-          </div>
-        </div>
-      )}
+      {/* Saved Tools tab removed — now lives at /dashboard/my-library */}
 
       {/* TAB CONTENT: My Reviews */}
-      {activeTab === 'reviews' && (
+      {activeTab === 'reviews' && pathname === '/dashboard' && (
         <div className="p-8 rounded-2xl bg-zinc-900/40 border border-zinc-800 text-center space-y-3 max-w-xl mx-auto">
           <div className="w-12 h-12 mx-auto rounded-xl bg-zinc-800 text-zinc-400 flex items-center justify-center">
             <MessageSquare className="w-6 h-6" />
@@ -380,92 +404,13 @@ export function DashboardClient({
               href="/tools"
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-semibold text-xs transition-colors border border-zinc-700"
             >
-              <Compass className="w-3.5 h-3.5" /> Explore & Review Tools
+              <Compass className="w-3.5 h-3.5" /> Explore &amp; Review Tools
             </Link>
           </div>
         </div>
       )}
 
-      {/* TAB CONTENT: My Submissions */}
-      {activeTab === 'submissions' && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-base font-bold text-zinc-100">Submitted AI Projects</h2>
-              <p className="text-xs text-zinc-400">Track moderation status of tools you submitted</p>
-            </div>
-            <Link
-              href="/submit"
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-zinc-100 hover:bg-white text-zinc-950 font-bold text-xs transition-colors shadow-sm"
-            >
-              <Plus className="w-3.5 h-3.5" /> Submit Tool
-            </Link>
-          </div>
-
-          {submissions.length === 0 ? (
-            <div className="p-8 rounded-2xl bg-zinc-900/40 border border-zinc-800 text-center space-y-3">
-              <div className="w-12 h-12 mx-auto rounded-xl bg-zinc-800 text-zinc-400 flex items-center justify-center">
-                <Send className="w-6 h-6" />
-              </div>
-              <h3 className="text-sm font-bold text-zinc-200">No Submissions Yet</h3>
-              <p className="text-xs text-zinc-400 max-w-sm mx-auto">
-                Have you created or discovered an awesome AI tool? Submit it to be featured in the directory.
-              </p>
-              <Link
-                href="/submit"
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-zinc-100 hover:bg-white text-zinc-950 font-bold text-xs transition-colors"
-              >
-                <Plus className="w-3.5 h-3.5" /> Submit First Tool
-              </Link>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {submissions.map((sub) => (
-                <div
-                  key={sub.id}
-                  className="p-4 rounded-xl bg-zinc-900/80 border border-zinc-800 space-y-2.5"
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <h4 className="text-sm font-bold text-zinc-100">{sub.tool_name}</h4>
-                      <a
-                        href={sub.website_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-[11px] text-zinc-400 hover:text-white flex items-center gap-1 mt-0.5 font-mono"
-                      >
-                        <ExternalLink className="w-3 h-3" />
-                        {sub.website_url.replace(/^https?:\/\//, '')}
-                      </a>
-                    </div>
-
-                    <span
-                      className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border ${
-                        sub.status === 'approved'
-                          ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                          : sub.status === 'rejected'
-                          ? 'bg-rose-500/10 text-rose-400 border-rose-500/20'
-                          : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
-                      }`}
-                    >
-                      {sub.status}
-                    </span>
-                  </div>
-
-                  <p className="text-xs text-zinc-400 line-clamp-2">
-                    {sub.description || 'No description provided.'}
-                  </p>
-
-                  <div className="pt-2 border-t border-zinc-800/80 flex items-center justify-between text-[10px] text-zinc-500">
-                    <span>Submitted: {new Date(sub.created_at).toLocaleDateString()}</span>
-                    <span className="uppercase">{sub.pricing}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+      {/* Submissions tab removed — now lives at /dashboard/submissions */}
 
       {/* Add Tool Modal */}
       <AddToolModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />
