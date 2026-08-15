@@ -87,6 +87,30 @@ export async function isToolSavedAction(toolId: string): Promise<boolean> {
 }
 
 /**
+ * Returns an array of tool IDs saved by the current authenticated user
+ */
+export async function getUserSavedToolIdsAction(): Promise<string[]> {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) return [];
+
+    const { data } = await supabase
+      .from('favorites')
+      .select('tool_id')
+      .eq('user_id', user.id);
+
+    return (data || []).map((f) => f.tool_id);
+  } catch {
+    return [];
+  }
+}
+
+/**
  * Submits a community review and rating for a tool
  */
 export async function submitReviewAction(

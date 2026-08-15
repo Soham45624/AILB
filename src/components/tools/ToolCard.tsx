@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -11,6 +12,12 @@ import {
 } from 'lucide-react';
 import { Tool } from '@/lib/types';
 import { toggleSaveToolAction } from '@/app/actions/userActions';
+import {
+  initSavedTools,
+  isToolIdSaved,
+  subscribeToSavedTools,
+  setToolSavedState,
+} from '@/lib/savedToolsStore';
 import { AuthModal } from '../auth/AuthModal';
 
 interface ToolCardProps {
@@ -18,11 +25,26 @@ interface ToolCardProps {
 }
 
 export function ToolCard({ tool }: ToolCardProps) {
-  const [isSaved, setIsSaved] = useState(false);
+  const router = useRouter();
+  const [isSaved, setIsSaved] = useState(() => isToolIdSaved(tool.id));
   const [savedCount, setSavedCount] = useState(tool.saved_count || 0);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [bookmarkAnim, setBookmarkAnim] = useState(false);
+
+  useEffect(() => {
+    initSavedTools();
+    setIsSaved(isToolIdSaved(tool.id));
+
+    const unsubscribe = subscribeToSavedTools(() => {
+      setIsSaved(isToolIdSaved(tool.id));
+    });
+    return unsubscribe;
+  }, [tool.id]);
+
+  const handleCardClick = () => {
+    router.push(`/tools/${tool.slug}`);
+  };
 
   const handleToggleSave = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -30,6 +52,7 @@ export function ToolCard({ tool }: ToolCardProps) {
 
     const nextSaved = !isSaved;
     setIsSaved(nextSaved);
+    setToolSavedState(tool.id, nextSaved);
     setSavedCount((prev) => (nextSaved ? prev + 1 : Math.max(0, prev - 1)));
 
     // Tactile bookmark animation on save
@@ -41,6 +64,7 @@ export function ToolCard({ tool }: ToolCardProps) {
     const res = await toggleSaveToolAction(tool.id);
     if (!res.success) {
       setIsSaved(!nextSaved);
+      setToolSavedState(tool.id, !nextSaved);
       setSavedCount((prev) => (!nextSaved ? prev + 1 : Math.max(0, prev - 1)));
       if (res.error?.includes('sign in')) {
         setIsAuthOpen(true);
@@ -71,13 +95,16 @@ export function ToolCard({ tool }: ToolCardProps) {
 
   return (
     <>
-      {/* card-interactive provides the signature scale(0.975) zoom-out hover */}
-      <div className="card-interactive group relative flex flex-col justify-between rounded-2xl bg-zinc-900/60 hover:bg-zinc-900 border border-zinc-800/70 hover:border-zinc-600/80 p-5 hover:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.6)]">
+      {/* Clicking anywhere on the card opens the tool detail page */}
+      <div
+        onClick={handleCardClick}
+        className="card-interactive group relative flex flex-col justify-between rounded-2xl bg-zinc-900/60 hover:bg-zinc-900 border border-zinc-800/70 hover:border-zinc-600/80 p-5 hover:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.6)] cursor-pointer"
+      >
         <div>
           {/* Top Row: Logo, Title, Category, Bookmark */}
           <div className="flex items-start justify-between gap-3 mb-3.5">
             <div className="flex items-center gap-3 min-w-0">
-              {/* Logo — independently scales very slightly on card hover */}
+              {/* Logo */}
               <div className="w-11 h-11 rounded-xl bg-zinc-800 border border-zinc-700/60 overflow-hidden flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-[1.03]">
                 {tool.logo_url && !imageError ? (
                   <Image
@@ -98,12 +125,9 @@ export function ToolCard({ tool }: ToolCardProps) {
               {/* Title & Category */}
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <Link
-                    href={`/tools/${tool.slug}`}
-                    className="font-bold text-zinc-100 text-sm hover:text-white truncate transition-colors"
-                  >
+                  <h3 className="font-bold text-zinc-100 text-sm hover:text-white truncate transition-colors">
                     {tool.name}
-                  </Link>
+                  </h3>
                   {tool.featured && (
                     <span className="p-0.5 rounded text-amber-400 bg-amber-400/10 shrink-0" title="Featured Tool">
                       <Sparkles className="w-3 h-3" />
@@ -119,10 +143,10 @@ export function ToolCard({ tool }: ToolCardProps) {
               </div>
             </div>
 
-            {/* Bookmark Action — btn-interactive + bookmark-saved on activation */}
+            {/* Bookmark Action */}
             <button
               onClick={handleToggleSave}
-              className={`btn-interactive p-2 rounded-xl transition-colors shrink-0 ${
+              className={`btn-interactive p-2 rounded-xl transition-colors shrink-0 z-10 ${
                 isSaved
                   ? 'text-white bg-zinc-700'
                   : 'text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800/60 opacity-60 group-hover:opacity-100'
@@ -141,7 +165,7 @@ export function ToolCard({ tool }: ToolCardProps) {
             {tool.description || 'No description provided.'}
           </p>
 
-          {/* Tags Pills — chip-interactive */}
+          {/* Tags Pills */}
           {tool.tags && tool.tags.length > 0 && (
             <div className="flex flex-wrap gap-1 mb-4">
               {tool.tags.slice(0, 3).map((tag) => (
@@ -149,7 +173,7 @@ export function ToolCard({ tool }: ToolCardProps) {
                   key={tag.id}
                   href={`/tools?tags=${tag.slug || tag.name}`}
                   onClick={(e) => e.stopPropagation()}
-                  className="chip-interactive text-[11px] font-medium px-2 py-0.5 rounded-md bg-zinc-950 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900 border border-zinc-800/80 hover:border-zinc-700"
+                  className="chip-interactive text-[11px] font-medium px-2 py-0.5 rounded-md bg-zinc-950 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900 border border-zinc-800/80 hover:border-zinc-700 z-10"
                 >
                   #{tag.name}
                 </Link>
@@ -180,14 +204,11 @@ export function ToolCard({ tool }: ToolCardProps) {
             </span>
           </div>
 
-          {/* CTA — more visible on card hover via group */}
-          <Link
-            href={`/tools/${tool.slug}`}
-            className="flex items-center gap-0.5 text-zinc-400 group-hover:text-white font-semibold transition-colors"
-          >
+          {/* CTA */}
+          <div className="flex items-center gap-0.5 text-zinc-400 group-hover:text-white font-semibold transition-colors">
             <span>Overview</span>
             <ArrowUpRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-          </Link>
+          </div>
         </div>
       </div>
 

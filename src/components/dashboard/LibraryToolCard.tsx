@@ -1,23 +1,23 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
   Star,
   ExternalLink,
   Trash2,
-  Upload,
   ArrowUpRight,
   Loader2,
 } from 'lucide-react';
 import { LibraryTool } from '@/app/actions/library';
 import { removeFromLibraryAction } from '@/app/actions/library';
+import { setToolSavedState } from '@/lib/savedToolsStore';
 
 interface LibraryToolCardProps {
   tool: LibraryTool;
   onRemoved: (toolId: string) => void;
-  onShare: (tool: LibraryTool) => void;
 }
 
 const PRICING_BADGE: Record<string, string> = {
@@ -28,7 +28,8 @@ const PRICING_BADGE: Record<string, string> = {
   contact: 'text-purple-400 bg-purple-500/10 border-purple-500/20',
 };
 
-export function LibraryToolCard({ tool, onRemoved, onShare }: LibraryToolCardProps) {
+export function LibraryToolCard({ tool, onRemoved }: LibraryToolCardProps) {
+  const router = useRouter();
   const [imageError, setImageError] = useState(false);
   const [removing, setRemoving] = useState(false);
   const [removeError, setRemoveError] = useState<string | null>(null);
@@ -36,13 +37,18 @@ export function LibraryToolCard({ tool, onRemoved, onShare }: LibraryToolCardPro
   const mainCategory = tool.categories?.[0] ?? null;
   const pricingBadge = PRICING_BADGE[tool.pricing] ?? 'text-zinc-400 bg-zinc-900 border-zinc-800';
 
+  const handleCardClick = () => {
+    router.push(`/tools/${tool.slug}`);
+  };
+
   const handleRemove = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
-    // Optimistic: immediately notify parent to animate card out
+    // Optimistic: immediately notify parent to animate card out & update store
     setRemoving(true);
     setRemoveError(null);
+    setToolSavedState(tool.id, false);
 
     // Small delay so the CSS transition starts before the DOM node vanishes
     await new Promise((r) => setTimeout(r, 60));
@@ -50,7 +56,8 @@ export function LibraryToolCard({ tool, onRemoved, onShare }: LibraryToolCardPro
 
     const res = await removeFromLibraryAction(tool.id);
     if (!res.success) {
-      // Rollback is handled by the parent restoring the tool to the list
+      // Rollback
+      setToolSavedState(tool.id, true);
       setRemoveError(res.error || 'Failed to remove');
       setRemoving(false);
     }
@@ -58,10 +65,11 @@ export function LibraryToolCard({ tool, onRemoved, onShare }: LibraryToolCardPro
 
   return (
     <div
+      onClick={handleCardClick}
       className={`
         card-interactive group relative flex flex-col rounded-[20px]
         bg-zinc-900/70 hover:bg-zinc-900 border border-zinc-800/70 hover:border-zinc-600/80
-        p-5 hover:shadow-[0_6px_28px_-6px_rgba(0,0,0,0.65)]
+        p-5 hover:shadow-[0_6px_28px_-6px_rgba(0,0,0,0.65)] cursor-pointer
         transition-opacity transition-transform
         ${removing ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'}
       `}
@@ -96,12 +104,9 @@ export function LibraryToolCard({ tool, onRemoved, onShare }: LibraryToolCardPro
 
         {/* Name + Category */}
         <div className="flex-1 min-w-0">
-          <Link
-            href={`/tools/${tool.slug}`}
-            className="font-bold text-sm text-zinc-100 hover:text-white truncate block transition-colors"
-          >
+          <h3 className="font-bold text-sm text-zinc-100 hover:text-white truncate block transition-colors">
             {tool.name}
-          </Link>
+          </h3>
           {mainCategory && (
             <span className="text-[11px] text-zinc-500 truncate block mt-0.5">
               {mainCategory.name}
@@ -110,19 +115,7 @@ export function LibraryToolCard({ tool, onRemoved, onShare }: LibraryToolCardPro
         </div>
 
         {/* Quick actions — visible on hover */}
-        <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-          {/* Share to AILIB */}
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              onShare(tool);
-            }}
-            title="Share to AILIB"
-            className="btn-interactive p-1.5 rounded-lg text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800"
-          >
-            <Upload className="w-3.5 h-3.5" />
-          </button>
-
+        <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
           {/* Remove from library */}
           <button
             onClick={handleRemove}
@@ -146,7 +139,7 @@ export function LibraryToolCard({ tool, onRemoved, onShare }: LibraryToolCardPro
 
       {/* Tags */}
       {tool.tags && tool.tags.length > 0 && (
-        <div className="flex flex-wrap gap-1 mb-4">
+        <div className="flex flex-wrap gap-1 mb-4 z-10">
           {tool.tags.slice(0, 3).map((tag) => (
             <span
               key={tag.id}
@@ -184,23 +177,23 @@ export function LibraryToolCard({ tool, onRemoved, onShare }: LibraryToolCardPro
         </div>
 
         {/* CTA: Open tool */}
-        <Link
-          href={`/tools/${tool.slug}`}
-          className="flex items-center gap-0.5 text-zinc-500 group-hover:text-zinc-200 font-semibold transition-colors text-[11px]"
-        >
+        <div className="flex items-center gap-0.5 text-zinc-500 group-hover:text-zinc-200 font-semibold transition-colors text-[11px]">
           <span>Open</span>
           <ArrowUpRight className="w-3 h-3" />
-        </Link>
+        </div>
       </div>
 
       {/* Full-card action bar — always visible at very bottom */}
-      <div className="mt-3 flex items-center gap-2">
-        <Link
-          href={`/tools/${tool.slug}`}
+      <div className="mt-3 flex items-center gap-2 z-10">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            router.push(`/tools/${tool.slug}`);
+          }}
           className="btn-interactive flex-1 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 font-semibold text-xs text-center transition-colors"
         >
           Open Tool
-        </Link>
+        </button>
         <a
           href={tool.website_url}
           target="_blank"
@@ -211,17 +204,6 @@ export function LibraryToolCard({ tool, onRemoved, onShare }: LibraryToolCardPro
           <ExternalLink className="w-3 h-3" />
           Website
         </a>
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-            onShare(tool);
-          }}
-          className="btn-interactive py-1.5 px-3 rounded-xl bg-zinc-800/60 hover:bg-zinc-800 border border-zinc-700/60 text-zinc-400 hover:text-zinc-200 font-semibold text-xs transition-colors flex items-center gap-1"
-          title="Share to AILIB"
-        >
-          <Upload className="w-3 h-3" />
-          <span className="hidden sm:inline">Share</span>
-        </button>
         <button
           onClick={handleRemove}
           disabled={removing}
