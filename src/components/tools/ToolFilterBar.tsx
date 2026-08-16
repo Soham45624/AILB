@@ -5,12 +5,9 @@ import { useState, useEffect, useTransition } from 'react';
 import {
   Search,
   SlidersHorizontal,
-  Star,
-  X,
-  Sparkles,
   ChevronDown,
-  RotateCcw,
-  Zap,
+  X,
+  Check,
 } from 'lucide-react';
 import { Category, Tag, SortOption } from '@/lib/types';
 import { FilterDrawer } from './FilterDrawer';
@@ -26,20 +23,14 @@ interface ToolFilterBarProps {
   initialPlatforms?: string[];
   initialTags?: string[];
   initialSort?: SortOption;
+  totalToolsCount?: number;
+  children?: React.ReactNode;
 }
-
-const QUICK_SUGGESTIONS = [
-  'AI video generator',
-  'free coding AI',
-  'presentation maker',
-  'image generator',
-];
 
 const SORT_OPTIONS: { value: SortOption; label: string }[] = [
   { value: 'relevant', label: 'Most Relevant' },
   { value: 'popular', label: 'Most Popular' },
   { value: 'highest_rated', label: 'Highest Rated' },
-  { value: 'most_reviewed', label: 'Most Reviewed' },
   { value: 'newest', label: 'Recently Added' },
   { value: 'trending', label: 'Trending' },
   { value: 'most_saved', label: 'Most Saved' },
@@ -55,6 +46,8 @@ export function ToolFilterBar({
   initialPlatforms = [],
   initialTags = [],
   initialSort = 'relevant',
+  totalToolsCount,
+  children,
 }: ToolFilterBarProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -84,14 +77,6 @@ export function ToolFilterBar({
     setSelectedTags(tagsParam ? tagsParam.split(',').filter(Boolean) : []);
     setSort((searchParams.get('sort') as SortOption) || 'relevant');
   }, [searchParams]);
-
-  // Count active non-default filters for the filter drawer badge
-  const activeFiltersCount =
-    (pricing.length > 0 ? 1 : 0) +
-    (rating > 0 ? 1 : 0) +
-    (platforms.length > 0 ? 1 : 0) +
-    (selectedTags.length > 0 ? 1 : 0) +
-    (category ? 1 : 0);
 
   const updateFiltersInUrl = (overrides: {
     search?: string | null;
@@ -178,18 +163,13 @@ export function ToolFilterBar({
     updateFiltersInUrl({ search });
   };
 
-  const handleSuggestionClick = (query: string) => {
-    setSearch(query);
-    updateFiltersInUrl({ search: query });
-  };
-
-  const handleCategoryClick = (catSlug: string) => {
+  const handleCategoryToggle = (catSlug: string) => {
     const nextCat = category === catSlug ? null : catSlug;
     setCategory(nextCat || '');
     updateFiltersInUrl({ category: nextCat });
   };
 
-  const handleQuickPricingToggle = (priceKey: string) => {
+  const handlePricingToggle = (priceKey: string) => {
     let nextPricing: string[];
     if (pricing.includes(priceKey)) {
       nextPricing = pricing.filter((p) => p !== priceKey);
@@ -198,6 +178,11 @@ export function ToolFilterBar({
     }
     setPricing(nextPricing);
     updateFiltersInUrl({ pricing: nextPricing });
+  };
+
+  const handleRatingChange = (newRating: number) => {
+    setRating(newRating);
+    updateFiltersInUrl({ rating: newRating });
   };
 
   const handleClearAll = () => {
@@ -213,72 +198,74 @@ export function ToolFilterBar({
     });
   };
 
+  const activeFiltersCount =
+    (pricing.length > 0 ? 1 : 0) +
+    (rating > 0 ? 1 : 0) +
+    (platforms.length > 0 ? 1 : 0) +
+    (selectedTags.length > 0 ? 1 : 0) +
+    (category ? 1 : 0);
+
   return (
-    <div className="space-y-4 mb-8">
-      {/* Top Main Search & Controls Bar */}
-      <div className="flex flex-col lg:flex-row gap-3 items-stretch lg:items-center justify-between">
-        {/* Search Input Box */}
-        <form onSubmit={handleSearchSubmit} className="relative flex-1">
+    <div className="space-y-6">
+      {/* =========================================================================
+          TOP SEARCH BAR & SORT SELECTOR (Figma Layout)
+         ========================================================================= */}
+      <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+        {/* Search Input Container */}
+        <form
+          onSubmit={handleSearchSubmit}
+          className="relative flex-1 flex items-center bg-white rounded-full px-4 py-2.5 border border-[#E2DDD2] shadow-sm hover:border-[#D0C9BA] transition-all"
+        >
           {isPending ? (
-            <div className="w-4 h-4 border-2 border-zinc-400 border-t-transparent rounded-full animate-spin absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <div className="w-4 h-4 border-2 border-[#141613] border-t-transparent rounded-full animate-spin mr-3 shrink-0" />
           ) : (
-            <Search className="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-[#9FA59A] mr-3 shrink-0 pointer-events-none" />
           )}
           <input
             type="text"
-            placeholder="Search AI tools across name, features, tags, use cases..."
+            placeholder="Search tools, categories, use cases..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-24 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-xs sm:text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 transition-colors"
+            className="w-full bg-transparent text-xs sm:text-sm text-[#141613] placeholder:text-[#94998E] focus:outline-none"
           />
-          <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
-            {search && (
-              <button
-                type="button"
-                onClick={() => {
-                  setSearch('');
-                  updateFiltersInUrl({ search: null });
-                }}
-                className="p-1 rounded-md text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 transition-colors"
-                title="Clear search"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
+          {search && (
             <button
-              type="submit"
-              disabled={isPending}
-              className="px-3 py-1.5 rounded-lg bg-zinc-100 hover:bg-white text-zinc-950 text-xs font-bold transition-colors disabled:opacity-50"
+              type="button"
+              onClick={() => {
+                setSearch('');
+                updateFiltersInUrl({ search: null });
+              }}
+              className="p-1 rounded-full text-[#9FA59A] hover:text-[#141613] transition-colors"
+              title="Clear search"
             >
-              {isPending ? 'Searching...' : 'Search'}
+              <X className="w-3.5 h-3.5" />
             </button>
-          </div>
+          )}
         </form>
 
-        {/* Right Controls: Filter Drawer Button & Sort Selector */}
-        <div className="flex items-center gap-2.5 shrink-0">
-          {/* Filter Drawer Trigger Button */}
+        {/* Right Controls: Sort selector & Mobile Filter Trigger */}
+        <div className="flex items-center gap-2.5 shrink-0 justify-end">
+          {/* Mobile Filter Button */}
           <button
             type="button"
             onClick={() => setIsDrawerOpen(true)}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl border text-xs font-bold transition-all ${
+            className={`lg:hidden flex items-center gap-1.5 px-4 py-2.5 rounded-full border text-xs font-bold transition-all shadow-sm ${
               activeFiltersCount > 0
-                ? 'bg-cyan-500/15 border-cyan-500/40 text-cyan-300 shadow-md shadow-cyan-500/10'
-                : 'bg-slate-900 border-slate-800 text-slate-200 hover:border-slate-700 hover:bg-slate-850'
+                ? 'bg-[#EDF7EE] border-[#CCE8CD] text-[#1E7E34]'
+                : 'bg-white border-[#E2DDD2] text-[#141613]'
             }`}
           >
             <SlidersHorizontal className="w-3.5 h-3.5" />
-            <span>All Filters</span>
+            <span>Filters</span>
             {activeFiltersCount > 0 && (
-              <span className="w-4 h-4 rounded-full bg-cyan-500 text-slate-950 text-[10px] font-extrabold flex items-center justify-center">
+              <span className="w-4 h-4 rounded-full bg-[#1E7E34] text-white text-[10px] flex items-center justify-center">
                 {activeFiltersCount}
               </span>
             )}
           </button>
 
           {/* Sort Selector Dropdown */}
-          <div className="relative flex items-center px-3.5 py-2.5 rounded-2xl bg-slate-900 border border-slate-800 text-xs font-medium text-slate-300">
-            <span className="text-slate-500 mr-2 font-normal hidden sm:inline">Sort:</span>
+          <div className="relative flex items-center bg-white rounded-full px-4 py-2.5 border border-[#E2DDD2] text-xs font-medium text-[#141613] shadow-sm hover:border-[#D0C9BA] transition-colors">
             <select
               value={sort}
               onChange={(e) => {
@@ -286,153 +273,185 @@ export function ToolFilterBar({
                 setSort(newSort);
                 updateFiltersInUrl({ sort: newSort });
               }}
-              className="bg-transparent text-slate-100 font-bold focus:outline-none cursor-pointer pr-5 appearance-none"
+              className="bg-transparent text-[#141613] font-semibold focus:outline-none cursor-pointer pr-5 appearance-none"
             >
               {SORT_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value} className="bg-slate-900 text-slate-200">
+                <option key={opt.value} value={opt.value}>
                   {opt.label}
                 </option>
               ))}
             </select>
-            <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-3 pointer-events-none" />
+            <ChevronDown className="w-3.5 h-3.5 text-[#73796E] absolute right-3 pointer-events-none" />
           </div>
         </div>
       </div>
 
-      {/* Suggested Search Query Pills */}
-      <div className="flex items-center gap-1.5 flex-wrap text-xs text-slate-400">
-        <span className="flex items-center gap-1 text-[11px] font-medium text-slate-500 mr-1">
-          <Sparkles className="w-3 h-3 text-cyan-400" />
-          Try:
-        </span>
-        {QUICK_SUGGESTIONS.map((sug) => (
-          <button
-            key={sug}
-            type="button"
-            onClick={() => handleSuggestionClick(sug)}
-            className={`px-2.5 py-1 rounded-lg text-xs transition-all border ${
-              search.toLowerCase() === sug.toLowerCase()
-                ? 'bg-cyan-500/20 border-cyan-500/40 text-cyan-300 font-semibold'
-                : 'bg-slate-900/80 border-slate-800/80 text-slate-400 hover:text-slate-200 hover:border-slate-700'
-            }`}
-          >
-            &ldquo;{sug}&rdquo;
-          </button>
-        ))}
+      {/* =========================================================================
+          MAIN 2-COLUMN LAYOUT: SIDEBAR + RESULTS
+         ========================================================================= */}
+      <div className="flex items-start gap-8">
+        {/* LEFT SIDEBAR (Desktop) */}
+        <aside className="hidden lg:block w-60 shrink-0 space-y-7 pt-1">
+          {/* Category Filter Section */}
+          <div className="space-y-3">
+            <h3 className="text-xs font-extrabold uppercase tracking-wider text-[#73796E]">
+              Category
+            </h3>
+            <div className="space-y-2">
+              {categories.map((cat) => {
+                const isSelected = category === cat.slug;
+                return (
+                  <label
+                    key={cat.id}
+                    onClick={() => handleCategoryToggle(cat.slug)}
+                    className="flex items-center gap-3 text-xs font-medium text-[#141613] cursor-pointer group select-none"
+                  >
+                    <div
+                      className={`w-4 h-4 rounded-md border flex items-center justify-center transition-all ${
+                        isSelected
+                          ? 'bg-[#141613] border-[#141613] text-white'
+                          : 'bg-white border-[#D0C9BA] group-hover:border-[#141613]'
+                      }`}
+                    >
+                      {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
+                    </div>
+                    <span className={`group-hover:text-black transition-colors ${isSelected ? 'font-bold' : ''}`}>
+                      {cat.name}
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Pricing Filter Section */}
+          <div className="space-y-3 pt-4 border-t border-[#EAE6DC]">
+            <h3 className="text-xs font-extrabold uppercase tracking-wider text-[#73796E]">
+              Pricing
+            </h3>
+            <div className="space-y-2">
+              {[
+                { key: 'free', label: 'Free' },
+                { key: 'freemium', label: 'Freemium' },
+                { key: 'paid', label: 'Paid' },
+              ].map((p) => {
+                const isSelected = pricing.includes(p.key);
+                return (
+                  <label
+                    key={p.key}
+                    onClick={() => handlePricingToggle(p.key)}
+                    className="flex items-center gap-3 text-xs font-medium text-[#141613] cursor-pointer group select-none"
+                  >
+                    <div
+                      className={`w-4 h-4 rounded-md border flex items-center justify-center transition-all ${
+                        isSelected
+                          ? 'bg-[#141613] border-[#141613] text-white'
+                          : 'bg-white border-[#D0C9BA] group-hover:border-[#141613]'
+                      }`}
+                    >
+                      {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
+                    </div>
+                    <span className={`group-hover:text-black transition-colors ${isSelected ? 'font-bold' : ''}`}>
+                      {p.label}
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Min Rating Radio Section */}
+          <div className="space-y-3 pt-4 border-t border-[#EAE6DC]">
+            <h3 className="text-xs font-extrabold uppercase tracking-wider text-[#73796E]">
+              Min Rating
+            </h3>
+            <div className="space-y-2">
+              {[
+                { value: 0, label: 'All ratings' },
+                { value: 4, label: '4+ stars' },
+              ].map((r) => {
+                const isSelected = rating === r.value;
+                return (
+                  <label
+                    key={r.value}
+                    onClick={() => handleRatingChange(r.value)}
+                    className="flex items-center gap-3 text-xs font-medium text-[#141613] cursor-pointer group select-none"
+                  >
+                    <div
+                      className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${
+                        isSelected
+                          ? 'border-[#5A7840]'
+                          : 'border-[#D0C9BA] group-hover:border-[#141613]'
+                      }`}
+                    >
+                      {isSelected && <span className="w-2 h-2 rounded-full bg-[#5A7840]" />}
+                    </div>
+                    <span className={`group-hover:text-black transition-colors ${isSelected ? 'font-bold text-[#141613]' : ''}`}>
+                      {r.label}
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+        </aside>
+
+        {/* RIGHT MAIN AREA */}
+        <div className="flex-1 min-w-0 space-y-4">
+          {/* Results Count Header & Active Filter Chips */}
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-[#73796E]">
+              {totalToolsCount !== undefined ? `${totalToolsCount} tools found` : ''}
+            </span>
+          </div>
+
+          {/* Active Filter Chips */}
+          <ActiveFilterChips
+            search={search}
+            category={category}
+            pricing={pricing}
+            rating={rating}
+            platforms={platforms}
+            tags={selectedTags}
+            sort={sort}
+            categories={categories}
+            allTags={tags}
+            onRemoveSearch={() => {
+              setSearch('');
+              updateFiltersInUrl({ search: null });
+            }}
+            onRemoveCategory={() => {
+              setCategory('');
+              updateFiltersInUrl({ category: null });
+            }}
+            onRemovePricing={(p) => {
+              const next = pricing.filter((item) => item !== p);
+              setPricing(next);
+              updateFiltersInUrl({ pricing: next });
+            }}
+            onRemoveRating={() => {
+              setRating(0);
+              updateFiltersInUrl({ rating: 0 });
+            }}
+            onRemovePlatform={(plat) => {
+              const next = platforms.filter((item) => item !== plat);
+              setPlatforms(next);
+              updateFiltersInUrl({ platforms: next });
+            }}
+            onRemoveTag={(tagSlug) => {
+              const next = selectedTags.filter((item) => item !== tagSlug);
+              setSelectedTags(next);
+              updateFiltersInUrl({ tags: next });
+            }}
+            onClearAll={handleClearAll}
+          />
+
+          {/* Tool Cards Grid injected from page */}
+          {children}
+        </div>
       </div>
 
-      {/* Quick Category Carousel Pills */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-        <button
-          onClick={() => {
-            setCategory('');
-            updateFiltersInUrl({ category: null });
-          }}
-          className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
-            !category
-              ? 'bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/25'
-              : 'bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800 hover:border-slate-700'
-          }`}
-        >
-          All Categories
-        </button>
-        {categories.map((cat) => {
-          const isSelected = category === cat.slug;
-          return (
-            <button
-              key={cat.id}
-              onClick={() => handleCategoryClick(cat.slug)}
-              className={`px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 ${
-                isSelected
-                  ? 'bg-cyan-500 text-slate-950 font-bold shadow-md shadow-cyan-500/25'
-                  : 'bg-slate-900 text-slate-300 hover:text-white border border-slate-800 hover:border-slate-700'
-              }`}
-            >
-              {cat.name}
-              {cat.tool_count !== undefined && cat.tool_count > 0 && (
-                <span
-                  className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-                    isSelected
-                      ? 'bg-slate-950/20 text-slate-950'
-                      : 'bg-slate-800 text-slate-400'
-                  }`}
-                >
-                  {cat.tool_count}
-                </span>
-              )}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Quick Pricing Filter Pills */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none text-xs">
-        <span className="text-slate-500 font-medium shrink-0 mr-1">Pricing:</span>
-        {[
-          { key: 'free', label: 'Free' },
-          { key: 'freemium', label: 'Freemium' },
-          { key: 'free_trial', label: 'Free Trial' },
-          { key: 'paid', label: 'Paid' },
-        ].map((item) => {
-          const isSelected = pricing.includes(item.key);
-          return (
-            <button
-              key={item.key}
-              onClick={() => handleQuickPricingToggle(item.key)}
-              className={`px-3 py-1 rounded-lg font-semibold whitespace-nowrap transition-all border ${
-                isSelected
-                  ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300 shadow-sm'
-                  : 'bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200'
-              }`}
-            >
-              {item.label}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Active Filter Chips with Remove and Reset */}
-      <ActiveFilterChips
-        search={search}
-        category={category}
-        pricing={pricing}
-        rating={rating}
-        platforms={platforms}
-        tags={selectedTags}
-        sort={sort}
-        categories={categories}
-        allTags={tags}
-        onRemoveSearch={() => {
-          setSearch('');
-          updateFiltersInUrl({ search: null });
-        }}
-        onRemoveCategory={() => {
-          setCategory('');
-          updateFiltersInUrl({ category: null });
-        }}
-        onRemovePricing={(p) => {
-          const next = pricing.filter((item) => item !== p);
-          setPricing(next);
-          updateFiltersInUrl({ pricing: next });
-        }}
-        onRemoveRating={() => {
-          setRating(0);
-          updateFiltersInUrl({ rating: 0 });
-        }}
-        onRemovePlatform={(plat) => {
-          const next = platforms.filter((item) => item !== plat);
-          setPlatforms(next);
-          updateFiltersInUrl({ platforms: next });
-        }}
-        onRemoveTag={(tSlug) => {
-          const next = selectedTags.filter((item) => item !== tSlug);
-          setSelectedTags(next);
-          updateFiltersInUrl({ tags: next });
-        }}
-        onClearAll={handleClearAll}
-      />
-
-      {/* Filter Drawer Dialog */}
+      {/* Mobile Filter Drawer */}
       <FilterDrawer
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
@@ -443,19 +462,20 @@ export function ToolFilterBar({
         selectedRating={rating}
         selectedPlatforms={platforms}
         selectedTags={selectedTags}
-        onApplyFilters={(filters) => {
-          setCategory(filters.category);
-          setPricing(filters.pricing);
-          setRating(filters.rating);
-          setPlatforms(filters.platforms);
-          setSelectedTags(filters.tags);
+        onApplyFilters={(f) => {
+          setCategory(f.category);
+          setPricing(f.pricing);
+          setRating(f.rating);
+          setPlatforms(f.platforms);
+          setSelectedTags(f.tags);
           updateFiltersInUrl({
-            category: filters.category,
-            pricing: filters.pricing,
-            rating: filters.rating,
-            platforms: filters.platforms,
-            tags: filters.tags,
+            category: f.category || null,
+            pricing: f.pricing,
+            rating: f.rating,
+            platforms: f.platforms,
+            tags: f.tags,
           });
+          setIsDrawerOpen(false);
         }}
         onResetFilters={handleClearAll}
       />

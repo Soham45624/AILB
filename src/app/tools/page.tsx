@@ -51,31 +51,28 @@ export default async function ToolsPage({ searchParams }: ToolsPageProps) {
   const activeCategoryObj = categories.find((c) => c.slug === category);
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 selection:bg-zinc-100 selection:text-zinc-950 flex flex-col justify-between">
+    <div className="min-h-screen bg-[#FBF9F5] text-[#141613] selection:bg-[#ECE8DF] selection:text-[#141613] flex flex-col justify-between">
       <Navbar />
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-10 flex-1 w-full">
-        {/* Header */}
-        <div className="mb-6 space-y-1.5">
-          <h1 className="text-2xl sm:text-3xl font-black text-zinc-100 tracking-tight">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-10 flex-1 w-full space-y-6">
+        {/* Page Header */}
+        <div className="space-y-1">
+          <h1 className="text-2xl sm:text-4xl font-extrabold text-[#141613] tracking-tight">
             {search ? (
-              <span>
-                Search results for &ldquo;{search}&rdquo;
-              </span>
+              <span>Search results for &ldquo;{search}&rdquo;</span>
             ) : activeCategoryObj ? (
               `${activeCategoryObj.name} Tools`
             ) : (
               'Explore AI Tools'
             )}
           </h1>
-
-          <p className="text-xs sm:text-sm text-zinc-400 max-w-xl">
+          <p className="text-xs sm:text-sm text-[#666B60] max-w-xl">
             {activeCategoryObj?.description ||
-              'Filter by capability, pricing, user evaluation, and supported platforms.'}
+              'Discover and filter AI software applications across categories, pricing models, and ratings.'}
           </p>
         </div>
 
-        {/* Filter Controls & Search */}
+        {/* Filter Bar with Sidebar and Injected ToolGrid */}
         <ToolFilterBar
           categories={categories}
           tags={allTags}
@@ -86,24 +83,10 @@ export default async function ToolsPage({ searchParams }: ToolsPageProps) {
           initialPlatforms={platformArray}
           initialTags={tagsArray}
           initialSort={sort}
-        />
-
-        {/* Results Counter */}
-        <div className="flex items-center justify-between pb-3 mb-6 border-b border-zinc-900 text-xs font-medium text-zinc-400">
-          <div className="flex items-center gap-2">
-            <span>
-              Showing <strong className="text-zinc-200">{tools.length}</strong>{' '}
-              {tools.length === 1 ? 'tool' : 'tools'}
-              {totalCount > tools.length && ` of ${totalCount}`}
-            </span>
-          </div>
-          <span className="text-[11px] text-zinc-500 font-mono">
-            Fast Index
-          </span>
-        </div>
-
-        {/* Tools Grid */}
-        <ToolGrid tools={tools} />
+          totalToolsCount={totalCount}
+        >
+          <ToolGrid tools={tools} />
+        </ToolFilterBar>
       </main>
 
       <Footer />

@@ -29,7 +29,6 @@ export function ActiveFilterChips({
   rating,
   platforms,
   tags,
-  sort,
   categories,
   allTags,
   onRemoveSearch,
@@ -73,18 +72,18 @@ export function ActiveFilterChips({
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-2 pt-1 pb-2">
-      <span className="text-xs font-semibold text-slate-400 mr-1">
+    <div className="flex flex-wrap items-center gap-2 pt-1 pb-4">
+      <span className="text-xs font-semibold text-[#73796E] mr-1">
         Active Filters:
       </span>
 
       {/* Search Chip */}
       {search && (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-medium animate-fade-in">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-[#EAE6DC] text-[#141613] text-xs font-medium shadow-sm animate-fade-in">
           Query: &ldquo;{search}&rdquo;
           <button
             onClick={onRemoveSearch}
-            className="hover:bg-cyan-500/20 rounded p-0.5 transition-colors"
+            className="hover:bg-[#F5F3ED] rounded-full p-0.5 transition-colors"
             title="Remove search filter"
           >
             <X className="w-3 h-3" />
@@ -94,11 +93,11 @@ export function ActiveFilterChips({
 
       {/* Category Chip */}
       {category && (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-500/10 border border-blue-500/30 text-blue-300 text-xs font-medium animate-fade-in">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EDF7EE] border border-[#CCE8CD] text-[#1E7E34] text-xs font-medium shadow-sm animate-fade-in">
           Category: {activeCategory?.name || category}
           <button
             onClick={onRemoveCategory}
-            className="hover:bg-blue-500/20 rounded p-0.5 transition-colors"
+            className="hover:bg-[#DDF0DE] rounded-full p-0.5 transition-colors"
             title="Remove category filter"
           >
             <X className="w-3 h-3" />
@@ -110,13 +109,13 @@ export function ActiveFilterChips({
       {pricing.map((p) => (
         <span
           key={p}
-          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-medium animate-fade-in"
+          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FAF3E6] border border-[#F0E2C8] text-[#6B5020] text-xs font-medium shadow-sm animate-fade-in"
         >
-          Price: {formatPricingLabel(p)}
+          Pricing: {formatPricingLabel(p)}
           <button
             onClick={() => onRemovePricing(p)}
-            className="hover:bg-emerald-500/20 rounded p-0.5 transition-colors"
-            title={`Remove ${p} pricing`}
+            className="hover:bg-[#F2E5CE] rounded-full p-0.5 transition-colors"
+            title={`Remove ${p} filter`}
           >
             <X className="w-3 h-3" />
           </button>
@@ -125,11 +124,11 @@ export function ActiveFilterChips({
 
       {/* Rating Chip */}
       {rating > 0 && (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-medium animate-fade-in">
-          Rating: {rating}+ ⭐
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FEF6E9] border border-[#F9DEC2] text-[#8C4E05] text-xs font-medium shadow-sm animate-fade-in">
+          Rating: {rating}+ Stars
           <button
             onClick={onRemoveRating}
-            className="hover:bg-amber-500/20 rounded p-0.5 transition-colors"
+            className="hover:bg-[#FCEAD0] rounded-full p-0.5 transition-colors"
             title="Remove rating filter"
           >
             <X className="w-3 h-3" />
@@ -141,13 +140,13 @@ export function ActiveFilterChips({
       {platforms.map((plat) => (
         <span
           key={plat}
-          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-medium animate-fade-in"
+          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-[#EAE6DC] text-[#141613] text-xs font-medium shadow-sm animate-fade-in"
         >
           Platform: {plat}
           <button
             onClick={() => onRemovePlatform(plat)}
-            className="hover:bg-purple-500/20 rounded p-0.5 transition-colors"
-            title={`Remove ${plat} platform`}
+            className="hover:bg-[#F5F3ED] rounded-full p-0.5 transition-colors"
+            title={`Remove ${plat} platform filter`}
           >
             <X className="w-3 h-3" />
           </button>
@@ -155,29 +154,29 @@ export function ActiveFilterChips({
       ))}
 
       {/* Tag Chips */}
-      {tags.map((tSlug) => (
+      {tags.map((tagSlug) => (
         <span
-          key={tSlug}
-          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-medium animate-fade-in"
+          key={tagSlug}
+          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#F3EFFB] border border-[#DDD2F5] text-[#5C42A6] text-xs font-medium shadow-sm animate-fade-in"
         >
-          Tag: {tagMap.get(tSlug) || tSlug}
+          #{tagMap.get(tagSlug) || tagSlug}
           <button
-            onClick={() => onRemoveTag(tSlug)}
-            className="hover:bg-indigo-500/20 rounded p-0.5 transition-colors"
-            title={`Remove tag ${tSlug}`}
+            onClick={() => onRemoveTag(tagSlug)}
+            className="hover:bg-[#E4D9F5] rounded-full p-0.5 transition-colors"
+            title={`Remove ${tagSlug} tag filter`}
           >
             <X className="w-3 h-3" />
           </button>
         </span>
       ))}
 
-      {/* Clear All Filters Button */}
+      {/* Clear All Action */}
       <button
         onClick={onClearAll}
-        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold border border-slate-700 transition-colors ml-1"
+        className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold text-[#D73A49] hover:bg-[#FDF0F2] border border-transparent hover:border-[#F8D2D7] transition-colors ml-auto"
       >
-        <RotateCcw className="w-3 h-3 text-slate-400" />
-        Clear All Filters
+        <RotateCcw className="w-3 h-3" />
+        <span>Clear All</span>
       </button>
     </div>
   );

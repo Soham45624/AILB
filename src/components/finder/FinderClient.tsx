@@ -24,10 +24,7 @@ import {
   Square,
   ArrowRight,
   MessageSquare,
-  Layers,
   Trash2,
-  ArrowLeft,
-  ShieldAlert,
 } from 'lucide-react';
 import {
   findAiToolsAction,
@@ -324,14 +321,14 @@ export function FinderClient() {
     <div className="space-y-8 max-w-5xl mx-auto animate-fade-in pb-16">
       {/* ── HEADER / INTRO ── */}
       <div className="text-center space-y-3 pt-4">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-xs font-semibold text-zinc-300">
-          <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#EDF7EE] border border-[#CCE8CD] text-xs font-semibold text-[#1E7E34]">
+          <Sparkles className="w-3.5 h-3.5" />
           <span>AI-Powered Tool Discovery</span>
         </div>
-        <h1 className="text-3xl sm:text-5xl font-black text-zinc-100 tracking-tight">
+        <h1 className="font-serif-heading text-3xl sm:text-5xl font-normal text-[#141613] tracking-tight">
           Tell AILIB what you need.
         </h1>
-        <p className="text-xs sm:text-sm text-zinc-400 max-w-xl mx-auto leading-relaxed">
+        <p className="text-xs sm:text-sm text-[#666B60] max-w-xl mx-auto leading-relaxed">
           Describe your task, workflow, or requirements in plain English. AILIB Finder searches our verified catalog and provides deep web discovery.
         </p>
       </div>
@@ -343,9 +340,9 @@ export function FinderClient() {
             e.preventDefault();
             handleSearch();
           }}
-          className="relative flex items-center shadow-2xl rounded-2xl bg-zinc-900 border border-zinc-850 focus-within:border-zinc-700 transition-all p-2"
+          className="relative flex items-center shadow-lg rounded-full bg-white border border-[#E2DDD2] p-2 hover:border-[#D0C9BA] transition-all"
         >
-          <Search className="w-5 h-5 text-zinc-500 ml-3 shrink-0 pointer-events-none" />
+          <Search className="w-5 h-5 text-[#9FA59A] ml-3.5 shrink-0 pointer-events-none" />
           <input
             ref={inputRef}
             type="text"
@@ -356,14 +353,14 @@ export function FinderClient() {
                 ? 'Refine your requirements (e.g., Must export to PowerPoint)...'
                 : 'What are you trying to accomplish? (e.g. Free AI for creating presentations)'
             }
-            className="w-full px-3.5 py-2.5 bg-transparent text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none"
+            className="w-full px-3.5 py-2.5 bg-transparent text-xs sm:text-sm text-[#141613] placeholder:text-[#94998E] focus:outline-none"
             disabled={loading || webSearching}
           />
 
           <button
             type="submit"
             disabled={!prompt.trim() || loading || webSearching}
-            className="btn-interactive px-5 py-2.5 rounded-xl bg-zinc-100 hover:bg-white text-zinc-950 font-bold text-xs flex items-center gap-1.5 shrink-0 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+            className="btn-interactive px-5 py-2.5 rounded-full bg-[#141613] hover:bg-[#2A2E27] text-white font-bold text-xs flex items-center gap-1.5 shrink-0 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
           >
             {loading ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -379,7 +376,7 @@ export function FinderClient() {
         {/* Quick starter prompts */}
         {turns.length === 0 && (
           <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-xs">
-            <span className="text-zinc-500 text-[11px] font-medium mr-1 flex items-center gap-1">
+            <span className="text-[#73796E] text-[11px] font-medium mr-1 flex items-center gap-1">
               <HelpCircle className="w-3 h-3" /> Try asking:
             </span>
             {SAMPLE_PROMPTS.map((p) => (
@@ -387,7 +384,7 @@ export function FinderClient() {
                 key={p}
                 type="button"
                 onClick={() => handleSearch(p)}
-                className="chip-interactive px-3 py-1 rounded-lg bg-zinc-900/80 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-zinc-800 text-[11px] transition-colors"
+                className="chip-interactive px-3 py-1 rounded-full bg-white hover:bg-[#F5F3ED] text-[#666B60] hover:text-[#141613] border border-[#EAE6DC] text-[11px] transition-colors shadow-sm"
               >
                 &ldquo;{p}&rdquo;
               </button>
@@ -398,9 +395,9 @@ export function FinderClient() {
 
       {/* ── CLARIFICATION PROMPT & CHIPS ── */}
       {clarificationQuestion && (
-        <div className="max-w-3xl mx-auto p-4 rounded-2xl bg-zinc-900 border border-indigo-500/30 space-y-3 animate-fade-in">
-          <div className="flex items-center gap-2 text-xs font-semibold text-indigo-300">
-            <MessageSquare className="w-4 h-4 text-indigo-400" />
+        <div className="max-w-3xl mx-auto p-4 rounded-2xl bg-white border border-[#DDD2F5] shadow-sm space-y-3 animate-fade-in">
+          <div className="flex items-center gap-2 text-xs font-semibold text-[#5C42A6]">
+            <MessageSquare className="w-4 h-4" />
             <span>{clarificationQuestion}</span>
           </div>
 
@@ -411,7 +408,7 @@ export function FinderClient() {
                   key={opt}
                   type="button"
                   onClick={() => handleSearch(`AI tool for ${opt.toLowerCase()}`)}
-                  className="chip-interactive px-3 py-1.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-200 border border-indigo-500/30 text-xs font-medium transition-colors"
+                  className="chip-interactive px-3 py-1.5 rounded-full bg-[#F3EFFB] hover:bg-[#EAE2F7] text-[#5C42A6] border border-[#DDD2F5] text-xs font-semibold transition-colors"
                 >
                   +{opt}
                 </button>
@@ -427,15 +424,15 @@ export function FinderClient() {
           activeRequirements.pricing.length > 0 ||
           activeRequirements.features.length > 0 ||
           activeRequirements.platforms.length > 0) && (
-          <div className="p-4 rounded-2xl bg-zinc-900/60 border border-zinc-800/80 space-y-2 animate-fade-in max-w-3xl mx-auto">
+          <div className="p-4 rounded-2xl bg-white border border-[#EAE6DC] space-y-2 animate-fade-in max-w-3xl mx-auto shadow-sm">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
-                <SlidersHorizontal className="w-3.5 h-3.5 text-zinc-400" /> Interpreted Requirements:
+              <span className="text-[11px] font-bold text-[#73796E] uppercase tracking-wider flex items-center gap-1.5">
+                <SlidersHorizontal className="w-3.5 h-3.5" /> Interpreted Requirements:
               </span>
               <button
                 type="button"
                 onClick={handleReset}
-                className="text-[11px] text-zinc-500 hover:text-zinc-300 transition-colors flex items-center gap-1"
+                className="text-[11px] text-[#73796E] hover:text-[#141613] transition-colors flex items-center gap-1"
               >
                 <RefreshCw className="w-3 h-3" /> Reset Search
               </button>
@@ -445,13 +442,13 @@ export function FinderClient() {
               {activeRequirements.categories.map((cat) => (
                 <span
                   key={cat}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 text-xs font-semibold"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#EDF7EE] text-[#1E7E34] border border-[#CCE8CD] text-xs font-semibold"
                 >
                   Category: {cat}
                   <button
                     type="button"
                     onClick={() => handleRemoveChip('category', cat)}
-                    className="hover:text-white"
+                    className="hover:text-black"
                   >
                     <X className="w-3 h-3" />
                   </button>
@@ -461,13 +458,13 @@ export function FinderClient() {
               {activeRequirements.pricing.map((pr) => (
                 <span
                   key={pr}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 text-xs font-semibold"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#FAF3E6] text-[#6B5020] border border-[#F0E2C8] text-xs font-semibold"
                 >
                   Pricing: {pr}
                   <button
                     type="button"
                     onClick={() => handleRemoveChip('pricing', pr)}
-                    className="hover:text-white"
+                    className="hover:text-black"
                   >
                     <X className="w-3 h-3" />
                   </button>
@@ -477,13 +474,13 @@ export function FinderClient() {
               {activeRequirements.features.map((feat) => (
                 <span
                   key={feat}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-zinc-800 text-zinc-300 border border-zinc-700 text-xs font-medium"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#F5F3ED] text-[#666B60] border border-[#EAE6DC] text-xs font-medium"
                 >
                   Feature: {feat}
                   <button
                     type="button"
                     onClick={() => handleRemoveChip('feature', feat)}
-                    className="hover:text-white"
+                    className="hover:text-black"
                   >
                     <X className="w-3 h-3" />
                   </button>
@@ -493,13 +490,13 @@ export function FinderClient() {
               {activeRequirements.platforms.map((plat) => (
                 <span
                   key={plat}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-sky-500/10 text-sky-300 border border-sky-500/20 text-xs font-medium"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#EEF5FD] text-[#0366D6] border border-[#CDE0F9] text-xs font-medium"
                 >
                   Platform: {plat}
                   <button
                     type="button"
                     onClick={() => handleRemoveChip('platform', plat)}
-                    className="hover:text-white"
+                    className="hover:text-black"
                   >
                     <X className="w-3 h-3" />
                   </button>
@@ -511,19 +508,19 @@ export function FinderClient() {
 
       {/* ── OUT OF SCOPE WARNING ── */}
       {outOfScopeMessage && (
-        <div className="max-w-2xl mx-auto p-5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs sm:text-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-fade-in">
+        <div className="max-w-2xl mx-auto p-5 rounded-2xl bg-[#FEF6E9] border border-[#F9DEC2] text-[#8C4E05] text-xs sm:text-sm flex flex-col sm:flex-row items-start sm:center justify-between gap-4 animate-fade-in">
           <div className="flex items-start gap-3">
-            <Info className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+            <Info className="w-5 h-5 text-[#C66100] shrink-0 mt-0.5" />
             <div className="space-y-1">
-              <p className="font-semibold text-amber-300">Tool Discovery Guidance</p>
-              <p className="leading-relaxed text-zinc-300">{outOfScopeMessage}</p>
+              <p className="font-bold text-[#8C4E05]">Tool Discovery Guidance</p>
+              <p className="leading-relaxed text-[#666B60]">{outOfScopeMessage}</p>
             </div>
           </div>
 
           <button
             type="button"
             onClick={() => handleSearch('AI tools for cybersecurity and security testing')}
-            className="btn-interactive px-3.5 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-semibold shrink-0 whitespace-nowrap"
+            className="btn-interactive px-3.5 py-2 rounded-full bg-[#141613] text-white text-xs font-semibold shrink-0 whitespace-nowrap"
           >
             Find Security Tools
           </button>
@@ -533,20 +530,20 @@ export function FinderClient() {
       {/* ── CONVERSATION TURNS HISTORY ── */}
       {turns.length > 1 && (
         <div className="max-w-3xl mx-auto space-y-3 pt-2">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-[#73796E]">
             Search History &amp; Refinements:
           </span>
           <div className="space-y-2">
             {turns.slice(-4, -1).map((turn) => (
               <div
                 key={turn.id}
-                className={`p-3 rounded-xl text-xs flex items-start gap-2.5 ${
+                className={`p-3.5 rounded-2xl text-xs flex items-start gap-2.5 ${
                   turn.role === 'user'
-                    ? 'bg-zinc-900/90 border border-zinc-800 text-zinc-300'
-                    : 'bg-zinc-950 border border-zinc-850 text-zinc-400'
+                    ? 'bg-white border border-[#EAE6DC] text-[#141613] shadow-sm'
+                    : 'bg-[#F7F4EC] border border-[#EAE6DC] text-[#666B60]'
                 }`}
               >
-                <div className="font-bold text-[10px] uppercase tracking-wider text-zinc-500 shrink-0 mt-0.5">
+                <div className="font-bold text-[10px] uppercase tracking-wider text-[#73796E] shrink-0 mt-0.5">
                   {turn.role === 'user' ? 'You:' : 'AILIB:'}
                 </div>
                 <div className="flex-1 leading-relaxed">{turn.content}</div>
@@ -559,15 +556,15 @@ export function FinderClient() {
       {/* ── SECTION 1: AILIB MATCHES (Database Tools) ── */}
       {latestMatches.length > 0 && (
         <div className="space-y-4 pt-2 max-w-5xl mx-auto">
-          <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+          <div className="flex items-center justify-between border-b border-[#EAE6DC] pb-3">
             <div className="flex items-center gap-2.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-              <h2 className="text-lg font-black text-zinc-100 tracking-tight">AILIB Matches</h2>
-              <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-black uppercase tracking-wider">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#5A7840] animate-pulse" />
+              <h2 className="text-lg font-bold text-[#141613] tracking-tight">AILIB Matches</h2>
+              <span className="px-2.5 py-0.5 rounded-full bg-[#EDF7EE] text-[#1E7E34] border border-[#CCE8CD] text-[10px] font-extrabold uppercase tracking-wider">
                 AILIB Library
               </span>
             </div>
-            <span className="text-xs text-zinc-500 font-mono">
+            <span className="text-xs text-[#73796E]">
               {latestMatches.length} verified tool{latestMatches.length !== 1 ? 's' : ''}
             </span>
           </div>
@@ -580,11 +577,11 @@ export function FinderClient() {
                 <div
                   key={tool.id}
                   onClick={() => router.push(`/tools/${tool.slug}`)}
-                  className="card-interactive group relative flex flex-col justify-between rounded-2xl bg-zinc-900/70 hover:bg-zinc-900 border border-zinc-800/80 hover:border-zinc-600/80 p-5 hover:shadow-2xl cursor-pointer space-y-4 transition-all"
+                  className="card-interactive group relative flex flex-col justify-between rounded-2xl bg-white border border-[#EAE6DC] p-5 hover:border-[#D0C9BA] hover:shadow-[0_8px_30px_rgba(0,0,0,0.05)] cursor-pointer space-y-4 transition-all"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-12 h-12 rounded-xl bg-zinc-800 border border-zinc-700/80 overflow-hidden flex items-center justify-center shrink-0">
+                      <div className="w-12 h-12 rounded-xl bg-[#141613] text-white overflow-hidden flex items-center justify-center font-bold text-sm shrink-0 shadow-sm">
                         {tool.logo_url ? (
                           <Image
                             src={tool.logo_url}
@@ -594,30 +591,23 @@ export function FinderClient() {
                             className="object-cover w-full h-full"
                           />
                         ) : (
-                          <span className="text-zinc-200 font-bold text-base">
-                            {tool.name.substring(0, 2).toUpperCase()}
-                          </span>
+                          <span>{tool.name.substring(0, 2).toUpperCase()}</span>
                         )}
                       </div>
 
                       <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-bold text-zinc-100 text-sm hover:text-white truncate">
+                        <div className="flex items-center gap-1.5">
+                          <h3 className="font-extrabold text-[#141613] text-sm group-hover:text-black truncate">
                             {tool.name}
                           </h3>
-                          {tool.featured && (
-                            <span className="p-0.5 rounded text-amber-400 bg-amber-400/10 shrink-0" title="Featured Tool">
-                              <Sparkles className="w-3 h-3" />
-                            </span>
-                          )}
                         </div>
 
-                        <div className="flex items-center gap-2 mt-1 text-xs">
-                          <span className="text-zinc-400 font-medium">
+                        <div className="flex items-center gap-2 mt-0.5 text-xs">
+                          <span className="text-[#666B60] font-medium">
                             {tool.categories?.[0]?.name || 'AI Tool'}
                           </span>
-                          <span className="text-zinc-600">•</span>
-                          <span className="uppercase text-[10px] font-bold px-2 py-0.2 rounded bg-zinc-800 text-zinc-300 border border-zinc-700">
+                          <span className="text-[#DDD7CB]">•</span>
+                          <span className="uppercase text-[10px] font-bold px-2 py-0.2 rounded bg-[#F5F3ED] text-[#666B60]">
                             {tool.pricing}
                           </span>
                         </div>
@@ -625,7 +615,7 @@ export function FinderClient() {
                     </div>
 
                     <div className="flex items-center gap-1.5 shrink-0">
-                      <span className="px-2.5 py-1 rounded-full text-xs font-black bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
+                      <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-[#EDF7EE] text-[#1E7E34] border border-[#CCE8CD] flex items-center gap-1">
                         <CheckCircle2 className="w-3.5 h-3.5" />
                         {matchPercentage}% Match
                       </span>
@@ -633,12 +623,12 @@ export function FinderClient() {
                       <button
                         type="button"
                         onClick={(e) => handleToggleSave(e, tool.id)}
-                        className={`btn-interactive p-1.5 rounded-lg transition-colors ${
+                        className={`p-1.5 rounded-full transition-colors ${
                           isSaved
-                            ? 'text-white bg-zinc-700'
-                            : 'text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800'
+                            ? 'text-[#141613] bg-[#ECE8DF]'
+                            : 'text-[#9FA59A] hover:text-[#141613] hover:bg-[#F5F3ED]'
                         }`}
-                        title={isSaved ? 'Saved to Favorites' : 'Save Tool'}
+                        title={isSaved ? 'Saved to Library' : 'Save Tool'}
                         aria-label="Save Tool"
                       >
                         <Bookmark className={`w-4 h-4 ${isSaved ? 'fill-current' : ''}`} />
@@ -646,35 +636,21 @@ export function FinderClient() {
                     </div>
                   </div>
 
-                  <div className="p-3 rounded-xl bg-zinc-950/80 border border-zinc-800/80 text-xs text-zinc-300 space-y-1">
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1">
+                  <div className="p-3 rounded-xl bg-[#FBF9F5] border border-[#EAE6DC] text-xs text-[#141613] space-y-1">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-[#1E7E34] flex items-center gap-1">
                       <Sparkles className="w-3 h-3" /> Why It Matches:
                     </div>
-                    <p className="leading-relaxed text-zinc-300 text-xs">{whyItMatches}</p>
+                    <p className="leading-relaxed text-[#666B60] text-xs">{whyItMatches}</p>
                   </div>
 
-                  <p className="text-xs text-zinc-400 line-clamp-2 leading-relaxed">
+                  <p className="text-xs text-[#666B60] line-clamp-2 leading-relaxed">
                     {tool.description || 'No description provided.'}
                   </p>
 
-                  {tool.tags && tool.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1">
-                      {tool.tags.slice(0, 3).map((tag) => (
-                        <span
-                          key={tag.id}
-                          className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-zinc-950 text-zinc-400 border border-zinc-850"
-                        >
-                          #{tag.name}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-
-                  <div className="pt-3 border-t border-zinc-800/80 flex items-center justify-between gap-2 text-xs">
-                    <div className="flex items-center gap-1 text-zinc-300 font-medium">
-                      <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                      <span>{tool.avg_rating > 0 ? tool.avg_rating.toFixed(1) : '5.0'}</span>
-                      <span className="text-zinc-600 text-[11px]">({tool.review_count || 0})</span>
+                  <div className="pt-3 border-t border-[#F2EFE8] flex items-center justify-between gap-2 text-xs">
+                    <div className="flex items-center gap-1 text-[#141613] font-bold">
+                      <Star className="w-3.5 h-3.5 fill-[#F5A623] text-[#F5A623]" />
+                      <span>{tool.avg_rating > 0 ? tool.avg_rating.toFixed(1) : '4.5'}</span>
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -683,7 +659,7 @@ export function FinderClient() {
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={(e) => e.stopPropagation()}
-                        className="btn-interactive px-3 py-1.5 rounded-lg bg-zinc-800/80 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 hover:text-white text-xs font-semibold transition-colors flex items-center gap-1"
+                        className="px-3 py-1.5 rounded-full bg-[#F5F3ED] hover:bg-[#ECE8DF] border border-[#EAE6DC] text-[#141613] text-xs font-semibold transition-colors flex items-center gap-1"
                       >
                         <span>Website</span>
                         <ExternalLink className="w-3 h-3" />
@@ -695,7 +671,7 @@ export function FinderClient() {
                           e.stopPropagation();
                           router.push(`/tools/${tool.slug}`);
                         }}
-                        className="btn-interactive px-3.5 py-1.5 rounded-lg bg-zinc-100 hover:bg-white text-zinc-950 text-xs font-bold transition-colors flex items-center gap-1"
+                        className="btn-interactive px-3.5 py-1.5 rounded-full bg-[#141613] hover:bg-[#2A2E27] text-white text-xs font-bold transition-colors flex items-center gap-1"
                       >
                         <span>View Tool</span>
                         <ArrowRight className="w-3 h-3" />
@@ -709,10 +685,10 @@ export function FinderClient() {
 
           {/* Prompt banner to explore more on the web */}
           {discoveredTools.length === 0 && !webSearching && (
-            <div className="mt-6 p-4 rounded-2xl bg-zinc-900/60 border border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-3 animate-fade-in">
+            <div className="mt-6 p-5 rounded-2xl bg-white border border-[#EAE6DC] flex flex-col sm:flex-row items-center justify-between gap-3 shadow-sm animate-fade-in">
               <div className="space-y-0.5 text-center sm:text-left">
-                <p className="text-xs font-bold text-zinc-200">Want to see more options?</p>
-                <p className="text-[11px] text-zinc-400">
+                <p className="text-xs font-bold text-[#141613]">Want to see more options?</p>
+                <p className="text-[11px] text-[#666B60]">
                   Search across the web for additional AI tools matching your requirements.
                 </p>
               </div>
@@ -720,7 +696,7 @@ export function FinderClient() {
               <button
                 type="button"
                 onClick={handleStartWebDiscovery}
-                className="btn-interactive px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-indigo-600/20 transition-all shrink-0"
+                className="btn-interactive px-4 py-2 rounded-full bg-[#141613] hover:bg-[#2A2E27] text-white font-bold text-xs flex items-center gap-2 shadow-sm transition-all shrink-0"
               >
                 <Globe className="w-3.5 h-3.5" />
                 <span>Search the Web</span>
@@ -730,50 +706,13 @@ export function FinderClient() {
         </div>
       )}
 
-      {/* ── NO AILIB MATCHES BANNER (Option to search web) ── */}
-      {turns.length > 0 && latestMatches.length === 0 && discoveredTools.length === 0 && !outOfScopeMessage && !loading && !webSearching && (
-        <div className="max-w-2xl mx-auto p-8 rounded-2xl bg-zinc-900 border border-zinc-800 text-center space-y-4 animate-fade-in shadow-2xl">
-          <div className="w-12 h-12 rounded-2xl bg-zinc-800 text-zinc-300 flex items-center justify-center mx-auto">
-            <Globe className="w-6 h-6 text-indigo-400" />
-          </div>
-
-          <div className="space-y-1.5">
-            <h3 className="text-base font-bold text-zinc-100">
-              I couldn&apos;t find a strong match in the AILIB library.
-            </h3>
-            <p className="text-xs text-zinc-400 max-w-md mx-auto leading-relaxed">
-              Would you like me to search the web for additional AI tools matching your requirements?
-            </p>
-          </div>
-
-          <div className="flex items-center justify-center gap-3 pt-2">
-            <button
-              type="button"
-              onClick={handleStartWebDiscovery}
-              className="btn-interactive px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-indigo-600/20 transition-all"
-            >
-              <Globe className="w-4 h-4" />
-              <span>Search the Web</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={handleReset}
-              className="btn-interactive px-4 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-semibold text-xs transition-colors"
-            >
-              Reset Search
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* ── WEB SEARCHING LOADER ── */}
       {webSearching && (
-        <div className="max-w-md mx-auto p-8 rounded-2xl bg-zinc-900/90 border border-zinc-800 text-center space-y-3 animate-fade-in">
-          <Loader2 className="w-8 h-8 animate-spin text-indigo-400 mx-auto" />
+        <div className="max-w-md mx-auto p-8 rounded-2xl bg-white border border-[#EAE6DC] text-center space-y-3 shadow-sm animate-fade-in">
+          <Loader2 className="w-8 h-8 animate-spin text-[#5A7840] mx-auto" />
           <div className="space-y-1">
-            <p className="font-bold text-sm text-zinc-200">Searching the web for AI tools...</p>
-            <p className="text-xs text-zinc-400">Discovering authentic websites and verified pricing models.</p>
+            <p className="font-bold text-sm text-[#141613]">Searching the web for AI tools...</p>
+            <p className="text-xs text-[#73796E]">Discovering authentic websites and verified pricing models.</p>
           </div>
         </div>
       )}
@@ -782,25 +721,25 @@ export function FinderClient() {
       {discoveredTools.length > 0 && (
         <div className="space-y-4 pt-4 max-w-5xl mx-auto animate-fade-in">
           {/* Section Header & Controls */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-zinc-800 pb-3 gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#EAE6DC] pb-3 gap-3">
             <div className="flex items-center gap-2.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-indigo-400 animate-pulse" />
-              <h2 className="text-lg font-black text-zinc-100 tracking-tight">More Tools From the Web</h2>
-              <span className="px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-[10px] font-black uppercase tracking-wider">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#0366D6] animate-pulse" />
+              <h2 className="text-lg font-bold text-[#141613] tracking-tight">More Tools From the Web</h2>
+              <span className="px-2.5 py-0.5 rounded-full bg-[#EEF5FD] text-[#0366D6] border border-[#CDE0F9] text-[10px] font-bold uppercase tracking-wider">
                 Web Discovery
               </span>
             </div>
 
             {/* Select All / Clear Selection Controls */}
             <div className="flex items-center gap-2 text-xs">
-              <span className="text-zinc-400 font-medium mr-1 font-mono">
+              <span className="text-[#73796E] font-medium mr-1">
                 {selectedCandidateCount} of {discoveredTools.length} selected
               </span>
 
               <button
                 type="button"
                 onClick={handleSelectAll}
-                className="px-2.5 py-1 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-semibold transition-colors"
+                className="px-3 py-1 rounded-full bg-white border border-[#EAE6DC] hover:bg-[#F5F3ED] text-[#141613] text-xs font-semibold transition-colors"
               >
                 Select All
               </button>
@@ -808,7 +747,7 @@ export function FinderClient() {
               <button
                 type="button"
                 onClick={handleClearSelection}
-                className="px-2.5 py-1 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-zinc-200 text-xs font-semibold transition-colors"
+                className="px-3 py-1 rounded-full bg-white border border-[#EAE6DC] hover:bg-[#F5F3ED] text-[#73796E] hover:text-[#141613] text-xs font-semibold transition-colors"
               >
                 Clear
               </button>
@@ -826,24 +765,23 @@ export function FinderClient() {
                   onClick={() => handleToggleSelectWebTool(tool.id)}
                   className={`relative flex flex-col justify-between rounded-2xl border p-5 space-y-4 cursor-pointer transition-all ${
                     isSelected
-                      ? 'bg-zinc-900 border-indigo-500/60 shadow-lg shadow-indigo-500/10 ring-1 ring-indigo-500/40'
-                      : 'bg-zinc-900/60 hover:bg-zinc-900 border-zinc-800'
+                      ? 'bg-white border-[#141613] shadow-md ring-1 ring-[#141613]'
+                      : 'bg-white hover:border-[#D0C9BA] border-[#EAE6DC]'
                   }`}
                 >
-                  {/* Top-Right Checkbox & Header */}
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <h3 className="font-bold text-zinc-100 text-sm truncate">{tool.name}</h3>
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 shrink-0">
-                          Web Discovery
+                        <h3 className="font-bold text-[#141613] text-sm truncate">{tool.name}</h3>
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#EEF5FD] text-[#0366D6] border border-[#CDE0F9] shrink-0">
+                          Web
                         </span>
                       </div>
 
                       <div className="flex items-center gap-2 mt-1 text-xs">
-                        <span className="text-zinc-400 font-medium">{tool.category_name}</span>
-                        <span className="text-zinc-600">•</span>
-                        <span className="uppercase text-[10px] font-bold px-2 py-0.2 rounded bg-zinc-800 text-zinc-300 border border-zinc-700">
+                        <span className="text-[#666B60] font-medium">{tool.category_name}</span>
+                        <span className="text-[#DDD7CB]">•</span>
+                        <span className="uppercase text-[10px] font-bold px-2 py-0.2 rounded bg-[#F5F3ED] text-[#666B60]">
                           {tool.pricing}
                         </span>
                       </div>
@@ -856,10 +794,10 @@ export function FinderClient() {
                         e.stopPropagation();
                         handleToggleSelectWebTool(tool.id);
                       }}
-                      className={`p-1.5 rounded-lg border transition-all shrink-0 ${
+                      className={`p-1.5 rounded-md border transition-all shrink-0 ${
                         isSelected
-                          ? 'bg-indigo-600 text-white border-indigo-500'
-                          : 'bg-zinc-800 text-zinc-400 border-zinc-700 hover:text-white'
+                          ? 'bg-[#141613] text-white border-[#141613]'
+                          : 'bg-white text-[#9FA59A] border-[#D0C9BA] hover:text-[#141613]'
                       }`}
                       title={isSelected ? 'Deselect Tool' : 'Select for Submission'}
                     >
@@ -867,44 +805,28 @@ export function FinderClient() {
                     </button>
                   </div>
 
-                  <p className="text-xs text-zinc-400 leading-relaxed line-clamp-3">{tool.description}</p>
+                  <p className="text-xs text-[#666B60] leading-relaxed line-clamp-3">{tool.description}</p>
 
-                  {/* Why it matches callout */}
-                  <div className="p-3 rounded-xl bg-zinc-950/80 border border-zinc-850 text-xs text-zinc-300 space-y-0.5">
-                    <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block">
+                  <div className="p-3 rounded-xl bg-[#FBF9F5] border border-[#EAE6DC] text-xs text-[#141613] space-y-0.5">
+                    <span className="text-[10px] font-bold text-[#0366D6] uppercase tracking-wider block">
                       Why It Matches:
                     </span>
-                    <p className="text-xs text-zinc-300 leading-relaxed">{tool.why_it_matches}</p>
+                    <p className="text-xs text-[#666B60] leading-relaxed">{tool.why_it_matches}</p>
                   </div>
 
-                  {/* Tags */}
-                  {tool.suggested_tags && tool.suggested_tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1">
-                      {tool.suggested_tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-zinc-950 text-zinc-400 border border-zinc-850"
-                        >
-                          #{tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Footer Bar: Visit Website */}
-                  <div className="pt-3 border-t border-zinc-800/80 flex items-center justify-between text-xs">
+                  <div className="pt-3 border-t border-[#F2EFE8] flex items-center justify-between text-xs">
                     <a
                       href={tool.website_url}
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
-                      className="btn-interactive px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 hover:text-white text-xs font-semibold flex items-center gap-1.5"
+                      className="px-3 py-1.5 rounded-full bg-[#F5F3ED] hover:bg-[#ECE8DF] border border-[#EAE6DC] text-[#141613] text-xs font-semibold flex items-center gap-1.5"
                     >
                       <span>Visit Website</span>
                       <ExternalLink className="w-3 h-3" />
                     </a>
 
-                    <span className="text-[11px] text-zinc-500 font-mono truncate max-w-[180px]">
+                    <span className="text-[11px] text-[#94998E] truncate max-w-[180px]">
                       {tool.website_url.replace(/^https?:\/\//, '').replace(/\/$/, '')}
                     </span>
                   </div>
@@ -914,12 +836,12 @@ export function FinderClient() {
           </div>
 
           {/* Submission Action Bar */}
-          <div className="p-5 rounded-2xl bg-zinc-900 border border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="p-5 rounded-2xl bg-white border border-[#EAE6DC] shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="space-y-0.5 text-center sm:text-left">
-              <p className="text-sm font-bold text-zinc-100">
+              <p className="text-sm font-bold text-[#141613]">
                 {selectedCandidateCount} tool{selectedCandidateCount !== 1 ? 's' : ''} selected
               </p>
-              <p className="text-xs text-zinc-400">
+              <p className="text-xs text-[#73796E]">
                 Selected tools will be reviewed before submission for authorization.
               </p>
             </div>
@@ -928,7 +850,7 @@ export function FinderClient() {
               type="button"
               onClick={handleOpenReview}
               disabled={selectedCandidateCount === 0}
-              className="btn-interactive px-6 py-3 rounded-xl bg-zinc-100 hover:bg-white text-zinc-950 font-bold text-xs flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-lg transition-all"
+              className="btn-interactive px-6 py-3 rounded-full bg-[#141613] hover:bg-[#2A2E27] text-white font-bold text-xs flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-md transition-all"
             >
               <PlusCircle className="w-4 h-4" />
               <span>
@@ -943,14 +865,14 @@ export function FinderClient() {
 
       {/* ── SUBMISSION FEEDBACK ALERT ── */}
       {submissionFeedback && (
-        <div className="max-w-2xl mx-auto p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-200 text-xs sm:text-sm flex items-center justify-between gap-3 animate-fade-in">
+        <div className="max-w-2xl mx-auto p-4 rounded-2xl bg-[#EDF7EE] border border-[#CCE8CD] text-[#1E7E34] text-xs sm:text-sm flex items-center justify-between gap-3 animate-fade-in shadow-sm">
           <div className="flex items-center gap-2.5">
-            <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
-            <p className="leading-relaxed">{submissionFeedback}</p>
+            <CheckCircle2 className="w-5 h-5 text-[#1E7E34] shrink-0" />
+            <p className="leading-relaxed font-medium">{submissionFeedback}</p>
           </div>
           <Link
             href="/dashboard/submissions"
-            className="btn-interactive px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-semibold whitespace-nowrap"
+            className="px-3 py-1.5 rounded-full bg-white border border-[#CCE8CD] text-[#1E7E34] text-xs font-bold whitespace-nowrap shadow-sm hover:bg-[#F4FAF4]"
           >
             My Submissions
           </Link>
@@ -959,37 +881,37 @@ export function FinderClient() {
 
       {/* ── REVIEW BEFORE SUBMISSION MODAL ── */}
       {isReviewOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-3xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-scale-up">
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-[#FBF9F5] border border-[#EAE6DC] rounded-3xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-scale-up">
             {/* Modal Header */}
-            <div className="p-6 border-b border-zinc-800 flex items-center justify-between">
+            <div className="p-6 border-b border-[#EAE6DC] bg-white flex items-center justify-between">
               <div>
-                <h3 className="text-xl font-black text-zinc-100 tracking-tight">Review Your Submission</h3>
-                <p className="text-xs text-zinc-400 mt-0.5">
+                <h3 className="text-lg font-bold text-[#141613]">Review Your Submission</h3>
+                <p className="text-xs text-[#73796E] mt-0.5">
                   Verify tool details before submitting for moderation.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setIsReviewOpen(false)}
-                className="p-2 rounded-xl hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition-colors"
+                className="p-2 rounded-full hover:bg-[#F5F3ED] text-[#73796E] hover:text-[#141613] transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Modal Body: Selected Tools List */}
-            <div className="p-6 overflow-y-auto space-y-4 flex-1 divide-y divide-zinc-800/80">
+            {/* Modal Body */}
+            <div className="p-6 overflow-y-auto space-y-4 flex-1 divide-y divide-[#EAE6DC]">
               {toolsInReview.map((tool) => (
                 <div key={tool.id} className="pt-4 first:pt-0 space-y-2">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <h4 className="font-bold text-sm text-zinc-100">{tool.name}</h4>
+                      <h4 className="font-bold text-sm text-[#141613]">{tool.name}</h4>
                       <a
                         href={tool.website_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-xs text-indigo-400 hover:underline flex items-center gap-1 mt-0.5"
+                        className="text-xs text-[#0366D6] hover:underline flex items-center gap-1 mt-0.5"
                       >
                         <span>{tool.website_url}</span>
                         <ExternalLink className="w-3 h-3" />
@@ -999,44 +921,33 @@ export function FinderClient() {
                     <button
                       type="button"
                       onClick={() => handleRemoveFromReview(tool.id)}
-                      className="p-1.5 rounded-lg text-rose-400 hover:bg-rose-500/10 transition-colors"
+                      className="p-1.5 rounded-full text-[#D73A49] hover:bg-[#FDF0F2] transition-colors"
                       title="Remove from submission"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
 
-                  <p className="text-xs text-zinc-400 leading-relaxed">{tool.description}</p>
+                  <p className="text-xs text-[#666B60] leading-relaxed">{tool.description}</p>
 
                   <div className="flex flex-wrap items-center gap-2 text-xs pt-1">
-                    <span className="px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 text-[11px] font-semibold">
+                    <span className="px-2 py-0.5 rounded-full bg-[#F5F3ED] text-[#666B60] text-[11px] font-semibold">
                       {tool.category_name}
                     </span>
-                    <span className="uppercase text-[10px] font-bold px-2 py-0.5 rounded bg-zinc-800 text-zinc-300">
+                    <span className="uppercase text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#F5F3ED] text-[#666B60]">
                       {tool.pricing}
                     </span>
-                    {tool.suggested_tags?.map((t) => (
-                      <span key={t} className="text-[10px] text-zinc-500">
-                        #{t}
-                      </span>
-                    ))}
                   </div>
                 </div>
               ))}
-
-              {toolsInReview.length === 0 && (
-                <div className="text-center py-8 text-xs text-zinc-500">
-                  No tools currently selected for review.
-                </div>
-              )}
             </div>
 
-            {/* Modal Disclaimer & Action Footer */}
-            <div className="p-6 border-t border-zinc-800 bg-zinc-950/60 space-y-4">
-              <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-300 flex items-start gap-2.5">
-                <Info className="w-4 h-4 shrink-0 mt-0.5 text-amber-400" />
+            {/* Modal Footer */}
+            <div className="p-6 border-t border-[#EAE6DC] bg-white space-y-4">
+              <div className="p-3 rounded-xl bg-[#FEF6E9] border border-[#F9DEC2] text-xs text-[#8C4E05] flex items-start gap-2.5">
+                <Info className="w-4 h-4 shrink-0 mt-0.5 text-[#C66100]" />
                 <p className="leading-relaxed">
-                  These tools will be submitted for authorization. They will not appear in the public AILIB library until approved.
+                  These tools will be submitted for authorization. They will appear in the library once approved.
                 </p>
               </div>
 
@@ -1044,7 +955,7 @@ export function FinderClient() {
                 <button
                   type="button"
                   onClick={() => setIsReviewOpen(false)}
-                  className="btn-interactive px-4 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-semibold text-xs transition-colors"
+                  className="px-4 py-2.5 rounded-full bg-[#F5F3ED] hover:bg-[#ECE8DF] text-[#141613] font-semibold text-xs transition-colors"
                 >
                   Go Back
                 </button>
@@ -1053,7 +964,7 @@ export function FinderClient() {
                   type="button"
                   onClick={handleConfirmSubmission}
                   disabled={toolsInReview.length === 0 || submittingWebTools}
-                  className="btn-interactive px-5 py-2.5 rounded-xl bg-zinc-100 hover:bg-white text-zinc-950 font-bold text-xs flex items-center gap-1.5 disabled:opacity-40 transition-all shadow-lg"
+                  className="btn-interactive px-6 py-2.5 rounded-full bg-[#141613] hover:bg-[#2A2E27] text-white font-bold text-xs flex items-center gap-1.5 disabled:opacity-40 shadow-md"
                 >
                   {submittingWebTools ? (
                     <Loader2 className="w-4 h-4 animate-spin" />

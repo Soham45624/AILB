@@ -15,7 +15,6 @@ export const metadata = {
 export default async function MyLibraryPage() {
   const supabase = await createClient();
 
-  // Auth guard — middleware also protects /dashboard/*, this is belt-and-suspenders
   const {
     data: { user },
     error: userError,
@@ -34,14 +33,14 @@ export default async function MyLibraryPage() {
     .select('id, name, slug, description, icon, color, sort_order, created_at')
     .order('sort_order', { ascending: true });
 
-  // Fetch all tags for the Share to AILIB tag editor
+  // Fetch all tags
   const { data: allTags } = await supabase
     .from('tags')
     .select('id, name, slug, created_at')
     .order('name', { ascending: true });
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between">
+    <div className="min-h-screen bg-[#FBF9F5] text-[#141613] selection:bg-[#ECE8DF] selection:text-[#141613] flex flex-col justify-between">
       <Navbar />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1 w-full">

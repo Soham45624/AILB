@@ -10,12 +10,12 @@ interface ToolGridProps {
 export function ToolGrid({ tools, emptyMessage = 'No AI tools found matching your criteria.' }: ToolGridProps) {
   if (tools.length === 0) {
     return (
-      <div className="py-16 text-center rounded-2xl bg-slate-900/40 border border-slate-800/60 p-8">
-        <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-slate-800/80 text-slate-400 flex items-center justify-center">
+      <div className="py-20 text-center rounded-2xl bg-white border border-[#EAE6DC] p-8 shadow-sm">
+        <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-[#F5F3ED] text-[#73796E] flex items-center justify-center">
           <SearchX className="w-6 h-6" />
         </div>
-        <h3 className="text-base font-bold text-slate-200 mb-1">No Tools Found</h3>
-        <p className="text-xs text-slate-400 max-w-sm mx-auto">{emptyMessage}</p>
+        <h3 className="text-base font-bold text-[#141613] mb-1">No Tools Found</h3>
+        <p className="text-xs text-[#666B60] max-w-sm mx-auto">{emptyMessage}</p>
       </div>
     );
   }

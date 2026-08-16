@@ -1,23 +1,31 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Plus_Jakarta_Sans, Newsreader } from "next/font/google";
 import { Suspense } from "react";
 import { NavigationProgressBar } from "@/components/ui/NavigationProgressBar";
 import "./globals.css";
 import { baseUrl } from "@/lib/config";
 
-const geist = Geist({
-  variable: "--font-geist-sans",
+const sans = Plus_Jakarta_Sans({
+  variable: "--font-sans",
   subsets: ["latin"],
+  display: "swap",
+});
+
+const serif = Newsreader({
+  variable: "--font-serif",
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
   title: {
-    default: "AI Discovery — Discover AI Tools That Actually Help",
-    template: "%s | AI Discovery",
+    default: "AILIB — Discover the right AI for what you build",
+    template: "%s | AILIB",
   },
   description:
-    "Search, filter, explore, and discover the best AI tools shared by the community. Ratings, reviews, categories, and daily new submissions.",
+    "Explore AI tools or tell AILIB what you're trying to accomplish. Independent directory of community-tested, verified AI applications.",
   keywords: [
     "AI tools",
     "artificial intelligence",
@@ -28,9 +36,9 @@ export const metadata: Metadata = {
     "code assistant",
     "video AI",
   ],
-  authors: [{ name: "AI Discovery Community" }],
-  creator: "AI Discovery",
-  publisher: "AI Discovery",
+  authors: [{ name: "AILIB Community" }],
+  creator: "AILIB",
+  publisher: "AILIB",
   robots: {
     index: true,
     follow: true,
@@ -43,27 +51,31 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "AI Discovery — Community-Powered AI Tool Library",
-    description: "Search, filter, explore, and discover AI tools shared by the community.",
+    title: "AILIB — Discover the right AI for what you build",
+    description: "Explore AI tools or tell AILIB what you're trying to accomplish.",
     url: baseUrl,
-    siteName: "AI Discovery",
+    siteName: "AILIB",
     locale: "en_US",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "AI Discovery — Discover AI Tools That Actually Help",
-    description: "Search, filter, and discover the best AI tools rated by the community.",
+    title: "AILIB — Discover the right AI for what you build",
+    description: "Explore AI tools or tell AILIB what you're trying to accomplish.",
   },
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: "AI Discovery",
+    name: "AILIB",
     url: baseUrl,
-    description: "Community-powered AI tool library and discovery directory.",
+    description: "Discover the right AI for what you build.",
     potentialAction: {
       "@type": "SearchAction",
       target: `${baseUrl}/tools?search={search_term_string}`,
@@ -74,7 +86,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${geist.variable} dark h-full antialiased`}
+      className={`${sans.variable} ${serif.variable} h-full antialiased`}
     >
       <head>
         <script
@@ -82,7 +94,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className="min-h-full flex flex-col bg-zinc-950 text-zinc-100">
+      <body className="min-h-full flex flex-col bg-[#FBF9F5] text-[#141613]">
         <Suspense fallback={null}>
           <NavigationProgressBar />
         </Suspense>

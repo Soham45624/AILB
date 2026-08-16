@@ -23,36 +23,36 @@ export default async function SubmitPage() {
   const [categories, tags] = await Promise.all([getCategories(), getTags()]);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 selection:bg-cyan-500 selection:text-slate-950 flex flex-col justify-between">
+    <div className="min-h-screen bg-[#FBF9F5] text-[#141613] selection:bg-[#ECE8DF] selection:text-[#141613] flex flex-col justify-between">
       <Navbar />
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1 w-full">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1 w-full space-y-8">
         {/* Page Header */}
-        <div className="text-center space-y-3 mb-10">
-          <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-bold uppercase tracking-wider">
+        <div className="text-center space-y-3 mb-8">
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#EDF7EE] border border-[#CCE8CD] text-[#1E7E34] text-xs font-bold uppercase tracking-wider">
             <Sparkles className="w-3.5 h-3.5" />
             Community Contributions
           </div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-100 tracking-tight">
+          <h1 className="font-serif-heading text-3xl sm:text-5xl font-normal text-[#141613] tracking-tight">
             Submit an AI Tool
           </h1>
-          <p className="text-sm text-slate-400 max-w-lg mx-auto">
-            Share an innovative AI tool with thousands of developers, creators, and researchers.
-            Submissions are reviewed by moderators before appearing live.
+          <p className="text-xs sm:text-sm text-[#666B60] max-w-lg mx-auto leading-relaxed">
+            Share an innovative AI application with developers, creators, and researchers.
+            Submissions are reviewed by moderators before appearing live on AILIB.
           </p>
 
           {/* Submission Guidelines Badges */}
-          <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-            <div className="inline-flex items-center gap-1.5 text-xs text-slate-400 bg-slate-900/80 px-3 py-1 rounded-full border border-slate-800">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+          <div className="flex flex-wrap items-center justify-center gap-2.5 pt-2">
+            <div className="inline-flex items-center gap-1.5 text-xs text-[#666B60] bg-white px-3 py-1 rounded-full border border-[#EAE6DC] shadow-sm">
+              <ShieldCheck className="w-3.5 h-3.5 text-[#1E7E34]" />
               <span>Moderated Review</span>
             </div>
-            <div className="inline-flex items-center gap-1.5 text-xs text-slate-400 bg-slate-900/80 px-3 py-1 rounded-full border border-slate-800">
-              <Zap className="w-3.5 h-3.5 text-amber-400" />
+            <div className="inline-flex items-center gap-1.5 text-xs text-[#666B60] bg-white px-3 py-1 rounded-full border border-[#EAE6DC] shadow-sm">
+              <Zap className="w-3.5 h-3.5 text-[#D96B27]" />
               <span>Instant Tag Suggestions</span>
             </div>
-            <div className="inline-flex items-center gap-1.5 text-xs text-slate-400 bg-slate-900/80 px-3 py-1 rounded-full border border-slate-800">
-              <HeartHandshake className="w-3.5 h-3.5 text-indigo-400" />
+            <div className="inline-flex items-center gap-1.5 text-xs text-[#666B60] bg-white px-3 py-1 rounded-full border border-[#EAE6DC] shadow-sm">
+              <HeartHandshake className="w-3.5 h-3.5 text-[#5C42A6]" />
               <span>Contributor Credit</span>
             </div>
           </div>

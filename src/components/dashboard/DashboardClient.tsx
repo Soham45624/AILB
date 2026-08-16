@@ -18,7 +18,6 @@ import {
 } from 'lucide-react';
 import { Profile } from '@/lib/types';
 import { updateProfileAction, signOutAction } from '@/app/actions/auth';
-import { AddToolModal } from '../home/AddToolModal';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 
@@ -58,8 +57,6 @@ export function DashboardClient({
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -98,24 +95,24 @@ export function DashboardClient({
   return (
     <div className="space-y-6 animate-fade-in max-w-5xl mx-auto">
       {/* Top Banner / User Info Card */}
-      <div className="p-6 rounded-2xl bg-zinc-900/60 border border-zinc-800/80 flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="p-6 rounded-3xl bg-white border border-[#EAE6DC] flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-sm">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-xl bg-zinc-800 border border-zinc-700/80 text-zinc-100 font-bold text-xl flex items-center justify-center">
+          <div className="w-14 h-14 rounded-full bg-[#141613] text-white font-extrabold text-lg flex items-center justify-center shadow-sm">
             {displayName ? displayName.substring(0, 2).toUpperCase() : user.email.substring(0, 2).toUpperCase()}
           </div>
 
           <div className="space-y-1">
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-lg font-bold text-zinc-100">
+              <h1 className="text-lg font-bold text-[#141613]">
                 {displayName || username || 'Community Member'}
               </h1>
               <span
                 className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 border ${
                   profile?.role === 'admin'
-                    ? 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                    ? 'bg-[#FDF0F2] text-[#D73A49] border-[#F8D2D7]'
                     : profile?.role === 'editor'
-                    ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
-                    : 'bg-zinc-800 text-zinc-400 border-zinc-700'
+                    ? 'bg-[#F3EFFB] text-[#5C42A6] border-[#DDD2F5]'
+                    : 'bg-[#F5F3ED] text-[#666B60] border-[#EAE6DC]'
                 }`}
               >
                 <Shield className="w-3 h-3" />
@@ -123,7 +120,7 @@ export function DashboardClient({
               </span>
             </div>
 
-            <p className="text-xs text-zinc-400">
+            <p className="text-xs text-[#73796E]">
               @{username || 'user'} • {user.email}
             </p>
           </div>
@@ -134,73 +131,33 @@ export function DashboardClient({
           {isAdminOrEditor && (
             <Link
               href="/admin"
-              className="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-zinc-950 font-bold text-xs shadow-md transition-colors flex items-center gap-1.5"
+              className="px-4 py-2 rounded-full bg-[#FAF3E6] border border-[#F0E2C8] text-[#8C4E05] font-bold text-xs shadow-sm transition-colors flex items-center gap-1.5"
             >
               <ShieldCheck className="w-4 h-4" />
-              <span>Management Dashboard</span>
+              <span>Admin Panel</span>
             </Link>
           )}
 
           <Link
             href="/submit"
-            className="px-3.5 py-2 rounded-xl bg-zinc-100 hover:bg-white text-zinc-950 font-semibold text-xs transition-colors flex items-center gap-1.5"
+            className="btn-interactive px-4 py-2 rounded-full bg-[#141613] hover:bg-[#2A2E27] text-white font-bold text-xs transition-colors flex items-center gap-1.5 shadow-sm"
           >
-            <Plus className="w-3.5 h-3.5" /> Submit AI Tool
+            <Plus className="w-3.5 h-3.5" /> <span>Submit AI Tool</span>
           </Link>
 
           <button
             onClick={handleSignOut}
-            className="px-3 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-zinc-800 text-xs font-semibold transition-colors flex items-center gap-1.5"
+            className="px-3.5 py-2 rounded-full bg-white hover:bg-[#FDF0F2] text-[#73796E] hover:text-[#D73A49] border border-[#EAE6DC] text-xs font-semibold transition-colors flex items-center gap-1.5"
           >
-            <LogOut className="w-3.5 h-3.5" /> Sign Out
+            <LogOut className="w-3.5 h-3.5" /> <span>Sign Out</span>
           </button>
         </div>
       </div>
 
-      {/* ADMIN CALLOUT BANNER (Visible if user is Admin or Editor) */}
-      {isAdminOrEditor && (
-        <div className="p-4 rounded-xl bg-gradient-to-r from-amber-500/10 via-zinc-900 to-zinc-900 border border-amber-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/30 shrink-0">
-              <ShieldCheck className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="font-bold text-xs text-zinc-100 flex items-center gap-2">
-                <span>Administrator Controls Active</span>
-                <span className="text-[10px] text-amber-400 uppercase font-mono bg-amber-400/10 px-1.5 py-0.2 rounded border border-amber-400/20">
-                  {profile?.role}
-                </span>
-              </div>
-              <p className="text-[11px] text-zinc-400">
-                You have elevated privileges to moderate tool submissions, manage directory tools, and resolve reports.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 shrink-0">
-            <Link
-              href="/admin/submissions"
-              className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-medium border border-zinc-700 transition-colors flex items-center gap-1"
-            >
-              <Send className="w-3 h-3" /> Submissions
-            </Link>
-
-            <Link
-              href="/admin"
-              className="px-3.5 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-zinc-950 font-bold text-xs transition-colors flex items-center gap-1"
-            >
-              <span>Open Admin Panel</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-        </div>
-      )}
-
       {/* Navigation Tabs */}
-      <div className="flex items-center gap-2 border-b border-zinc-900 pb-2 overflow-x-auto scrollbar-none">
-        {/* In-page tabs */}
+      <div className="flex items-center gap-2 border-b border-[#EAE6DC] pb-2 overflow-x-auto scrollbar-none">
         {[
-          { id: 'profile', label: 'Dashboard', icon: User },
+          { id: 'profile', label: 'Dashboard Profile', icon: User },
           { id: 'reviews', label: 'My Reviews', count: reviewsCount, icon: MessageSquare },
         ].map((tab) => {
           const Icon = tab.icon;
@@ -209,10 +166,10 @@ export function DashboardClient({
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-colors ${
                 isActive
-                  ? 'bg-zinc-800 text-white'
-                  : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900'
+                  ? 'bg-[#141613] text-white shadow-sm'
+                  : 'text-[#666B60] hover:text-[#141613] hover:bg-[#F5F3ED]'
               }`}
             >
               <Icon className="w-3.5 h-3.5" />
@@ -220,7 +177,7 @@ export function DashboardClient({
               {tab.count !== undefined && (
                 <span
                   className={`px-1.5 py-0.2 rounded-full text-[10px] ${
-                    isActive ? 'bg-zinc-100 text-zinc-950 font-bold' : 'bg-zinc-800 text-zinc-400'
+                    isActive ? 'bg-white text-[#141613] font-bold' : 'bg-[#EAE6DC] text-[#666B60]'
                   }`}
                 >
                   {tab.count}
@@ -230,25 +187,14 @@ export function DashboardClient({
           );
         })}
 
-        {/* Route-based nav items */}
         <Link
           href="/dashboard/my-library"
-          className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors ${
-            pathname === '/dashboard/my-library'
-              ? 'bg-zinc-800 text-white'
-              : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900'
-          }`}
+          className="flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap text-[#666B60] hover:text-[#141613] hover:bg-[#F5F3ED] transition-colors"
         >
           <Library className="w-3.5 h-3.5" />
           <span>My Library</span>
           {savedCount > 0 && (
-            <span
-              className={`px-1.5 py-0.2 rounded-full text-[10px] ${
-                pathname === '/dashboard/my-library'
-                  ? 'bg-zinc-100 text-zinc-950 font-bold'
-                  : 'bg-zinc-800 text-zinc-400'
-              }`}
-            >
+            <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-[#EAE6DC] text-[#666B60]">
               {savedCount}
             </span>
           )}
@@ -256,164 +202,174 @@ export function DashboardClient({
 
         <Link
           href="/dashboard/submissions"
-          className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors ${
-            pathname === '/dashboard/submissions'
-              ? 'bg-zinc-800 text-white'
-              : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900'
-          }`}
+          className="flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap text-[#666B60] hover:text-[#141613] hover:bg-[#F5F3ED] transition-colors"
         >
           <Send className="w-3.5 h-3.5" />
-          <span>My Submissions</span>
+          <span>Submissions</span>
           {submissions.length > 0 && (
-            <span
-              className={`px-1.5 py-0.2 rounded-full text-[10px] ${
-                pathname === '/dashboard/submissions'
-                  ? 'bg-zinc-100 text-zinc-950 font-bold'
-                  : 'bg-zinc-800 text-zinc-400'
-              }`}
-            >
+            <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-[#EAE6DC] text-[#666B60]">
               {submissions.length}
             </span>
           )}
         </Link>
       </div>
 
-      {/* TAB CONTENT: Profile Settings */}
+      {/* TAB CONTENT: PROFILE */}
       {activeTab === 'profile' && (
-        <div className="max-w-2xl p-6 rounded-2xl bg-zinc-900/60 border border-zinc-800 space-y-6">
-          <div>
-            <h2 className="text-base font-bold text-zinc-100">Personal Profile</h2>
-            <p className="text-xs text-zinc-400 mt-0.5">
-              Manage your display name, username, bio, and portfolio link.
-            </p>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Quick Metrics Col */}
+          <div className="space-y-4">
+            <div className="p-5 rounded-2xl bg-white border border-[#EAE6DC] space-y-4 shadow-sm">
+              <h3 className="text-xs font-bold text-[#73796E] uppercase tracking-wider">
+                Activity Overview
+              </h3>
+
+              <div className="space-y-3">
+                <Link
+                  href="/dashboard/my-library"
+                  className="flex items-center justify-between p-3 rounded-xl bg-[#FBF9F5] border border-[#EAE6DC] hover:border-[#D0C9BA] transition-colors"
+                >
+                  <div className="flex items-center gap-2.5 text-xs text-[#141613] font-semibold">
+                    <Library className="w-4 h-4 text-[#5A7840]" />
+                    <span>Saved in Library</span>
+                  </div>
+                  <span className="text-sm font-bold text-[#141613]">{savedCount}</span>
+                </Link>
+
+                <Link
+                  href="/dashboard/submissions"
+                  className="flex items-center justify-between p-3 rounded-xl bg-[#FBF9F5] border border-[#EAE6DC] hover:border-[#D0C9BA] transition-colors"
+                >
+                  <div className="flex items-center gap-2.5 text-xs text-[#141613] font-semibold">
+                    <Send className="w-4 h-4 text-[#0366D6]" />
+                    <span>Tool Submissions</span>
+                  </div>
+                  <span className="text-sm font-bold text-[#141613]">{submissions.length}</span>
+                </Link>
+
+                <div className="flex items-center justify-between p-3 rounded-xl bg-[#FBF9F5] border border-[#EAE6DC]">
+                  <div className="flex items-center gap-2.5 text-xs text-[#141613] font-semibold">
+                    <MessageSquare className="w-4 h-4 text-[#5C42A6]" />
+                    <span>Community Reviews</span>
+                  </div>
+                  <span className="text-sm font-bold text-[#141613]">{reviewsCount}</span>
+                </div>
+              </div>
+            </div>
           </div>
 
-          {saveError && (
-            <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-start gap-2 animate-fade-in">
-              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-400" />
-              <span>{saveError}</span>
-            </div>
-          )}
+          {/* Edit Profile Form */}
+          <div className="lg:col-span-2">
+            <form
+              onSubmit={handleProfileSubmit}
+              className="p-6 rounded-3xl bg-white border border-[#EAE6DC] space-y-5 shadow-sm"
+            >
+              <div className="border-b border-[#F2EFE8] pb-3">
+                <h3 className="text-base font-bold text-[#141613]">Public Profile Details</h3>
+                <p className="text-xs text-[#73796E]">Update your profile information visible across AILIB</p>
+              </div>
 
-          {saveSuccess && (
-            <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2 animate-fade-in">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-              <span>Profile updated successfully!</span>
-            </div>
-          )}
+              {saveSuccess && (
+                <div className="p-3 rounded-xl bg-[#EDF7EE] border border-[#CCE8CD] text-[#1E7E34] text-xs flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>Profile updated successfully!</span>
+                </div>
+              )}
 
-          <form onSubmit={handleProfileSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {saveError && (
+                <div className="p-3 rounded-xl bg-[#FDF0F2] border border-[#F8D2D7] text-[#D73A49] text-xs flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4" />
+                  <span>{saveError}</span>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#73796E] mb-1">
+                    Username
+                  </label>
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    className="w-full px-3.5 py-2 rounded-xl bg-white border border-[#E2DDD2] text-xs text-[#141613] focus:outline-none focus:border-[#141613]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#73796E] mb-1">
+                    Display Name
+                  </label>
+                  <input
+                    type="text"
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                    className="w-full px-3.5 py-2 rounded-xl bg-white border border-[#E2DDD2] text-xs text-[#141613] focus:outline-none focus:border-[#141613]"
+                  />
+                </div>
+              </div>
+
               <div>
-                <label className="block text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-1.5">
-                  Display Name
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#73796E] mb-1">
+                  Bio / Tagline
                 </label>
-                <input
-                  type="text"
-                  placeholder="John Doe"
-                  value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-xs text-zinc-100 focus:outline-none focus:border-zinc-600"
+                <textarea
+                  rows={2}
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value)}
+                  placeholder="Software engineer, AI explorer, or indie creator..."
+                  className="w-full px-3.5 py-2 rounded-xl bg-white border border-[#E2DDD2] text-xs text-[#141613] focus:outline-none focus:border-[#141613] resize-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-1.5">
-                  Username
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="johndoe"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-xs text-zinc-100 focus:outline-none focus:border-zinc-600"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-1.5">
-                Bio / About You
-              </label>
-              <textarea
-                rows={3}
-                placeholder="AI enthusiast, engineer, or prompt designer..."
-                value={bio}
-                onChange={(e) => setBio(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-xs text-zinc-100 focus:outline-none focus:border-zinc-600 resize-none"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-1.5">
-                  Personal Website / Link
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#73796E] mb-1">
+                  Website or Portfolio URL
                 </label>
                 <input
                   type="url"
-                  placeholder="https://mywebsite.com"
                   value={website}
                   onChange={(e) => setWebsite(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-xs text-zinc-100 focus:outline-none focus:border-zinc-600"
+                  placeholder="https://example.com"
+                  className="w-full px-3.5 py-2 rounded-xl bg-white border border-[#E2DDD2] text-xs text-[#141613] focus:outline-none focus:border-[#141613]"
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-1.5">
-                  Avatar Image URL
-                </label>
-                <input
-                  type="url"
-                  placeholder="https://images.com/my-photo.jpg"
-                  value={avatarUrl}
-                  onChange={(e) => setAvatarUrl(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-xs text-zinc-100 focus:outline-none focus:border-zinc-600"
-                />
+              <div className="pt-2 flex justify-end">
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="btn-interactive px-6 py-2.5 rounded-full bg-[#141613] hover:bg-[#2A2E27] text-white font-bold text-xs flex items-center gap-1.5 shadow-sm disabled:opacity-50"
+                >
+                  <Save className="w-3.5 h-3.5" />
+                  <span>{saving ? 'Saving...' : 'Save Profile'}</span>
+                </button>
               </div>
-            </div>
-
-            <div className="pt-2">
-              <button
-                type="submit"
-                disabled={saving}
-                className="px-5 py-2 rounded-xl bg-zinc-100 hover:bg-white text-zinc-950 font-bold text-xs shadow-md transition-colors flex items-center gap-1.5 disabled:opacity-50"
-              >
-                <Save className="w-3.5 h-3.5" />
-                {saving ? 'Saving...' : 'Save Profile'}
-              </button>
-            </div>
-          </form>
+            </form>
+          </div>
         </div>
       )}
 
-      {/* Saved Tools tab removed — now lives at /dashboard/my-library */}
-
-      {/* TAB CONTENT: My Reviews */}
-      {activeTab === 'reviews' && pathname === '/dashboard' && (
-        <div className="p-8 rounded-2xl bg-zinc-900/40 border border-zinc-800 text-center space-y-3 max-w-xl mx-auto">
-          <div className="w-12 h-12 mx-auto rounded-xl bg-zinc-800 text-zinc-400 flex items-center justify-center">
+      {/* TAB CONTENT: REVIEWS */}
+      {activeTab === 'reviews' && (
+        <div className="p-8 rounded-3xl bg-white border border-[#EAE6DC] text-center space-y-4 shadow-sm">
+          <div className="w-12 h-12 rounded-full bg-[#F5F3ED] text-[#73796E] flex items-center justify-center mx-auto">
             <MessageSquare className="w-6 h-6" />
           </div>
-          <h3 className="text-base font-bold text-zinc-100">My Reviews</h3>
-          <p className="text-xs text-zinc-400 max-w-sm mx-auto leading-relaxed">
-            You haven&apos;t reviewed any AI tools yet. Share your evaluation on tools you&apos;ve tested.
-          </p>
-          <div className="pt-2">
-            <Link
-              href="/tools"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-semibold text-xs transition-colors border border-zinc-700"
-            >
-              <Compass className="w-3.5 h-3.5" /> Explore &amp; Review Tools
-            </Link>
+          <div>
+            <h3 className="text-base font-bold text-[#141613]">My Submitted Reviews</h3>
+            <p className="text-xs text-[#666B60] mt-1 max-w-sm mx-auto">
+              You have submitted {reviewsCount} community reviews.
+            </p>
           </div>
+          <Link
+            href="/tools"
+            className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-[#141613] hover:bg-[#2A2E27] text-white font-bold text-xs shadow-sm transition-all"
+          >
+            <Compass className="w-3.5 h-3.5" /> Explore &amp; Review Tools
+          </Link>
         </div>
       )}
-
-      {/* Submissions tab removed — now lives at /dashboard/submissions */}
-
-      {/* Add Tool Modal */}
-      <AddToolModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />
     </div>
   );
 }

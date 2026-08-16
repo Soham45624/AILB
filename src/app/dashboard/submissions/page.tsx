@@ -20,7 +20,7 @@ export default async function DashboardSubmissionsPage() {
   }
 
   // Fetch submissions submitted by this user with category
-  const { data: submissions, error } = await supabase
+  const { data: submissions } = await supabase
     .from('submissions')
     .select(`
       *,
@@ -30,39 +30,39 @@ export default async function DashboardSubmissionsPage() {
     .order('created_at', { ascending: false });
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 selection:bg-cyan-500 selection:text-slate-950 flex flex-col justify-between">
+    <div className="min-h-screen bg-[#FBF9F5] text-[#141613] selection:bg-[#ECE8DF] selection:text-[#141613] flex flex-col justify-between">
       <Navbar />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1 w-full">
         {/* Breadcrumb & Navigation */}
-        <div className="flex items-center justify-between pb-6 mb-8 border-b border-slate-900">
+        <div className="flex items-center justify-between pb-6 mb-8 border-b border-[#EAE6DC]">
           <div>
-            <div className="flex items-center gap-2 text-xs text-slate-400 mb-2">
-              <Link href="/dashboard" className="hover:text-cyan-400 flex items-center gap-1">
+            <div className="flex items-center gap-2 text-xs text-[#73796E] mb-2">
+              <Link href="/dashboard" className="hover:text-[#141613] flex items-center gap-1">
                 <ArrowLeft className="w-3.5 h-3.5" /> Back to Dashboard
               </Link>
               <span>/</span>
-              <span className="text-slate-200 font-semibold">Submissions</span>
+              <span className="text-[#141613] font-semibold">Submissions</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-100 tracking-tight flex items-center gap-2.5">
-              <Send className="w-6 h-6 text-cyan-400" />
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#141613] tracking-tight flex items-center gap-2.5">
+              <Send className="w-6 h-6 text-[#5A7840]" />
               My Tool Submissions
             </h1>
-            <p className="text-xs sm:text-sm text-slate-400 mt-1">
-              Track the live moderation status of all AI tools you have submitted to the community directory.
+            <p className="text-xs sm:text-sm text-[#666B60] mt-1">
+              Track the moderation status of all AI tools you have submitted to AILIB.
             </p>
           </div>
 
           <Link
             href="/submit"
-            className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-xs shadow-md shadow-cyan-500/20 transition-all shrink-0"
+            className="btn-interactive inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-[#141613] hover:bg-[#2A2E27] text-white font-bold text-xs shadow-md transition-all shrink-0"
           >
             <Plus className="w-4 h-4" />
             <span>Submit New Tool</span>
           </Link>
         </div>
 
-        {/* Submissions List Component with Status Tabs */}
+        {/* Submissions List */}
         <UserSubmissionsList initialSubmissions={submissions || []} />
       </main>
 

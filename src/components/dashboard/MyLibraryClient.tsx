@@ -44,9 +44,7 @@ const RATING_OPTIONS = [
 ];
 
 export function MyLibraryClient({ initialTools, categories }: MyLibraryClientProps) {
-  // Tool list — client-side state for optimistic removes
   const [tools, setTools] = useState<LibraryTool[]>(initialTools);
-  // Track IDs being removed so we can animate them
   const [, setRemovingIds] = useState<Set<string>>(new Set());
 
   // Search + Filters
@@ -61,15 +59,10 @@ export function MyLibraryClient({ initialTools, categories }: MyLibraryClientPro
   const activeFilterCount =
     (filterCategory ? 1 : 0) + (filterPricing ? 1 : 0) + (filterRating ? 1 : 0);
 
-  // ── Optimistic remove ──────────────────────────────────────────────────────
   const handleRemoved = useCallback(
     async (toolId: string) => {
-      // Mark as removing for animation
       setRemovingIds((prev) => new Set(prev).add(toolId));
-
-      // Wait for CSS transition (200ms) then splice
       await new Promise((r) => setTimeout(r, 220));
-
       setTools((prev) => prev.filter((t) => t.id !== toolId));
       setRemovingIds((prev) => {
         const next = new Set(prev);
@@ -80,7 +73,6 @@ export function MyLibraryClient({ initialTools, categories }: MyLibraryClientPro
     []
   );
 
-  // ── Derived: filtered + sorted ──────────────────────────────────────────
   const displayedTools = useMemo(() => {
     let result = tools;
 
@@ -142,28 +134,27 @@ export function MyLibraryClient({ initialTools, categories }: MyLibraryClientPro
     setQuery('');
   };
 
-  // ── Empty state ─────────────────────────────────────────────────────────
   const isEmptyLibrary = tools.length === 0;
   const isEmptyResults = !isEmptyLibrary && displayedTools.length === 0;
 
   return (
     <div className="space-y-7 max-w-6xl mx-auto animate-fade-in">
-      {/* ── Header ── */}
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-800 border border-zinc-700/60 text-zinc-400 text-[11px] font-semibold uppercase tracking-wider mb-2">
-            <Library className="w-3 h-3" />
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EDF7EE] border border-[#CCE8CD] text-[#1E7E34] text-[11px] font-bold uppercase tracking-wider mb-2">
+            <Library className="w-3.5 h-3.5" />
             Personal Collection
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-zinc-100 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#141613] tracking-tight">
             My Library
           </h1>
-          <p className="text-sm text-zinc-400 mt-1">
+          <p className="text-xs sm:text-sm text-[#666B60] mt-1">
             {tools.length > 0 ? (
               <>
                 Your saved AI tools, all in one place.{' '}
-                <span className="text-zinc-500 text-xs">
-                  {tools.length} {tools.length === 1 ? 'tool' : 'tools'} saved
+                <span className="text-[#9FA59A] text-xs">
+                  ({tools.length} {tools.length === 1 ? 'tool' : 'tools'} saved)
                 </span>
               </>
             ) : (
@@ -173,66 +164,66 @@ export function MyLibraryClient({ initialTools, categories }: MyLibraryClientPro
         </div>
       </div>
 
-      {/* ── Empty Library State ── */}
+      {/* Empty Library State */}
       {isEmptyLibrary && (
-        <div className="py-20 flex flex-col items-center text-center space-y-5">
-          <div className="w-16 h-16 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center">
-            <Library className="w-7 h-7 text-zinc-500" />
+        <div className="py-20 flex flex-col items-center text-center space-y-5 bg-white border border-[#EAE6DC] rounded-3xl p-8 shadow-sm">
+          <div className="w-16 h-16 rounded-full bg-[#F5F3ED] text-[#73796E] flex items-center justify-center">
+            <Library className="w-7 h-7" />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-zinc-100">Your library is empty.</h2>
-            <p className="text-sm text-zinc-400 mt-1.5 max-w-sm leading-relaxed">
+            <h2 className="text-lg font-bold text-[#141613]">Your library is empty.</h2>
+            <p className="text-xs text-[#666B60] mt-1.5 max-w-sm leading-relaxed">
               Save AI tools you want to explore later and they&apos;ll appear here.
             </p>
           </div>
           <div className="flex flex-col sm:flex-row items-center gap-3">
             <Link
               href="/tools"
-              className="btn-interactive inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-zinc-100 hover:bg-white text-zinc-950 font-bold text-sm transition-colors"
+              className="btn-interactive inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#141613] hover:bg-[#2A2E27] text-white font-bold text-xs transition-colors shadow-md"
             >
               <Compass className="w-4 h-4" />
-              Explore AI Tools
+              <span>Explore AI Tools</span>
             </Link>
             <Link
               href="/finder"
-              className="btn-interactive inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 font-semibold text-sm transition-colors"
+              className="btn-interactive inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-white hover:bg-[#F5F3ED] border border-[#EAE6DC] text-[#141613] font-semibold text-xs transition-colors"
             >
-              <Sparkles className="w-4 h-4" />
-              Try AILIB Finder
+              <Sparkles className="w-4 h-4 text-[#5A7840]" />
+              <span>Try AI Finder</span>
             </Link>
           </div>
         </div>
       )}
 
-      {/* ── Search + Filter + Sort bar ── */}
+      {/* Search + Filter + Sort bar */}
       {!isEmptyLibrary && (
         <div className="space-y-3">
           <div className="flex items-center gap-2">
             {/* Search */}
             <div className="relative flex-1">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 pointer-events-none" />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9FA59A] pointer-events-none" />
               <input
                 type="search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search your library..."
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600 transition-colors"
+                className="w-full pl-10 pr-4 py-2.5 rounded-full bg-white border border-[#E2DDD2] text-xs sm:text-sm text-[#141613] placeholder:text-[#94998E] focus:outline-none focus:border-[#141613] transition-colors shadow-sm"
               />
             </div>
 
             {/* Filter toggle */}
             <button
               onClick={() => setShowFilters((p) => !p)}
-              className={`btn-interactive flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border text-sm font-semibold transition-colors whitespace-nowrap ${
+              className={`btn-interactive flex items-center gap-1.5 px-4 py-2.5 rounded-full border text-xs font-semibold transition-colors whitespace-nowrap shadow-sm ${
                 showFilters || activeFilterCount > 0
-                  ? 'bg-zinc-800 border-zinc-600 text-zinc-100'
-                  : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800'
+                  ? 'bg-[#141613] border-[#141613] text-white'
+                  : 'bg-white border-[#E2DDD2] text-[#141613] hover:bg-[#F5F3ED]'
               }`}
             >
-              <SlidersHorizontal className="w-4 h-4" />
+              <SlidersHorizontal className="w-3.5 h-3.5" />
               <span>Filters</span>
               {activeFilterCount > 0 && (
-                <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-zinc-100 text-zinc-950 font-bold">
+                <span className="w-4 h-4 rounded-full bg-white text-[#141613] font-bold text-[10px] flex items-center justify-center">
                   {activeFilterCount}
                 </span>
               )}
@@ -242,7 +233,7 @@ export function MyLibraryClient({ initialTools, categories }: MyLibraryClientPro
             <div className="relative">
               <button
                 onClick={() => setSortOpen((p) => !p)}
-                className="btn-interactive flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-sm font-semibold text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 transition-colors whitespace-nowrap"
+                className="btn-interactive flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-white border border-[#E2DDD2] text-xs font-semibold text-[#141613] hover:bg-[#F5F3ED] transition-colors whitespace-nowrap shadow-sm"
               >
                 <span className="hidden sm:inline">{SORT_LABELS[sortBy]}</span>
                 <span className="sm:hidden">Sort</span>
@@ -250,184 +241,128 @@ export function MyLibraryClient({ initialTools, categories }: MyLibraryClientPro
               </button>
 
               {sortOpen && (
-                <div className="absolute right-0 top-full mt-1 z-30 bg-zinc-900 border border-zinc-700 rounded-xl shadow-xl overflow-hidden w-44">
-                  {(Object.entries(SORT_LABELS) as [SortOption, string][]).map(([val, label]) => (
-                    <button
-                      key={val}
-                      onClick={() => {
-                        setSortBy(val);
-                        setSortOpen(false);
-                      }}
-                      className={`w-full text-left px-4 py-2.5 text-xs transition-colors ${
-                        sortBy === val
-                          ? 'text-zinc-100 bg-zinc-800 font-semibold'
-                          : 'text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200'
-                      }`}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
+                <>
+                  <div
+                    className="fixed inset-0 z-10"
+                    onClick={() => setSortOpen(false)}
+                  />
+                  <div className="absolute right-0 top-full mt-2 w-44 rounded-2xl bg-white border border-[#EAE6DC] shadow-xl py-1 z-20 overflow-hidden">
+                    {(Object.keys(SORT_LABELS) as SortOption[]).map((key) => (
+                      <button
+                        key={key}
+                        onClick={() => {
+                          setSortBy(key);
+                          setSortOpen(false);
+                        }}
+                        className={`w-full px-3.5 py-2 text-left text-xs transition-colors ${
+                          sortBy === key
+                            ? 'bg-[#F5F3ED] text-[#141613] font-bold'
+                            : 'text-[#666B60] hover:text-[#141613] hover:bg-[#FBF9F5]'
+                        }`}
+                      >
+                        {SORT_LABELS[key]}
+                      </button>
+                    ))}
+                  </div>
+                </>
               )}
             </div>
           </div>
 
-          {/* Filters panel */}
+          {/* Filter Panel (Collapsible) */}
           {showFilters && (
-            <div className="p-4 rounded-2xl bg-zinc-900/60 border border-zinc-800 space-y-4 animate-fade-in">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="p-4 rounded-2xl bg-white border border-[#EAE6DC] shadow-sm space-y-4 animate-fade-in">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {/* Category */}
                 <div>
-                  <label className="block text-[11px] font-semibold text-zinc-500 uppercase tracking-wider mb-2">
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#73796E] mb-1">
                     Category
                   </label>
-                  <div className="flex flex-wrap gap-1.5">
-                    {categories.slice(0, 8).map((c) => (
-                      <button
-                        key={c.id}
-                        onClick={() =>
-                          setFilterCategory((prev) => (prev === c.id ? '' : c.id))
-                        }
-                        className={`chip-interactive px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${
-                          filterCategory === c.id
-                            ? 'bg-zinc-200 text-zinc-950 border-zinc-300'
-                            : 'bg-zinc-800 text-zinc-400 border-zinc-700 hover:text-zinc-200'
-                        }`}
-                      >
+                  <select
+                    value={filterCategory}
+                    onChange={(e) => setFilterCategory(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-[#FBF9F5] border border-[#E2DDD2] text-xs text-[#141613] focus:outline-none focus:border-[#141613]"
+                  >
+                    <option value="">All Categories</option>
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.id}>
                         {c.name}
-                      </button>
+                      </option>
                     ))}
-                  </div>
+                  </select>
                 </div>
 
                 {/* Pricing */}
                 <div>
-                  <label className="block text-[11px] font-semibold text-zinc-500 uppercase tracking-wider mb-2">
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#73796E] mb-1">
                     Pricing
                   </label>
-                  <div className="flex flex-wrap gap-1.5">
-                    {PRICING_OPTIONS.map((p) => (
-                      <button
-                        key={p.value}
-                        onClick={() =>
-                          setFilterPricing((prev) => (prev === p.value ? '' : p.value))
-                        }
-                        className={`chip-interactive px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${
-                          filterPricing === p.value
-                            ? 'bg-zinc-200 text-zinc-950 border-zinc-300'
-                            : 'bg-zinc-800 text-zinc-400 border-zinc-700 hover:text-zinc-200'
-                        }`}
-                      >
-                        {p.label}
-                      </button>
+                  <select
+                    value={filterPricing}
+                    onChange={(e) => setFilterPricing(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-[#FBF9F5] border border-[#E2DDD2] text-xs text-[#141613] focus:outline-none focus:border-[#141613]"
+                  >
+                    <option value="">All Pricing</option>
+                    {PRICING_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
                     ))}
-                  </div>
+                  </select>
                 </div>
 
                 {/* Rating */}
                 <div>
-                  <label className="block text-[11px] font-semibold text-zinc-500 uppercase tracking-wider mb-2">
-                    Rating
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#73796E] mb-1">
+                    Minimum Rating
                   </label>
-                  <div className="flex flex-wrap gap-1.5">
-                    {RATING_OPTIONS.map((r) => (
-                      <button
-                        key={r.value}
-                        onClick={() =>
-                          setFilterRating((prev) => (prev === r.value ? '' : r.value))
-                        }
-                        className={`chip-interactive px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${
-                          filterRating === r.value
-                            ? 'bg-zinc-200 text-zinc-950 border-zinc-300'
-                            : 'bg-zinc-800 text-zinc-400 border-zinc-700 hover:text-zinc-200'
-                        }`}
-                      >
-                        {r.label}
-                      </button>
+                  <select
+                    value={filterRating}
+                    onChange={(e) => setFilterRating(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-[#FBF9F5] border border-[#E2DDD2] text-xs text-[#141613] focus:outline-none focus:border-[#141613]"
+                  >
+                    <option value="">Any Rating</option>
+                    {RATING_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
                     ))}
-                  </div>
+                  </select>
                 </div>
               </div>
 
               {activeFilterCount > 0 && (
-                <div className="pt-2 border-t border-zinc-800/60">
+                <div className="flex justify-end pt-1">
                   <button
                     onClick={clearAllFilters}
-                    className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors flex items-center gap-1"
+                    className="text-xs font-bold text-[#D73A49] hover:underline flex items-center gap-1"
                   >
-                    <X className="w-3 h-3" />
-                    Clear all filters
+                    <X className="w-3.5 h-3.5" />
+                    <span>Clear Filters</span>
                   </button>
                 </div>
               )}
             </div>
           )}
-
-          {/* Active filter chips */}
-          {(query || activeFilterCount > 0) && (
-            <div className="flex flex-wrap items-center gap-1.5">
-              {query && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-zinc-800 text-zinc-300 text-xs border border-zinc-700">
-                  &ldquo;{query}&rdquo;
-                  <button onClick={() => setQuery('')} className="text-zinc-500 hover:text-zinc-200">
-                    <X className="w-3 h-3" />
-                  </button>
-                </span>
-              )}
-              {filterCategory && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-zinc-800 text-zinc-300 text-xs border border-zinc-700">
-                  {categories.find((c) => c.id === filterCategory)?.name}
-                  <button onClick={() => setFilterCategory('')} className="text-zinc-500 hover:text-zinc-200">
-                    <X className="w-3 h-3" />
-                  </button>
-                </span>
-              )}
-              {filterPricing && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-zinc-800 text-zinc-300 text-xs border border-zinc-700">
-                  {PRICING_OPTIONS.find((p) => p.value === filterPricing)?.label}
-                  <button onClick={() => setFilterPricing('')} className="text-zinc-500 hover:text-zinc-200">
-                    <X className="w-3 h-3" />
-                  </button>
-                </span>
-              )}
-              {filterRating && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-zinc-800 text-zinc-300 text-xs border border-zinc-700">
-                  {RATING_OPTIONS.find((r) => r.value === filterRating)?.label}
-                  <button onClick={() => setFilterRating('')} className="text-zinc-500 hover:text-zinc-200">
-                    <X className="w-3 h-3" />
-                  </button>
-                </span>
-              )}
-              <span className="text-xs text-zinc-600 ml-1">
-                {displayedTools.length} result{displayedTools.length !== 1 ? 's' : ''}
-              </span>
-            </div>
-          )}
         </div>
       )}
 
-      {/* ── No results from filters ── */}
+      {/* Empty Results State */}
       {isEmptyResults && (
-        <div className="py-16 flex flex-col items-center text-center space-y-4">
-          <div className="w-12 h-12 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center">
-            <Search className="w-5 h-5 text-zinc-500" />
-          </div>
-          <div>
-            <h3 className="text-base font-bold text-zinc-200">No matching tools</h3>
-            <p className="text-xs text-zinc-400 mt-1">Try a different search or adjust your filters.</p>
-          </div>
+        <div className="py-16 text-center bg-white border border-[#EAE6DC] rounded-3xl p-6 shadow-sm space-y-3">
+          <p className="text-sm font-bold text-[#141613]">No tools match your active filters.</p>
           <button
             onClick={clearAllFilters}
-            className="btn-interactive px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 font-semibold text-sm transition-colors"
+            className="text-xs text-[#141613] font-bold hover:underline"
           >
-            Clear Filters
+            Clear all filters
           </button>
         </div>
       )}
 
-      {/* ── Tool Grid ── */}
+      {/* Tool Cards Grid */}
       {!isEmptyLibrary && displayedTools.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {displayedTools.map((tool) => (
             <LibraryToolCard
               key={tool.id}

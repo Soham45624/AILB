@@ -9,11 +9,11 @@ import {
   Search,
   LogIn,
   LogOut,
-  Compass,
-  LayoutDashboard,
+  Bookmark,
+  User,
   ShieldCheck,
-  Send,
-  Library,
+  LayoutDashboard,
+  X,
 } from 'lucide-react';
 import { getCurrentUserAction, signOutAction } from '@/app/actions/auth';
 
@@ -44,6 +44,7 @@ const fetchUserSession = async () => {
 export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
+  const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [user, setUser] = useState<any>(cachedUser);
   const [isLoading, setIsLoading] = useState(!hasFetchedUser);
@@ -59,11 +60,9 @@ export function Navbar() {
     if (!hasFetchedUser) {
       fetchUserSession();
     } else {
-      // Sync immediately with cache
       setUser(cachedUser);
       setIsLoading(false);
 
-      // Perform a silent background validation to check if the session is still active
       getCurrentUserAction().then((res) => {
         if (res.success && res.user) {
           if (JSON.stringify(res.user) !== JSON.stringify(cachedUser)) {
@@ -87,103 +86,140 @@ export function Navbar() {
     router.refresh();
   };
 
-  const navLinks = [
-    { name: 'Directory', href: '/tools', icon: Compass },
-    { name: 'AI Finder', href: '/finder', icon: Sparkles },
-    { name: 'Categories', href: '/#categories' },
-    { name: 'Submit AI Tool', href: '/submit' },
-    { name: 'My Library', href: '/dashboard/my-library', icon: Library },
-  ];
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/tools?search=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchOpen(false);
+    }
+  };
 
   return (
-    <header className="sticky top-0 z-50 bg-zinc-950/90 backdrop-blur-md border-b border-zinc-800/80 transition-colors">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-15 flex items-center justify-between gap-4">
-        {/* Brand Logo */}
-        <Link href="/" className="flex items-center gap-2.5 group shrink-0">
-          <div className="w-8 h-8 rounded-lg bg-zinc-100 text-zinc-950 flex items-center justify-center font-black text-sm tracking-tighter group-hover:bg-white transition-colors">
-            AI
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="font-bold text-sm tracking-tight text-zinc-100">
-              Discovery
+    <header className="sticky top-0 z-50 bg-[#FBF9F5]/90 backdrop-blur-md border-b border-[#EAE6DC] transition-colors">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+        {/* Left: Brand Logo + Primary Nav Links */}
+        <div className="flex items-center gap-8">
+          {/* Brand Logo with Olive Green Icon */}
+          <Link href="/" className="flex items-center gap-2.5 group shrink-0">
+            <div className="w-8 h-8 rounded-full bg-[#5A7840] text-white flex items-center justify-center shadow-sm group-hover:bg-[#4E6837] transition-colors">
+              <Sparkles className="w-4 h-4 fill-white text-white" />
+            </div>
+            <span className="font-extrabold text-base tracking-tight text-[#141613]">
+              AILIB
             </span>
-          </div>
-        </Link>
-
-        {/* Center Nav Links */}
-        <nav className="hidden md:flex items-center gap-1">
-          {navLinks.map((link) => {
-            const isActive = pathname === link.href;
-            return (
-              <Link
-                key={link.name}
-                href={link.href}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                  isActive
-                    ? 'text-white bg-zinc-800/90'
-                    : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900'
-                }`}
-              >
-                {link.name}
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* Right Actions */}
-        <div className="flex items-center gap-2.5">
-          {/* Quick Search */}
-          <form action="/tools" method="GET" className="hidden sm:flex items-center relative">
-            <input
-              type="text"
-              name="search"
-              placeholder="Search tools..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-36 lg:w-48 pl-8 pr-2.5 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-xs text-zinc-200 placeholder:text-zinc-500 focus:outline-none focus:border-zinc-600 transition-colors"
-            />
-            <Search className="w-3.5 h-3.5 text-zinc-500 absolute left-2.5 pointer-events-none" />
-          </form>
-
-          {/* + Submit Button */}
-          <Link
-            href="/submit"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-100 hover:bg-white text-zinc-950 font-semibold text-xs transition-colors shrink-0"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span className="hidden xs:inline">Submit</span>
           </Link>
 
-          {/* User Profile / Admin Link / Login */}
+          {/* Nav Links */}
+          <nav className="hidden md:flex items-center gap-2">
+            <Link
+              href="/tools"
+              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                pathname.startsWith('/tools')
+                  ? 'bg-[#ECE8DF] text-[#141613]'
+                  : 'text-[#666B60] hover:text-[#141613] hover:bg-[#F2EFE8]'
+              }`}
+            >
+              Explore
+            </Link>
+
+            <Link
+              href="/finder"
+              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                pathname === '/finder'
+                  ? 'bg-[#ECE8DF] text-[#141613]'
+                  : 'text-[#666B60] hover:text-[#141613] hover:bg-[#F2EFE8]'
+              }`}
+            >
+              AI Finder
+            </Link>
+          </nav>
+        </div>
+
+        {/* Right: Search, Library, + Add Tool, Avatar */}
+        <div className="flex items-center gap-3">
+          {/* Quick Search Toggle / Input */}
+          {searchOpen ? (
+            <form onSubmit={handleSearchSubmit} className="flex items-center relative animate-fade-in">
+              <input
+                type="text"
+                placeholder="Search AI tools..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                autoFocus
+                className="w-48 sm:w-64 pl-8 pr-7 py-1.5 rounded-full bg-white border border-[#DDD7CB] text-xs text-[#141613] placeholder:text-[#94998E] focus:outline-none focus:border-[#141613] shadow-sm"
+              />
+              <Search className="w-3.5 h-3.5 text-[#73796E] absolute left-3 pointer-events-none" />
+              <button
+                type="button"
+                onClick={() => setSearchOpen(false)}
+                className="absolute right-2.5 text-[#73796E] hover:text-[#141613]"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </form>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setSearchOpen(true)}
+              className="p-2 rounded-full text-[#666B60] hover:text-[#141613] hover:bg-[#ECE8DF] transition-colors"
+              title="Search AI Tools"
+            >
+              <Search className="w-4 h-4" />
+            </button>
+          )}
+
+          {/* Library Link with Bookmark */}
+          <Link
+            href="/dashboard/my-library"
+            className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
+              pathname === '/dashboard/my-library'
+                ? 'bg-[#ECE8DF] text-[#141613]'
+                : 'text-[#666B60] hover:text-[#141613] hover:bg-[#F2EFE8]'
+            }`}
+          >
+            <Bookmark className="w-3.5 h-3.5" />
+            <span>Library</span>
+          </Link>
+
+          {/* + Add Tool Solid Black Pill Button */}
+          <Link
+            href="/submit"
+            className="btn-interactive flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#141613] hover:bg-[#2A2E27] text-white font-bold text-xs shadow-sm shrink-0"
+          >
+            <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+            <span>Add Tool</span>
+          </Link>
+
+          {/* User Profile / Admin / Auth */}
           {isLoading ? (
-            <div className="h-8 w-24 bg-zinc-900/60 border border-zinc-800/60 rounded-lg animate-pulse" />
+            <div className="w-8 h-8 rounded-full bg-[#ECE8DF] animate-pulse" />
           ) : user ? (
             <div className="flex items-center gap-1.5">
               {user.role === 'admin' && (
                 <Link
                   href="/admin"
-                  className="p-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 text-xs font-medium flex items-center gap-1"
+                  className="p-2 rounded-full bg-white hover:bg-[#ECE8DF] text-[#141613] border border-[#DDD7CB] transition-colors shadow-sm"
                   title="Admin Portal"
                 >
-                  <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#5A7840]" />
                 </Link>
               )}
 
               <Link
                 href="/dashboard"
-                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-medium transition-colors ${
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border transition-colors shadow-sm ${
                   pathname.startsWith('/dashboard')
-                    ? 'bg-zinc-800 border-zinc-700 text-white'
-                    : 'bg-zinc-900 border-zinc-800 text-zinc-300 hover:bg-zinc-850 hover:text-white'
+                    ? 'bg-[#141613] text-white border-[#141613]'
+                    : 'bg-[#ECE8DF] text-[#141613] border-[#DDD7CB] hover:bg-[#E2DDD2]'
                 }`}
+                title={user.username || user.email}
               >
-                <LayoutDashboard className="w-3.5 h-3.5 text-zinc-400" />
-                <span className="max-w-[90px] truncate">{user.username || user.email?.split('@')[0]}</span>
+                {(user.username || user.email || 'U')[0].toUpperCase()}
               </Link>
 
               <button
                 onClick={handleSignOut}
-                className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900 transition-colors"
+                className="p-1.5 rounded-full text-[#73796E] hover:text-[#141613] hover:bg-[#ECE8DF] transition-colors"
                 title="Sign Out"
               >
                 <LogOut className="w-3.5 h-3.5" />
@@ -192,10 +228,10 @@ export function Navbar() {
           ) : (
             <Link
               href="/login"
-              className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-zinc-200 text-xs font-medium transition-colors"
+              className="w-8 h-8 rounded-full bg-[#ECE8DF] hover:bg-[#E2DDD2] border border-[#DDD7CB] text-[#555] hover:text-[#141613] flex items-center justify-center transition-colors shadow-sm"
+              title="Sign In"
             >
-              <LogIn className="w-3.5 h-3.5 text-zinc-400" />
-              <span>Sign In</span>
+              <User className="w-4 h-4" />
             </Link>
           )}
         </div>

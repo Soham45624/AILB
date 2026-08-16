@@ -1,12 +1,14 @@
 @import "tailwindcss";
 
 @theme inline {
-  --font-sans: var(--font-geist-sans);
-  --color-background: #09090b;
-  --color-foreground: #fafafa;
+  --font-sans: var(--font-sans), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-serif: var(--font-serif), Georgia, Cambria, "Times New Roman", Times, serif;
+  --color-background: #FBF9F5;
+  --color-foreground: #141613;
 }
 
 /* ===== SOURCE INLINE: Force Tailwind v4 to preserve custom interaction classes ===== */
+@source inline(".font-serif-heading");
 @source inline(".card-interactive");
 @source inline(".btn-interactive");
 @source inline(".chip-interactive");
@@ -14,7 +16,6 @@
 @source inline(".bookmark-saved");
 @source inline(".animate-fade-in");
 @source inline(".scrollbar-none");
-@source inline(".bg-grid-pattern");
 @source inline(".line-clamp-1");
 @source inline(".line-clamp-2");
 @source inline(".line-clamp-3");
@@ -26,23 +27,28 @@
 
 html {
   scroll-behavior: smooth;
-  color-scheme: dark;
+  color-scheme: light;
+  background-color: #FBF9F5;
 }
 
 body {
-  background-color: #09090b;
-  color: #fafafa;
-  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  background-color: #FBF9F5;
+  color: #141613;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
 }
 
+.font-serif-heading {
+  font-family: var(--font-serif), Georgia, serif;
+}
+
 /* Minimalist Ultra-Thin Scrollbar */
-::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #27272a; border-radius: 9999px; }
-::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
+::-webkit-scrollbar-thumb { background: #DCD6CA; border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: #BDB5A4; }
 
 /* Hide scrollbar utility */
 .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
@@ -53,9 +59,9 @@ body {
 .line-clamp-2 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 .line-clamp-3 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
 
-/* Subtle dot grid */
+/* Subtle dot grid for hero/headers */
 .bg-grid-pattern {
-  background-image: radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+  background-image: radial-gradient(rgba(20, 22, 19, 0.04) 1px, transparent 1px);
   background-size: 24px 24px;
 }
 
@@ -82,27 +88,24 @@ body {
    AILIB SIGNATURE INTERACTION SYSTEM
    ===================================================================== */
 
-/* card-interactive: signature scale(0.975) zoom-out hover */
+/* card-interactive: smooth subtle elevation & scale */
 .card-interactive {
   cursor: pointer;
   transform: scale(1);
   will-change: transform;
   transition:
-    transform 200ms cubic-bezier(0.22, 1, 0.36, 1),
-    border-color 200ms ease,
-    box-shadow 200ms ease,
+    transform 180ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 180ms ease,
+    box-shadow 180ms ease,
     background-color 150ms ease;
 }
 .card-interactive:hover {
-  transform: scale(0.975);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px -4px rgba(20, 22, 19, 0.06);
 }
 .card-interactive:active {
-  transform: scale(0.960);
+  transform: scale(0.985);
   transition-duration: 80ms;
-}
-.card-interactive:focus-visible {
-  outline: 2px solid #a1a1aa;
-  outline-offset: 2px;
 }
 
 /* btn-interactive: subtle tactile press feel */
@@ -119,15 +122,11 @@ body {
   transform: scale(0.985);
 }
 .btn-interactive:active {
-  transform: scale(0.970);
+  transform: scale(0.965);
   transition-duration: 60ms;
 }
-.btn-interactive:focus-visible {
-  outline: 2px solid #a1a1aa;
-  outline-offset: 2px;
-}
 
-/* chip-interactive: tag pills, compact chips */
+/* chip-interactive: category & tag pills */
 .chip-interactive {
   transform: scale(1);
   will-change: transform;
@@ -138,34 +137,22 @@ body {
     color 150ms ease;
 }
 .chip-interactive:hover {
-  transform: scale(0.970);
+  transform: translateY(-1px);
 }
 .chip-interactive:active {
-  transform: scale(0.940);
+  transform: scale(0.96);
   transition-duration: 60ms;
 }
-.chip-interactive:focus-visible {
-  outline: 2px solid #a1a1aa;
-  outline-offset: 2px;
-}
 
-/* input-interactive: focus ring for inputs/textareas */
+/* input-interactive: focus state */
 .input-interactive {
-  transition: border-color 200ms ease, box-shadow 200ms ease;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    background-color 150ms ease;
 }
 .input-interactive:focus {
   outline: none;
-  border-color: #71717a;
-  box-shadow: 0 0 0 2px rgba(113, 113, 122, 0.18);
-}
-
-/* prefers-reduced-motion: strip scale, keep colour changes */
-@media (prefers-reduced-motion: reduce) {
-  .card-interactive,
-  .btn-interactive,
-  .chip-interactive {
-    transform: none !important;
-    will-change: auto;
-    transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
-  }
+  border-color: #141613;
+  box-shadow: 0 0 0 2px rgba(20, 22, 19, 0.08);
 }

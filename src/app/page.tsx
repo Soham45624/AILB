@@ -3,211 +3,243 @@ import { getTools, getCategories } from '@/lib/data';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { ToolCard } from '@/components/tools/ToolCard';
-import { CategoryCard } from '@/components/home/CategoryCard';
 import {
   Search,
   ArrowRight,
-  TrendingUp,
-  Star,
-  Zap,
+  Code2,
+  Sparkles,
+  Video,
+  PenTool,
+  FlaskConical,
+  Briefcase,
+  Music,
   Plus,
 } from 'lucide-react';
 
 export const revalidate = 60;
 
 export default async function HomePage() {
-  const [categories, trendingTools, topRatedTools, freeTools] = await Promise.all([
+  const [categories, trendingTools, recentTools] = await Promise.all([
     getCategories(),
-    getTools({ trendingOnly: true, limit: 3 }),
-    getTools({ sortBy: 'highest_rated', limit: 3 }),
-    getTools({ pricing: 'free', limit: 3 }),
+    getTools({ trendingOnly: true, limit: 6 }),
+    getTools({ sortBy: 'newest', limit: 6 }),
   ]);
 
-  const quickTags = ['writing', 'image generator', 'coding', 'video', 'productivity', 'free'];
+  // Visual Category configuration matching Figma's popular categories
+  const popularCategoryBadges = [
+    {
+      name: 'Coding',
+      slug: 'coding',
+      icon: Code2,
+      color: 'text-[#1E7E34]',
+      bg: 'bg-[#EDF7EE]',
+      border: 'border-[#CCE8CD]',
+    },
+    {
+      name: 'Image Generation',
+      slug: 'image-generation',
+      icon: Sparkles,
+      color: 'text-[#6F42C1]',
+      bg: 'bg-[#F4EFFD]',
+      border: 'border-[#DECFF7]',
+    },
+    {
+      name: 'Video',
+      slug: 'video-generation',
+      icon: Video,
+      color: 'text-[#D73A49]',
+      bg: 'bg-[#FDF0F2]',
+      border: 'border-[#F8D2D7]',
+    },
+    {
+      name: 'Writing',
+      slug: 'writing',
+      icon: PenTool,
+      color: 'text-[#D96B27]',
+      bg: 'bg-[#FDF3EB]',
+      border: 'border-[#F8DCC8]',
+    },
+    {
+      name: 'Research',
+      slug: 'research',
+      icon: FlaskConical,
+      color: 'text-[#0366D6]',
+      bg: 'bg-[#EEF5FD]',
+      border: 'border-[#CDE0F9]',
+    },
+    {
+      name: 'Productivity',
+      slug: 'productivity',
+      icon: Briefcase,
+      color: 'text-[#5C42A6]',
+      bg: 'bg-[#F3EFFB]',
+      border: 'border-[#DDD2F5]',
+    },
+    {
+      name: 'Audio',
+      slug: 'audio',
+      icon: Music,
+      color: 'text-[#C66100]',
+      bg: 'bg-[#FDF2E9]',
+      border: 'border-[#F9DECA]',
+    },
+  ];
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 selection:bg-zinc-100 selection:text-zinc-950 flex flex-col justify-between">
+    <div className="min-h-screen bg-[#FBF9F5] text-[#141613] flex flex-col justify-between selection:bg-[#ECE8DF] selection:text-[#141613]">
       <Navbar />
 
       <main className="flex-1">
-        {/* HERO SECTION */}
-        <section className="relative pt-20 pb-16 md:pt-28 md:pb-24 border-b border-zinc-900 bg-grid-pattern">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center space-y-8">
-            {/* Pill */}
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-xs text-zinc-300 font-medium animate-fade-in">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              <span>Independent Directory of Verified AI Tools</span>
-            </div>
-
-            {/* Title */}
+        {/* =========================================================================
+            HERO SECTION
+           ========================================================================= */}
+        <section className="relative pt-20 pb-16 md:pt-28 md:pb-24 px-4 sm:px-6">
+          <div className="max-w-4xl mx-auto text-center space-y-8">
+            {/* Main Editorial Serif Headline */}
             <div className="space-y-4">
-              <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-white leading-[1.1]">
-                Find AI tools that <br className="hidden sm:inline" />
-                actually solve problems.
+              <h1 className="font-serif-heading text-4xl sm:text-6xl md:text-7xl font-normal tracking-tight text-[#141613] leading-[1.12]">
+                Discover the right AI <br />
+                for what you build.
               </h1>
-              <p className="text-sm sm:text-base text-zinc-400 max-w-xl mx-auto leading-relaxed">
-                Discover, compare, and evaluate community-tested AI applications without marketing noise.
+              <p className="text-base sm:text-lg text-[#666B60] max-w-xl mx-auto leading-relaxed font-normal">
+                Explore AI tools or tell AILIB what you&apos;re trying to accomplish.
               </p>
             </div>
 
-            {/* Search Box — input-interactive focus enhancement */}
-            <div className="max-w-xl mx-auto">
-              <form action="/tools" method="GET" className="relative group/searchbox">
+            {/* Floating Search Bar */}
+            <div className="max-w-2xl mx-auto">
+              <form
+                action="/tools"
+                method="GET"
+                className="relative flex items-center bg-white rounded-full p-2 border border-[#E2DDD2] shadow-[0_8px_30px_rgba(0,0,0,0.06)] hover:border-[#D0C9BA] transition-all"
+              >
+                <Search className="w-5 h-5 text-[#9FA59A] ml-4 shrink-0 pointer-events-none" />
                 <input
                   type="text"
                   name="search"
-                  placeholder="Search by keyword, use case, or tag..."
-                  className="input-interactive w-full pl-11 pr-24 py-3.5 rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-zinc-100 placeholder:text-zinc-500 shadow-lg"
+                  placeholder="What are you trying to accomplish?"
+                  className="w-full bg-transparent px-3.5 py-2.5 text-sm text-[#141613] placeholder:text-[#94998E] focus:outline-none"
                 />
-                <Search className="w-4 h-4 text-zinc-500 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <button
                   type="submit"
-                  className="btn-interactive absolute right-2 top-1/2 -translate-y-1/2 px-3.5 py-1.5 rounded-lg bg-zinc-100 hover:bg-white text-zinc-950 font-bold text-xs"
+                  className="btn-interactive px-5 py-3 rounded-full bg-[#141613] hover:bg-[#2A2E27] text-white font-bold text-xs flex items-center gap-1.5 shrink-0 shadow-sm"
                 >
-                  Search
+                  <span>Find Tools</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </form>
 
-              {/* Quick Tags — chip-interactive */}
-              <div className="flex flex-wrap items-center justify-center gap-1.5 pt-3 text-xs">
-                <span className="text-zinc-500 text-[11px] font-medium mr-1">Popular:</span>
-                {quickTags.map((tag) => (
-                  <Link
-                    key={tag}
-                    href={`/tools?search=${encodeURIComponent(tag)}`}
-                    className="chip-interactive px-2.5 py-0.5 rounded-md bg-zinc-900/80 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-zinc-800/80 text-[11px]"
-                  >
-                    #{tag}
-                  </Link>
-                ))}
+              {/* Try prompt suggestions */}
+              <div className="pt-3 text-xs text-[#73796E] font-medium flex items-center justify-center flex-wrap gap-1">
+                <span>Try:</span>
+                <Link
+                  href="/tools?search=YouTube+videos"
+                  className="text-[#555C50] hover:text-[#141613] hover:underline"
+                >
+                  &ldquo;I need an AI that creates YouTube videos...&rdquo;
+                </Link>
+                <span>or</span>
+                <Link
+                  href="/tools?search=coding+assistant"
+                  className="text-[#555C50] hover:text-[#141613] hover:underline"
+                >
+                  &ldquo;Find a free coding assistant&rdquo;
+                </Link>
+              </div>
+            </div>
+
+            {/* Popular Categories Row */}
+            <div className="pt-6 space-y-3.5">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-[#9FA59A]">
+                Popular Categories
+              </div>
+
+              <div className="flex flex-wrap items-center justify-center gap-2.5">
+                {popularCategoryBadges.map((cat) => {
+                  const Icon = cat.icon;
+                  return (
+                    <Link
+                      key={cat.slug}
+                      href={`/tools?category=${cat.slug}`}
+                      className={`chip-interactive inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-white border border-[#E2DDD2] hover:border-[#D0C9BA] text-xs font-semibold text-[#141613] shadow-sm hover:shadow transition-all`}
+                    >
+                      <span className={`p-1 rounded-full ${cat.bg} ${cat.color}`}>
+                        <Icon className="w-3.5 h-3.5" />
+                      </span>
+                      <span>{cat.name}</span>
+                    </Link>
+                  );
+                })}
               </div>
             </div>
           </div>
         </section>
 
-        {/* CATEGORIES SECTION */}
-        <section id="categories" className="py-16 max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="flex items-baseline justify-between gap-4 mb-6">
-            <div>
-              <h2 className="text-xl font-bold text-zinc-100 tracking-tight">
-                Explore by Category
-              </h2>
-              <p className="text-xs text-zinc-400 mt-0.5">Organized by core capabilities and workflow</p>
-            </div>
+        {/* =========================================================================
+            TRENDING TOOLS SECTION
+           ========================================================================= */}
+        <section className="py-12 max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="flex items-center justify-between gap-4 mb-6">
+            <h2 className="text-xl sm:text-2xl font-bold text-[#141613] tracking-tight">
+              Trending Tools
+            </h2>
             <Link
-              href="/tools"
-              className="btn-interactive text-xs font-semibold text-zinc-400 hover:text-white flex items-center gap-1"
+              href="/tools?sort=trending"
+              className="text-xs font-semibold text-[#666B60] hover:text-[#141613] flex items-center gap-1 transition-colors"
             >
-              Browse All <ArrowRight className="w-3 h-3" />
+              <span>View all</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
 
-          {/* Category compact grid — chip-interactive feel */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-            {categories.slice(0, 12).map((category) => (
-              <Link
-                key={category.id}
-                href={`/tools?category=${category.slug}`}
-                className="chip-interactive p-3.5 rounded-xl bg-zinc-900/50 hover:bg-zinc-900 border border-zinc-800/70 hover:border-zinc-700 text-left space-y-1.5 group"
-              >
-                <div className="font-semibold text-xs text-zinc-200 group-hover:text-white truncate transition-colors">
-                  {category.name}
-                </div>
-                <div className="text-[10px] text-zinc-500 font-mono group-hover:text-zinc-300 transition-colors">
-                  Explore →
-                </div>
-              </Link>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {trendingTools.map((tool) => (
+              <ToolCard key={tool.id} tool={tool} />
             ))}
           </div>
         </section>
 
-        {/* TRENDING SECTION */}
-        <section className="py-14 border-t border-zinc-900 bg-zinc-900/20">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6">
-            <div className="flex items-baseline justify-between gap-4 mb-6">
-              <div className="flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-emerald-400" />
-                <h2 className="text-lg font-bold text-zinc-100 tracking-tight">Trending Tools</h2>
-              </div>
-              <Link
-                href="/tools?sort=trending"
-                className="btn-interactive text-xs font-semibold text-zinc-400 hover:text-white flex items-center gap-1"
-              >
-                View Trending <ArrowRight className="w-3 h-3" />
-              </Link>
-            </div>
+        {/* =========================================================================
+            RECENTLY ADDED SECTION
+           ========================================================================= */}
+        <section className="py-12 max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="flex items-center justify-between gap-4 mb-6">
+            <h2 className="text-xl sm:text-2xl font-bold text-[#141613] tracking-tight">
+              Recently Added
+            </h2>
+            <Link
+              href="/tools?sort=newest"
+              className="text-xs font-semibold text-[#666B60] hover:text-[#141613] flex items-center gap-1 transition-colors"
+            >
+              <span>View all</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
 
-            {/* ToolCards use card-interactive internally */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {trendingTools.map((tool) => (
-                <ToolCard key={tool.id} tool={tool} />
-              ))}
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {recentTools.map((tool) => (
+              <ToolCard key={tool.id} tool={tool} />
+            ))}
           </div>
         </section>
 
-        {/* TOP RATED & FREE TOOLS */}
-        <section className="py-14 border-t border-zinc-900 max-w-6xl mx-auto px-4 sm:px-6 space-y-14">
-          {/* Highest Rated */}
-          <div>
-            <div className="flex items-baseline justify-between gap-4 mb-6">
-              <div className="flex items-center gap-2">
-                <Star className="w-4 h-4 text-amber-400" />
-                <h2 className="text-lg font-bold text-zinc-100 tracking-tight">Top Community Rated</h2>
-              </div>
-              <Link
-                href="/tools?sort=highest_rated"
-                className="btn-interactive text-xs font-semibold text-zinc-400 hover:text-white flex items-center gap-1"
-              >
-                See All Top Rated <ArrowRight className="w-3 h-3" />
-              </Link>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {topRatedTools.map((tool) => (
-                <ToolCard key={tool.id} tool={tool} />
-              ))}
-            </div>
-          </div>
-
-          {/* 100% Free Tools */}
-          <div>
-            <div className="flex items-baseline justify-between gap-4 mb-6">
-              <div className="flex items-center gap-2">
-                <Zap className="w-4 h-4 text-sky-400" />
-                <h2 className="text-lg font-bold text-zinc-100 tracking-tight">100% Free Forever</h2>
-              </div>
-              <Link
-                href="/tools?pricing=free"
-                className="btn-interactive text-xs font-semibold text-zinc-400 hover:text-white flex items-center gap-1"
-              >
-                View Free Tools <ArrowRight className="w-3 h-3" />
-              </Link>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {freeTools.map((tool) => (
-                <ToolCard key={tool.id} tool={tool} />
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* CREATOR CALLOUT */}
-        <section className="py-16 border-t border-zinc-900 bg-zinc-900/30">
+        {/* =========================================================================
+            CREATOR CALLOUT SECTION
+           ========================================================================= */}
+        <section className="py-16 border-t border-[#EAE6DC] bg-white mt-12">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center space-y-4">
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-100 tracking-tight">
+            <h2 className="font-serif-heading text-2xl sm:text-4xl text-[#141613] font-normal tracking-tight">
               Built an AI tool? Put it in front of active users.
             </h2>
-            <p className="text-xs sm:text-sm text-zinc-400 max-w-lg mx-auto leading-relaxed">
-              Submit your AI application in under 2 minutes. Free forever for indie creators.
+            <p className="text-xs sm:text-sm text-[#666B60] max-w-lg mx-auto leading-relaxed">
+              Submit your AI application to AILIB in under 2 minutes. Free forever for indie creators.
             </p>
             <div className="pt-2">
               <Link
                 href="/submit"
-                className="btn-interactive inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-zinc-100 hover:bg-white text-zinc-950 font-bold text-xs shadow-md"
+                className="btn-interactive inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#141613] hover:bg-[#2A2E27] text-white font-bold text-xs shadow-md"
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="w-4 h-4 stroke-[2.5]" />
                 <span>Submit AI Tool</span>
               </Link>
             </div>

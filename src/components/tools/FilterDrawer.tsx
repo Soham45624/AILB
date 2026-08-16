@@ -6,13 +6,9 @@ import {
   SlidersHorizontal,
   Check,
   Star,
-  Globe,
-  Tag as TagIcon,
   RotateCcw,
-  Sparkles,
-  Layers,
 } from 'lucide-react';
-import { Category, Tag, PlatformType, PricingType } from '@/lib/types';
+import { Category, Tag, PlatformType } from '@/lib/types';
 
 interface FilterDrawerProps {
   isOpen: boolean;
@@ -34,7 +30,7 @@ interface FilterDrawerProps {
   onResetFilters: () => void;
 }
 
-const ALL_PLATFORMS: { label: PlatformType; icon?: string }[] = [
+const ALL_PLATFORMS: { label: PlatformType }[] = [
   { label: 'Web' },
   { label: 'macOS' },
   { label: 'Windows' },
@@ -49,14 +45,12 @@ const ALL_PRICING: { key: string; label: string; desc: string }[] = [
   { key: 'freemium', label: 'Freemium', desc: 'Free plan with optional upgrades' },
   { key: 'free_trial', label: 'Free Trial', desc: 'Free trial period available' },
   { key: 'paid', label: 'Paid', desc: 'Paid subscription or license' },
-  { key: 'contact', label: 'Enterprise', desc: 'Custom enterprise pricing' },
 ];
 
 const RATING_OPTIONS = [
   { value: 4.5, label: '4.5+ Stars', sub: 'Top Tier AI Tools' },
   { value: 4.0, label: '4.0+ Stars', sub: 'Highly Rated' },
   { value: 3.0, label: '3.0+ Stars', sub: 'Good Quality' },
-  { value: 2.0, label: '2.0+ Stars', sub: 'Community Rated' },
   { value: 0, label: 'All Ratings', sub: 'Include New Submissions' },
 ];
 
@@ -130,32 +124,32 @@ export function FilterDrawer({
     <div className="fixed inset-0 z-50 overflow-hidden">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm transition-opacity"
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       />
 
       {/* Slide-over Drawer Panel */}
       <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
-        <div className="w-screen max-w-md bg-slate-900 border-l border-slate-800 shadow-2xl flex flex-col justify-between overflow-hidden animate-fade-in">
+        <div className="w-screen max-w-md bg-[#FBF9F5] border-l border-[#EAE6DC] shadow-2xl flex flex-col justify-between overflow-hidden animate-fade-in">
           {/* Header */}
-          <div className="p-6 border-b border-slate-800 flex items-center justify-between">
+          <div className="p-6 border-b border-[#EAE6DC] flex items-center justify-between bg-white">
             <div className="flex items-center gap-2.5">
-              <div className="p-2 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
+              <div className="p-2 rounded-full bg-[#EDF7EE] text-[#1E7E34]">
                 <SlidersHorizontal className="w-4 h-4" />
               </div>
               <div>
-                <h2 className="text-base font-bold text-slate-100">
+                <h2 className="text-base font-extrabold text-[#141613]">
                   Filter AI Library
                 </h2>
-                <p className="text-xs text-slate-400">
-                  Combine multi-criteria filters
+                <p className="text-xs text-[#73796E]">
+                  Refine tools by category, pricing, and ratings
                 </p>
               </div>
             </div>
 
             <button
               onClick={onClose}
-              className="p-2 rounded-xl text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors"
+              className="p-2 rounded-full text-[#73796E] hover:text-[#141613] hover:bg-[#F5F3ED] transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
@@ -163,16 +157,52 @@ export function FilterDrawer({
 
           {/* Scrollable Content */}
           <div className="p-6 overflow-y-auto space-y-7 flex-1">
-            {/* Pricing Filter */}
+            {/* Category Filter */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-300">
+                <label className="text-xs font-extrabold uppercase tracking-wider text-[#73796E]">
+                  Categories
+                </label>
+                {localCategory && (
+                  <button
+                    onClick={() => setLocalCategory('')}
+                    className="text-[11px] text-[#1E7E34] hover:underline"
+                  >
+                    Reset
+                  </button>
+                )}
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {categories.map((cat) => {
+                  const isSelected = localCategory === cat.slug;
+                  return (
+                    <button
+                      type="button"
+                      key={cat.id}
+                      onClick={() => setLocalCategory(isSelected ? '' : cat.slug)}
+                      className={`p-2.5 rounded-xl border text-left text-xs font-semibold transition-all ${
+                        isSelected
+                          ? 'bg-[#141613] border-[#141613] text-white'
+                          : 'bg-white border-[#EAE6DC] text-[#141613] hover:border-[#D0C9BA]'
+                      }`}
+                    >
+                      <div className="truncate">{cat.name}</div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Pricing Filter */}
+            <div className="space-y-3 pt-4 border-t border-[#EAE6DC]">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-extrabold uppercase tracking-wider text-[#73796E]">
                   Pricing Model
                 </label>
                 {localPricing.length > 0 && (
                   <button
                     onClick={() => setLocalPricing([])}
-                    className="text-[11px] text-cyan-400 hover:underline"
+                    className="text-[11px] text-[#1E7E34] hover:underline"
                   >
                     Reset
                   </button>
@@ -188,23 +218,23 @@ export function FilterDrawer({
                       onClick={() => togglePricing(item.key)}
                       className={`flex items-center justify-between p-3 rounded-xl border text-left transition-all ${
                         isChecked
-                          ? 'bg-cyan-500/10 border-cyan-500/40 text-slate-100 shadow-sm'
-                          : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200'
+                          ? 'bg-white border-[#141613] text-[#141613] shadow-sm'
+                          : 'bg-white border-[#EAE6DC] text-[#666B60] hover:border-[#D0C9BA]'
                       }`}
                     >
                       <div>
-                        <div className="text-xs font-bold text-slate-200">
+                        <div className="text-xs font-bold text-[#141613]">
                           {item.label}
                         </div>
-                        <div className="text-[11px] text-slate-500">
+                        <div className="text-[11px] text-[#73796E]">
                           {item.desc}
                         </div>
                       </div>
                       <div
-                        className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
+                        className={`w-4 h-4 rounded-md border flex items-center justify-center transition-colors ${
                           isChecked
-                            ? 'bg-cyan-500 border-cyan-500 text-slate-950'
-                            : 'border-slate-700 bg-slate-900'
+                            ? 'bg-[#141613] border-[#141613] text-white'
+                            : 'border-[#D0C9BA] bg-white'
                         }`}
                       >
                         {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
@@ -216,8 +246,8 @@ export function FilterDrawer({
             </div>
 
             {/* Minimum Rating Filter */}
-            <div className="space-y-3">
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-300">
+            <div className="space-y-3 pt-4 border-t border-[#EAE6DC]">
+              <label className="text-xs font-extrabold uppercase tracking-wider text-[#73796E]">
                 Minimum Rating
               </label>
               <div className="grid grid-cols-2 gap-2">
@@ -228,19 +258,19 @@ export function FilterDrawer({
                       type="button"
                       key={opt.value}
                       onClick={() => setLocalRating(opt.value)}
-                      className={`p-2.5 rounded-xl border text-left transition-all ${
+                      className={`p-3 rounded-xl border text-left transition-all ${
                         isSelected
-                          ? 'bg-amber-500/10 border-amber-500/40 text-amber-300'
-                          : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200'
+                          ? 'bg-[#FAF3E6] border-[#F0E2C8] text-[#6B5020]'
+                          : 'bg-white border-[#EAE6DC] text-[#666B60] hover:border-[#D0C9BA]'
                       }`}
                     >
                       <div className="flex items-center gap-1 text-xs font-bold">
                         {opt.value > 0 && (
-                          <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                          <Star className="w-3.5 h-3.5 fill-[#F5A623] text-[#F5A623]" />
                         )}
                         <span>{opt.label}</span>
                       </div>
-                      <div className="text-[10px] text-slate-500 truncate mt-0.5">
+                      <div className="text-[10px] text-[#73796E] truncate mt-0.5">
                         {opt.sub}
                       </div>
                     </button>
@@ -249,132 +279,51 @@ export function FilterDrawer({
               </div>
             </div>
 
-            {/* Supported Platforms Filter */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-300">
-                  Platforms & APIs
-                </label>
-                {localPlatforms.length > 0 && (
-                  <button
-                    onClick={() => setLocalPlatforms([])}
-                    className="text-[11px] text-cyan-400 hover:underline"
-                  >
-                    Reset
-                  </button>
-                )}
-              </div>
-              <div className="flex flex-wrap gap-2">
+            {/* Platforms */}
+            <div className="space-y-3 pt-4 border-t border-[#EAE6DC]">
+              <label className="text-xs font-extrabold uppercase tracking-wider text-[#73796E]">
+                Platforms
+              </label>
+              <div className="flex flex-wrap gap-1.5">
                 {ALL_PLATFORMS.map((plat) => {
-                  const isChecked = localPlatforms.includes(plat.label);
+                  const isSelected = localPlatforms.includes(plat.label);
                   return (
                     <button
                       type="button"
                       key={plat.label}
                       onClick={() => togglePlatform(plat.label)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all flex items-center gap-1.5 ${
-                        isChecked
-                          ? 'bg-purple-500/15 border-purple-500/40 text-purple-300 shadow-sm'
-                          : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200'
+                      className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
+                        isSelected
+                          ? 'bg-[#141613] border-[#141613] text-white'
+                          : 'bg-white border-[#EAE6DC] text-[#666B60] hover:border-[#D0C9BA]'
                       }`}
                     >
-                      <span>{plat.label}</span>
-                      {isChecked && <Check className="w-3 h-3" />}
+                      {plat.label}
                     </button>
                   );
                 })}
               </div>
-            </div>
-
-            {/* Multi-Select Tags Filter */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-300">
-                  Popular Tags & Features
-                </label>
-                {localTags.length > 0 && (
-                  <button
-                    onClick={() => setLocalTags([])}
-                    className="text-[11px] text-cyan-400 hover:underline"
-                  >
-                    Reset
-                  </button>
-                )}
-              </div>
-              <div className="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto pr-1">
-                {tags.map((tag) => {
-                  const isChecked = localTags.includes(tag.slug);
-                  return (
-                    <button
-                      type="button"
-                      key={tag.id}
-                      onClick={() => toggleTag(tag.slug)}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-all flex items-center gap-1.5 ${
-                        isChecked
-                          ? 'bg-indigo-500/20 border-indigo-500/50 text-indigo-300 shadow-sm'
-                          : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200'
-                      }`}
-                    >
-                      <TagIcon className="w-2.5 h-2.5 text-slate-500" />
-                      {tag.name}
-                      {tag.tool_count !== undefined && (
-                        <span className="text-[10px] text-slate-500">
-                          ({tag.tool_count})
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Category Filter */}
-            <div className="space-y-3">
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-300">
-                Primary Category
-              </label>
-              <select
-                value={localCategory}
-                onChange={(e) => setLocalCategory(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs font-semibold text-slate-200 focus:outline-none focus:border-cyan-500"
-              >
-                <option value="">All 18 Categories</option>
-                {categories.map((c) => (
-                  <option key={c.id} value={c.slug}>
-                    {c.name} {c.tool_count ? `(${c.tool_count})` : ''}
-                  </option>
-                ))}
-              </select>
             </div>
           </div>
 
-          {/* Footer Actions */}
-          <div className="p-6 border-t border-slate-800 bg-slate-950/50 flex items-center justify-between gap-3">
+          {/* Footer Action Buttons */}
+          <div className="p-6 border-t border-[#EAE6DC] bg-white flex items-center justify-between gap-3">
             <button
               type="button"
               onClick={handleReset}
-              className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-slate-200 hover:bg-slate-800/80 transition-colors"
+              className="flex items-center gap-1.5 px-4 py-2.5 rounded-full text-xs font-semibold text-[#73796E] hover:text-[#141613] hover:bg-[#F5F3ED] transition-colors"
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              Reset All
+              <span>Reset</span>
             </button>
 
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleApply}
-                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 text-xs font-bold shadow-lg shadow-cyan-500/20 transition-all hover:scale-105"
-              >
-                Apply Filters
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={handleApply}
+              className="btn-interactive px-6 py-2.5 rounded-full bg-[#141613] hover:bg-[#2A2E27] text-white font-bold text-xs shadow-md"
+            >
+              Apply Filters
+            </button>
           </div>
         </div>
       </div>

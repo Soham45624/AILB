@@ -68,7 +68,7 @@ function SignupForm() {
       if (error) {
         if (error.message.includes('not enabled') || error.message.includes('Unsupported provider')) {
           setError(
-            'Google Sign-Up is not enabled yet in your Supabase project. Please register with email/password below, or enable Google Provider in Supabase Dashboard (Authentication -> Providers -> Google).'
+            'Google Sign-In is not enabled in your Supabase project. Please sign up with email/password below.'
           );
         } else {
           setError(error.message);
@@ -82,33 +82,33 @@ function SignupForm() {
   };
 
   return (
-    <div className="w-full max-w-md p-8 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-2xl backdrop-blur-xl relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-48 h-48 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-
+    <div className="w-full max-w-md p-8 rounded-3xl bg-white border border-[#EAE6DC] shadow-lg relative overflow-hidden">
       {/* Header */}
       <div className="text-center space-y-2 mb-6">
-        <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-500 via-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/20 mb-2">
-          <Sparkles className="w-6 h-6" />
+        <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#5A7840] text-white shadow-sm mb-2">
+          <Sparkles className="w-6 h-6 fill-white" />
         </div>
-        <h1 className="text-2xl font-extrabold text-slate-100 tracking-tight">Create an Account</h1>
-        <p className="text-xs text-slate-400">
-          Join thousands of developers, researchers, and creators discovering the best AI tools.
+        <h1 className="font-serif-heading text-2xl sm:text-3xl font-normal text-[#141613] tracking-tight">
+          Create an Account
+        </h1>
+        <p className="text-xs text-[#666B60]">
+          Join AILIB to curate your library, submit tools, and review AI applications.
         </p>
       </div>
 
-      {/* Error Alert */}
-      {error && (
-        <div className="mb-5 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-start gap-2.5 animate-fade-in">
-          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-400" />
-          <span className="leading-relaxed">{error}</span>
+      {/* Success Notification */}
+      {success && (
+        <div className="mb-5 p-4 rounded-xl bg-[#EDF7EE] border border-[#CCE8CD] text-[#1E7E34] text-xs flex items-start gap-2.5 animate-fade-in shadow-sm">
+          <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
+          <span>Account created successfully! Redirecting you now...</span>
         </div>
       )}
 
-      {/* Success Alert */}
-      {success && (
-        <div className="mb-5 p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2.5 animate-fade-in">
-          <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
-          <span>Account created successfully! Redirecting...</span>
+      {/* Error Alert */}
+      {error && (
+        <div className="mb-5 p-3.5 rounded-xl bg-[#FDF0F2] border border-[#F8D2D7] text-[#D73A49] text-xs flex items-start gap-2.5 animate-fade-in">
+          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+          <span className="leading-relaxed">{error}</span>
         </div>
       )}
 
@@ -116,8 +116,8 @@ function SignupForm() {
       <button
         type="button"
         onClick={handleGoogleSignUp}
-        disabled={googleLoading || loading}
-        className="w-full py-2.5 px-4 rounded-xl bg-slate-950 hover:bg-slate-850 border border-slate-800 hover:border-slate-700 text-slate-200 text-xs font-semibold transition-all flex items-center justify-center gap-2 mb-5 disabled:opacity-50"
+        disabled={googleLoading}
+        className="w-full py-2.5 px-4 rounded-full bg-white hover:bg-[#F5F3ED] border border-[#E2DDD2] text-[#141613] font-semibold text-xs transition-colors flex items-center justify-center gap-2 mb-4 shadow-sm"
       >
         <svg className="w-4 h-4" viewBox="0 0 24 24">
           <path
@@ -137,109 +137,103 @@ function SignupForm() {
             d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
           />
         </svg>
-        <span>{googleLoading ? 'Connecting to Google...' : 'Sign up with Google'}</span>
+        <span>{googleLoading ? 'Connecting...' : 'Sign up with Google'}</span>
       </button>
 
-      {/* Divider */}
-      <div className="relative flex items-center justify-center mb-5">
-        <div className="border-t border-slate-800 w-full" />
-        <span className="bg-slate-900 px-3 text-[11px] uppercase font-bold text-slate-500 tracking-wider">
-          Or with email
-        </span>
-        <div className="border-t border-slate-800 w-full" />
+      <div className="flex items-center gap-3 my-4">
+        <div className="flex-1 h-px bg-[#EAE6DC]" />
+        <span className="text-[10px] font-bold uppercase text-[#9FA59A]">or email</span>
+        <div className="flex-1 h-px bg-[#EAE6DC]" />
       </div>
 
-      {/* Signup Form */}
-      <form onSubmit={handleSubmit} className="space-y-3.5">
+      {/* Sign Up Form */}
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
-              Username <span className="text-rose-400">*</span>
+            <label className="block text-xs font-bold uppercase tracking-wider text-[#73796E] mb-1.5">
+              Username
             </label>
             <div className="relative">
-              <User className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+              <User className="w-3.5 h-3.5 text-[#9FA59A] absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 required
-                placeholder="dev_user"
+                placeholder="janedoe"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-cyan-500/60 focus:ring-2 focus:ring-cyan-500/20"
+                className="w-full pl-9 pr-3 py-2 rounded-full bg-white border border-[#E2DDD2] text-xs text-[#141613] placeholder:text-[#94998E] focus:outline-none focus:border-[#141613]"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+            <label className="block text-xs font-bold uppercase tracking-wider text-[#73796E] mb-1.5">
               Display Name
             </label>
             <input
               type="text"
-              placeholder="John Doe"
+              placeholder="Jane Doe"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-cyan-500/60 focus:ring-2 focus:ring-cyan-500/20"
+              className="w-full px-3.5 py-2 rounded-full bg-white border border-[#E2DDD2] text-xs text-[#141613] placeholder:text-[#94998E] focus:outline-none focus:border-[#141613]"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
-            Email Address <span className="text-rose-400">*</span>
+          <label className="block text-xs font-bold uppercase tracking-wider text-[#73796E] mb-1.5">
+            Email Address
           </label>
           <div className="relative">
-            <Mail className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Mail className="w-4 h-4 text-[#9FA59A] absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="email"
               required
               placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-cyan-500/60 focus:ring-2 focus:ring-cyan-500/20"
+              className="w-full pl-10 pr-4 py-2.5 rounded-full bg-white border border-[#E2DDD2] text-xs sm:text-sm text-[#141613] placeholder:text-[#94998E] focus:outline-none focus:border-[#141613]"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
-            Password <span className="text-rose-400">*</span>
+          <label className="block text-xs font-bold uppercase tracking-wider text-[#73796E] mb-1.5">
+            Password (min 6 characters)
           </label>
           <div className="relative">
-            <Lock className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Lock className="w-4 h-4 text-[#9FA59A] absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="password"
               required
               minLength={6}
-              placeholder="At least 6 characters"
+              placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-cyan-500/60 focus:ring-2 focus:ring-cyan-500/20"
+              className="w-full pl-10 pr-4 py-2.5 rounded-full bg-white border border-[#E2DDD2] text-xs sm:text-sm text-[#141613] placeholder:text-[#94998E] focus:outline-none focus:border-[#141613]"
             />
           </div>
         </div>
 
         <button
           type="submit"
-          disabled={loading}
-          className="w-full py-3 mt-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-xs shadow-lg shadow-cyan-500/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+          disabled={loading || success}
+          className="btn-interactive w-full py-3 rounded-full bg-[#141613] hover:bg-[#2A2E27] text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-1.5 disabled:opacity-50 mt-2"
         >
           {loading ? (
-            'Creating Account...'
+            'Creating account...'
           ) : (
             <>
-              <UserPlus className="w-4 h-4" /> Sign Up
+              <UserPlus className="w-3.5 h-3.5" />
+              <span>Create Account</span>
             </>
           )}
         </button>
       </form>
 
-      {/* Footer link */}
-      <div className="mt-6 text-center text-xs text-slate-400">
+      <div className="mt-6 text-center text-xs text-[#73796E]">
         Already have an account?{' '}
-        <Link
-          href={`/login${redirect !== '/dashboard' ? `?redirect=${encodeURIComponent(redirect)}` : ''}`}
-          className="text-cyan-400 hover:underline font-bold"
-        >
+        <Link href="/login" className="text-[#141613] font-bold hover:underline">
           Sign In
         </Link>
       </div>
@@ -249,13 +243,15 @@ function SignupForm() {
 
 export default function SignupPage() {
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between selection:bg-cyan-500 selection:text-slate-950">
+    <div className="min-h-screen bg-[#FBF9F5] text-[#141613] selection:bg-[#ECE8DF] selection:text-[#141613] flex flex-col justify-between">
       <Navbar />
-      <main className="flex items-center justify-center px-4 py-16">
-        <Suspense fallback={<div className="text-slate-400 text-xs">Loading sign up...</div>}>
+
+      <main className="flex-1 flex items-center justify-center p-4 sm:p-6 py-12">
+        <Suspense fallback={<div className="text-xs text-[#73796E]">Loading sign up...</div>}>
           <SignupForm />
         </Suspense>
       </main>
+
       <Footer />
     </div>
   );

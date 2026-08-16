@@ -8,7 +8,6 @@ import {
   AlertCircle,
   CheckCircle2,
   UserCheck,
-  Tag as TagIcon,
   Plus,
   Hash,
 } from 'lucide-react';
@@ -31,7 +30,7 @@ const POPULAR_SUGGESTED_TAGS = [
   'voice cloning',
   'open source',
   'api access',
-  'workflow automation',
+  'productivity',
 ];
 
 export function AddToolModal({ isOpen, onClose }: AddToolModalProps) {
@@ -49,7 +48,6 @@ export function AddToolModal({ isOpen, onClose }: AddToolModalProps) {
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
-  // Check auth state whenever modal opens
   useEffect(() => {
     if (isOpen) {
       setCheckingAuth(true);
@@ -71,7 +69,6 @@ export function AddToolModal({ isOpen, onClose }: AddToolModalProps) {
     const raw = (tagToAdd || tagInput).trim();
     if (!raw) return;
 
-    // Clean leading # and spaces
     const cleanTag = raw.replace(/^#+/, '').trim();
     if (cleanTag && !tags.some((t) => t.toLowerCase() === cleanTag.toLowerCase())) {
       setTags([...tags, cleanTag]);
@@ -100,26 +97,20 @@ export function AddToolModal({ isOpen, onClose }: AddToolModalProps) {
     formData.append('url', url);
     formData.append('description', description);
     formData.append('pricing', pricing);
-    formData.append('tags', JSON.stringify(tags));
+    if (tags.length > 0) formData.append('tags', JSON.stringify(tags));
 
-    try {
-      console.log('Dispatching submitToolAction with tags:', tags);
-      const response = await submitToolAction(formData);
+    const res = await submitToolAction(formData);
+    setLoading(false);
 
-      if (!response.success) {
-        console.error('Submission failed with error:', response.error);
-        setError(response.error || 'Failed to submit tool. Please try again.');
-        setLoading(false);
-        return;
-      }
-
-      console.log('Submission confirmed created in Supabase:', response.submission);
-      setSubmissionData(response.submission);
-      setLoading(false);
-    } catch (err: any) {
-      console.error('Client submission error:', err);
-      setError(err.message || 'An unexpected error occurred during submission.');
-      setLoading(false);
+    if (!res.success) {
+      setError(res.error || 'Failed to submit tool.');
+    } else {
+      setSubmissionData({
+        id: res.submission?.id,
+        tool_name: name,
+        status: res.submission?.status || 'pending',
+        tags,
+      });
     }
   };
 
@@ -129,7 +120,6 @@ export function AddToolModal({ isOpen, onClose }: AddToolModalProps) {
     setDescription('');
     setPricing('free');
     setTags([]);
-    setTagInput('');
     setError(null);
     setSubmissionData(null);
     onClose();
@@ -137,57 +127,44 @@ export function AddToolModal({ isOpen, onClose }: AddToolModalProps) {
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in overflow-y-auto">
-        <div className="relative w-full max-w-lg rounded-2xl bg-slate-900 border border-slate-800 shadow-2xl p-6 overflow-hidden my-8">
-          {/* Decorative glow */}
-          <div className="absolute top-0 right-0 w-48 h-48 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
+        <div className="relative w-full max-w-lg rounded-3xl bg-[#FBF9F5] border border-[#EAE6DC] shadow-2xl p-6 overflow-hidden">
           {/* Header */}
-          <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+          <div className="flex items-center justify-between pb-4 border-b border-[#EAE6DC]">
             <div className="flex items-center gap-2.5">
-              <div className="p-2 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
-                <Sparkles className="w-5 h-5" />
+              <div className="p-2 rounded-full bg-[#EDF7EE] text-[#1E7E34]">
+                <Sparkles className="w-4 h-4" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-slate-100">Submit an AI Tool</h3>
-                <p className="text-xs text-slate-400">
-                  Add a new AI project to the Supabase moderation queue
-                </p>
+                <h3 className="text-base font-bold text-[#141613]">Submit AI Tool</h3>
+                <p className="text-xs text-[#73796E]">Share a tool with the AILIB directory</p>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-100 hover:bg-slate-800 transition-colors"
+              className="p-1.5 rounded-full text-[#73796E] hover:text-[#141613] hover:bg-[#F5F3ED] transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
-          {/* User Auth Status Banner */}
+          {/* User Auth Banner */}
           {!checkingAuth && (
-            <div className="mt-4">
+            <div className="mt-4 p-3 rounded-xl bg-white border border-[#EAE6DC] flex items-center justify-between text-xs shadow-sm">
               {currentUser ? (
-                <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <UserCheck className="w-4 h-4 text-emerald-400" />
-                    <span>
-                      Submitting as <strong className="font-semibold">{currentUser.email}</strong>
-                    </span>
-                  </div>
-                  <span className="text-[10px] bg-emerald-500/20 px-2 py-0.5 rounded-full font-bold uppercase">
-                    Authenticated
+                <div className="flex items-center gap-2 text-[#1E7E34]">
+                  <UserCheck className="w-4 h-4" />
+                  <span>
+                    Submitting as <strong className="text-[#141613]">{currentUser.email}</strong>
                   </span>
                 </div>
               ) : (
-                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-2">
-                    <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
-                    <span>Please sign in to submit a tool.</span>
-                  </div>
+                <div className="flex items-center justify-between w-full">
+                  <span className="text-[#73796E]">Sign in to track your submissions:</span>
                   <button
                     type="button"
                     onClick={() => setIsAuthModalOpen(true)}
-                    className="px-3 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shrink-0 transition-colors"
+                    className="text-[#141613] font-bold hover:underline"
                   >
                     Sign In
                   </button>
@@ -196,12 +173,12 @@ export function AddToolModal({ isOpen, onClose }: AddToolModalProps) {
             </div>
           )}
 
-          {/* Real Error Message Banner */}
+          {/* Error Alert */}
           {error && (
-            <div className="mt-4 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-start gap-2.5 animate-fade-in">
-              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-400" />
+            <div className="mt-4 p-3.5 rounded-xl bg-[#FDF0F2] border border-[#F8D2D7] text-[#D73A49] text-xs flex items-start gap-2.5 animate-fade-in">
+              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
               <div className="space-y-1">
-                <p className="font-bold text-rose-200">Submission Error</p>
+                <p className="font-bold">Submission Error</p>
                 <p className="leading-relaxed">{error}</p>
               </div>
             </div>
@@ -210,31 +187,17 @@ export function AddToolModal({ isOpen, onClose }: AddToolModalProps) {
           {/* Success State */}
           {submissionData ? (
             <div className="py-8 text-center space-y-4">
-              <div className="w-14 h-14 mx-auto rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center">
+              <div className="w-14 h-14 mx-auto rounded-full bg-[#EDF7EE] text-[#1E7E34] flex items-center justify-center shadow-sm">
                 <CheckCircle2 className="w-8 h-8" />
               </div>
-              <h4 className="text-xl font-bold text-slate-100">Tool Submitted to Supabase!</h4>
-              <p className="text-sm text-slate-400 max-w-sm mx-auto">
-                Your submission for <strong className="text-cyan-400">{submissionData.tool_name}</strong> was recorded in the database (Status: <span className="font-semibold text-amber-400">{submissionData.status}</span>).
+              <h4 className="text-xl font-bold text-[#141613]">Tool Submitted!</h4>
+              <p className="text-xs sm:text-sm text-[#666B60] max-w-sm mx-auto">
+                Your submission for <strong className="text-[#141613]">{submissionData.tool_name}</strong> was recorded for moderator review.
               </p>
 
-              {/* Tag confirmation chips */}
-              {submissionData.tags && submissionData.tags.length > 0 && (
-                <div className="flex flex-wrap justify-center gap-1.5 pt-1">
-                  {submissionData.tags.map((t: string) => (
-                    <span key={t} className="text-xs px-2.5 py-0.5 rounded-lg bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
-                      #{t}
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              <div className="text-xs text-slate-500 bg-slate-950 p-2.5 rounded-xl max-w-xs mx-auto border border-slate-800">
-                Submission ID: {submissionData.id}
-              </div>
               <button
                 onClick={handleReset}
-                className="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-100 text-sm font-semibold transition-colors"
+                className="px-6 py-2.5 rounded-full bg-[#141613] text-white text-xs font-bold shadow-md"
               >
                 Done
               </button>
@@ -242,8 +205,8 @@ export function AddToolModal({ isOpen, onClose }: AddToolModalProps) {
           ) : (
             <form onSubmit={handleSubmit} className="mt-4 space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                  Tool Name <span className="text-rose-400">*</span>
+                <label className="block text-[11px] font-bold text-[#73796E] uppercase tracking-wider mb-1">
+                  Tool Name <span className="text-[#D73A49]">*</span>
                 </label>
                 <input
                   type="text"
@@ -251,13 +214,13 @@ export function AddToolModal({ isOpen, onClose }: AddToolModalProps) {
                   placeholder="e.g. ChatCanvas AI"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all"
+                  className="w-full px-3.5 py-2 rounded-xl bg-white border border-[#E2DDD2] text-xs text-[#141613] placeholder:text-[#94998E] focus:outline-none focus:border-[#141613]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                  Website URL <span className="text-rose-400">*</span>
+                <label className="block text-[11px] font-bold text-[#73796E] uppercase tracking-wider mb-1">
+                  Website URL <span className="text-[#D73A49]">*</span>
                 </label>
                 <input
                   type="url"
@@ -265,18 +228,18 @@ export function AddToolModal({ isOpen, onClose }: AddToolModalProps) {
                   placeholder="https://example.com"
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all"
+                  className="w-full px-3.5 py-2 rounded-xl bg-white border border-[#E2DDD2] text-xs text-[#141613] placeholder:text-[#94998E] focus:outline-none focus:border-[#141613]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                <label className="block text-[11px] font-bold text-[#73796E] uppercase tracking-wider mb-1">
                   Pricing Model
                 </label>
                 <select
                   value={pricing}
                   onChange={(e) => setPricing(e.target.value)}
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 text-sm text-slate-100 focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all"
+                  className="w-full px-3.5 py-2 rounded-xl bg-white border border-[#E2DDD2] text-xs text-[#141613] focus:outline-none focus:border-[#141613]"
                 >
                   <option value="free">Free</option>
                   <option value="freemium">Freemium</option>
@@ -287,7 +250,7 @@ export function AddToolModal({ isOpen, onClose }: AddToolModalProps) {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                <label className="block text-[11px] font-bold text-[#73796E] uppercase tracking-wider mb-1">
                   Short Description
                 </label>
                 <textarea
@@ -295,36 +258,28 @@ export function AddToolModal({ isOpen, onClose }: AddToolModalProps) {
                   placeholder="Briefly describe what this AI tool does..."
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all resize-none"
+                  className="w-full px-3.5 py-2 rounded-xl bg-white border border-[#E2DDD2] text-xs text-[#141613] placeholder:text-[#94998E] focus:outline-none focus:border-[#141613] resize-none"
                 />
               </div>
 
-              {/* CUSTOM #TAGS INPUT SECTION */}
+              {/* Tags */}
               <div className="space-y-2 pt-1">
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center justify-between">
-                  <span className="flex items-center gap-1">
-                    <Hash className="w-3.5 h-3.5 text-cyan-400" />
-                    Custom Tags & Keywords
-                  </span>
-                  <span className="text-[10px] text-slate-500 font-normal">
-                    Press Enter or comma to add
-                  </span>
+                <label className="block text-[11px] font-bold text-[#73796E] uppercase tracking-wider">
+                  Tags &amp; Keywords
                 </label>
 
-                {/* Active Tag Chips */}
                 {tags.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 pb-1">
                     {tags.map((t) => (
                       <span
                         key={t}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 text-xs font-semibold animate-fade-in"
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#EDF7EE] border border-[#CCE8CD] text-[#1E7E34] text-xs font-semibold"
                       >
                         #{t}
                         <button
                           type="button"
                           onClick={() => handleRemoveTag(t)}
-                          className="p-0.5 rounded hover:bg-cyan-500/20 text-cyan-400 hover:text-cyan-200 transition-colors"
-                          title="Remove tag"
+                          className="hover:text-black"
                         >
                           <X className="w-3 h-3" />
                         </button>
@@ -333,69 +288,45 @@ export function AddToolModal({ isOpen, onClose }: AddToolModalProps) {
                   </div>
                 )}
 
-                {/* Input with Add button */}
                 <div className="flex items-center gap-2">
                   <div className="relative flex-1">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-bold">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9FA59A] text-xs font-bold">
                       #
                     </span>
                     <input
                       type="text"
-                      placeholder="e.g. editing, image generator, copilot..."
+                      placeholder="e.g. image generator, copilot..."
                       value={tagInput}
                       onChange={(e) => setTagInput(e.target.value)}
                       onKeyDown={handleKeyDown}
-                      className="w-full pl-7 pr-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-cyan-500/60 focus:ring-2 focus:ring-cyan-500/20 transition-all"
+                      className="w-full pl-7 pr-3 py-2 rounded-xl bg-white border border-[#E2DDD2] text-xs text-[#141613] placeholder:text-[#94998E] focus:outline-none focus:border-[#141613]"
                     />
                   </div>
                   <button
                     type="button"
                     onClick={() => handleAddTag()}
-                    className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition-colors shrink-0 flex items-center gap-1"
+                    className="px-3.5 py-2 rounded-xl bg-[#F5F3ED] hover:bg-[#ECE8DF] text-[#141613] text-xs font-semibold border border-[#EAE6DC] transition-colors shrink-0 flex items-center gap-1"
                   >
-                    <Plus className="w-3.5 h-3.5 text-cyan-400" />
-                    Add Tag
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Add</span>
                   </button>
-                </div>
-
-                {/* Suggested Tags Pill Bar */}
-                <div className="pt-1 flex items-center gap-1.5 flex-wrap">
-                  <span className="text-[10px] text-slate-500 font-medium">Quick suggestions:</span>
-                  {POPULAR_SUGGESTED_TAGS.map((sug) => {
-                    const isAdded = tags.some((t) => t.toLowerCase() === sug.toLowerCase());
-                    return (
-                      <button
-                        type="button"
-                        key={sug}
-                        disabled={isAdded}
-                        onClick={() => handleAddTag(sug)}
-                        className={`text-[11px] px-2 py-0.5 rounded-md border transition-all ${
-                          isAdded
-                            ? 'bg-slate-950 border-slate-850 text-slate-600 cursor-not-allowed'
-                            : 'bg-slate-950/80 border-slate-800 text-slate-400 hover:text-cyan-300 hover:border-cyan-500/40'
-                        }`}
-                      >
-                        #{sug}
-                      </button>
-                    );
-                  })}
                 </div>
               </div>
 
-              <div className="pt-3 flex items-center justify-end gap-3 border-t border-slate-800/80">
+              <div className="pt-3 flex items-center justify-end gap-3 border-t border-[#EAE6DC]">
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-800 text-slate-300 text-xs font-semibold transition-colors"
+                  className="px-4 py-2 rounded-full bg-[#F5F3ED] hover:bg-[#ECE8DF] text-[#141613] text-xs font-semibold transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex items-center gap-2 px-5 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 text-xs font-bold shadow-md shadow-cyan-500/20 transition-all disabled:opacity-50"
+                  className="btn-interactive flex items-center gap-2 px-5 py-2 rounded-full bg-[#141613] hover:bg-[#2A2E27] text-white text-xs font-bold shadow-md transition-all disabled:opacity-50"
                 >
-                  {loading ? 'Submitting to Supabase...' : 'Submit Tool'}
+                  {loading ? 'Submitting...' : 'Submit Tool'}
                   <Send className="w-3.5 h-3.5" />
                 </button>
               </div>
@@ -404,7 +335,6 @@ export function AddToolModal({ isOpen, onClose }: AddToolModalProps) {
         </div>
       </div>
 
-      {/* Auth Modal if user needs to sign in */}
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}

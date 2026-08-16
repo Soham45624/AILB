@@ -3,7 +3,7 @@
 import { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Sparkles, LogIn, Lock, Mail, AlertCircle, CheckCircle2, Info } from 'lucide-react';
+import { Sparkles, LogIn, Lock, Mail, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { signInAction } from '@/app/actions/auth';
 import { createClient } from '@/lib/supabase/client';
 import { Navbar } from '@/components/layout/Navbar';
@@ -65,7 +65,7 @@ function LoginForm() {
       if (error) {
         if (error.message.includes('not enabled') || error.message.includes('Unsupported provider')) {
           setError(
-            'Google Sign-In is not enabled yet in your Supabase project. Please sign in with email/password below, or enable Google Provider in Supabase Dashboard (Authentication -> Providers -> Google).'
+            'Google Sign-In is not enabled in your Supabase project. Please sign in with email/password below.'
           );
         } else {
           setError(error.message);
@@ -79,24 +79,24 @@ function LoginForm() {
   };
 
   return (
-    <div className="w-full max-w-md p-8 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-2xl backdrop-blur-xl relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-48 h-48 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-
+    <div className="w-full max-w-md p-8 rounded-3xl bg-white border border-[#EAE6DC] shadow-lg relative overflow-hidden">
       {/* Header */}
       <div className="text-center space-y-2 mb-6">
-        <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-500 via-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/20 mb-2">
-          <Sparkles className="w-6 h-6" />
+        <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#5A7840] text-white shadow-sm mb-2">
+          <Sparkles className="w-6 h-6 fill-white" />
         </div>
-        <h1 className="text-2xl font-extrabold text-slate-100 tracking-tight">Welcome Back</h1>
-        <p className="text-xs text-slate-400">
-          Sign in to your account to save tools, post reviews, and submit projects.
+        <h1 className="font-serif-heading text-2xl sm:text-3xl font-normal text-[#141613] tracking-tight">
+          Welcome Back
+        </h1>
+        <p className="text-xs text-[#666B60]">
+          Sign in to your account to save tools, manage your library, and post reviews.
         </p>
       </div>
 
       {/* Error Alert */}
       {error && (
-        <div className="mb-5 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-start gap-2.5 animate-fade-in">
-          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-400" />
+        <div className="mb-5 p-3.5 rounded-xl bg-[#FDF0F2] border border-[#F8D2D7] text-[#D73A49] text-xs flex items-start gap-2.5 animate-fade-in">
+          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
           <span className="leading-relaxed">{error}</span>
         </div>
       )}
@@ -105,8 +105,8 @@ function LoginForm() {
       <button
         type="button"
         onClick={handleGoogleSignIn}
-        disabled={googleLoading || loading}
-        className="w-full py-2.5 px-4 rounded-xl bg-slate-950 hover:bg-slate-850 border border-slate-800 hover:border-slate-700 text-slate-200 text-xs font-semibold transition-all flex items-center justify-center gap-2 mb-5 disabled:opacity-50"
+        disabled={googleLoading}
+        className="w-full py-2.5 px-4 rounded-full bg-white hover:bg-[#F5F3ED] border border-[#E2DDD2] text-[#141613] font-semibold text-xs transition-colors flex items-center justify-center gap-2 mb-4 shadow-sm"
       >
         <svg className="w-4 h-4" viewBox="0 0 24 24">
           <path
@@ -126,58 +126,47 @@ function LoginForm() {
             d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
           />
         </svg>
-        <span>{googleLoading ? 'Connecting to Google...' : 'Continue with Google'}</span>
+        <span>{googleLoading ? 'Connecting...' : 'Continue with Google'}</span>
       </button>
 
-      {/* Divider */}
-      <div className="relative flex items-center justify-center mb-5">
-        <div className="border-t border-slate-800 w-full" />
-        <span className="bg-slate-900 px-3 text-[11px] uppercase font-bold text-slate-500 tracking-wider">
-          Or with email
-        </span>
-        <div className="border-t border-slate-800 w-full" />
+      <div className="flex items-center gap-3 my-4">
+        <div className="flex-1 h-px bg-[#EAE6DC]" />
+        <span className="text-[10px] font-bold uppercase text-[#9FA59A]">or email</span>
+        <div className="flex-1 h-px bg-[#EAE6DC]" />
       </div>
 
-      {/* Email Form */}
+      {/* Email / Password Form */}
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+          <label className="block text-xs font-bold uppercase tracking-wider text-[#73796E] mb-1.5">
             Email Address
           </label>
           <div className="relative">
-            <Mail className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Mail className="w-4 h-4 text-[#9FA59A] absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="email"
               required
               placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-cyan-500/60 focus:ring-2 focus:ring-cyan-500/20 transition-all"
+              className="w-full pl-10 pr-4 py-2.5 rounded-full bg-white border border-[#E2DDD2] text-xs sm:text-sm text-[#141613] placeholder:text-[#94998E] focus:outline-none focus:border-[#141613] transition-colors"
             />
           </div>
         </div>
 
         <div>
-          <div className="flex items-center justify-between mb-1.5">
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
-              Password
-            </label>
-            <Link
-              href="/forgot-password"
-              className="text-[11px] text-cyan-400 hover:underline font-medium"
-            >
-              Forgot password?
-            </Link>
-          </div>
+          <label className="block text-xs font-bold uppercase tracking-wider text-[#73796E] mb-1.5">
+            Password
+          </label>
           <div className="relative">
-            <Lock className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Lock className="w-4 h-4 text-[#9FA59A] absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="password"
               required
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-cyan-500/60 focus:ring-2 focus:ring-cyan-500/20 transition-all"
+              className="w-full pl-10 pr-4 py-2.5 rounded-full bg-white border border-[#E2DDD2] text-xs sm:text-sm text-[#141613] placeholder:text-[#94998E] focus:outline-none focus:border-[#141613] transition-colors"
             />
           </div>
         </div>
@@ -185,26 +174,23 @@ function LoginForm() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-xs shadow-lg shadow-cyan-500/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+          className="btn-interactive w-full py-3 rounded-full bg-[#141613] hover:bg-[#2A2E27] text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-1.5 disabled:opacity-50 mt-2"
         >
           {loading ? (
             'Signing in...'
           ) : (
             <>
-              <LogIn className="w-4 h-4" /> Sign In
+              <LogIn className="w-3.5 h-3.5" />
+              <span>Sign In</span>
             </>
           )}
         </button>
       </form>
 
-      {/* Footer link */}
-      <div className="mt-6 text-center text-xs text-slate-400">
+      <div className="mt-6 text-center text-xs text-[#73796E]">
         Don&apos;t have an account?{' '}
-        <Link
-          href={`/signup${redirect !== '/dashboard' ? `?redirect=${encodeURIComponent(redirect)}` : ''}`}
-          className="text-cyan-400 hover:underline font-bold"
-        >
-          Create one now
+        <Link href="/signup" className="text-[#141613] font-bold hover:underline">
+          Create Account
         </Link>
       </div>
     </div>
@@ -213,13 +199,15 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between selection:bg-cyan-500 selection:text-slate-950">
+    <div className="min-h-screen bg-[#FBF9F5] text-[#141613] selection:bg-[#ECE8DF] selection:text-[#141613] flex flex-col justify-between">
       <Navbar />
-      <main className="flex items-center justify-center px-4 py-16">
-        <Suspense fallback={<div className="text-slate-400 text-xs">Loading sign in...</div>}>
+
+      <main className="flex-1 flex items-center justify-center p-4 sm:p-6 py-12">
+        <Suspense fallback={<div className="text-xs text-[#73796E]">Loading sign in...</div>}>
           <LoginForm />
         </Suspense>
       </main>
+
       <Footer />
     </div>
   );
