@@ -127,7 +127,7 @@ export function AddToolModal({ isOpen, onClose }: AddToolModalProps) {
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#141613]/25 backdrop-blur-[6px] animate-fade-in">
         <div className="relative w-full max-w-lg rounded-3xl bg-[#FBF9F5] border border-[#EAE6DC] shadow-2xl p-6 overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between pb-4 border-b border-[#EAE6DC]">

@@ -153,7 +153,7 @@ export function ShareToAILIBModal({
     <div
       ref={overlayRef}
       onClick={handleOverlayClick}
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/40 backdrop-blur-sm animate-fade-in"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-[#141613]/25 backdrop-blur-[6px] animate-fade-in"
     >
       <div className="relative w-full sm:max-w-xl max-h-[92dvh] overflow-y-auto rounded-t-3xl sm:rounded-3xl bg-[#FBF9F5] border border-[#EAE6DC] shadow-2xl flex flex-col">
         {/* Header */}

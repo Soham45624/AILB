@@ -930,8 +930,8 @@ export function FinderClient() {
 
       {/* ── REVIEW BEFORE SUBMISSION MODAL ── */}
       {isReviewOpen && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-[#FBF9F5] border border-[#EAE6DC] rounded-3xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-scale-up">
+        <div className="fixed inset-0 z-50 bg-[#141613]/25 backdrop-blur-[6px] flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white border border-[#EAE6DC] rounded-3xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-[0_24px_80px_rgba(20,22,19,0.12)] overflow-hidden animate-scale-up">
             {/* Modal Header */}
             <div className="p-6 border-b border-[#EAE6DC] bg-white flex items-center justify-between">
               <div>

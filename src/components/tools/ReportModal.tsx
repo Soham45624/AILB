@@ -69,7 +69,7 @@ export function ReportButton({ reportType, targetId, targetName }: ReportButtonP
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#141613]/25 backdrop-blur-[6px] animate-fade-in">
           <div className="w-full max-w-md p-6 rounded-3xl bg-[#FBF9F5] border border-[#EAE6DC] shadow-2xl space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-[#EAE6DC]">
               <div className="flex items-center gap-2">

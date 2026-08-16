@@ -124,7 +124,7 @@ export function FilterDrawer({
     <div className="fixed inset-0 z-50 overflow-hidden">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
+        className="absolute inset-0 bg-[#141613]/20 backdrop-blur-[4px] transition-opacity"
         onClick={onClose}
       />
 
