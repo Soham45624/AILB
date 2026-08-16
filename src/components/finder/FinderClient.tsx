@@ -26,6 +26,7 @@ import {
   ArrowRight,
   MessageSquare,
   Trash2,
+  Clock,
 } from 'lucide-react';
 import {
   findAiToolsAction,
@@ -808,16 +809,22 @@ export function FinderClient() {
             {discoveredTools.map((tool) => {
               const isSelected = Boolean(selectedWebToolIds[tool.id]);
               const webBrand = getBrandPalette(tool.name);
-              const webInitials = getInitials(tool.name);
               const isPublished = Boolean(tool.is_in_library);
+              const isPending = Boolean(tool.is_pending);
+              const isBlocked = isPublished || isPending; // not selectable
+
+              // Pick accent colour based on state
+              const accentColor = isPublished ? '#1E7E34' : isPending ? '#B45309' : webBrand.bg;
 
               return (
                 <div
                   key={tool.id}
-                  onClick={() => !isPublished && handleToggleSelectWebTool(tool.id)}
+                  onClick={() => !isBlocked && handleToggleSelectWebTool(tool.id)}
                   className={`relative flex flex-col justify-between rounded-2xl border overflow-hidden p-5 space-y-4 transition-all duration-200 ${
                     isPublished
                       ? 'bg-[#F7F9F7] border-[#C8E6C9] cursor-default'
+                      : isPending
+                      ? 'bg-[#FFFBF0] border-[#FCD34D] cursor-default'
                       : isSelected
                       ? 'bg-[#FAFCF9] border-[#A3D1A9] shadow-[0_12px_40px_rgba(0,0,0,0.09)] -translate-y-1 cursor-pointer'
                       : 'bg-white hover:border-[#D0C9BA] border-[#EAE6DC] hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 cursor-pointer'
@@ -825,8 +832,8 @@ export function FinderClient() {
                 >
                   {/* ── TOP ACCENT BAR ── */}
                   <div
-                    style={{ backgroundColor: isPublished ? '#1E7E34' : webBrand.bg }}
-                    className={`absolute inset-x-0 top-0 h-[3.5px] transition-opacity duration-200 ${isSelected || isPublished ? 'opacity-100' : 'opacity-0'}`}
+                    style={{ backgroundColor: accentColor }}
+                    className={`absolute inset-x-0 top-0 h-[3.5px] transition-opacity duration-200 ${isSelected || isBlocked ? 'opacity-100' : 'opacity-0'}`}
                   />
 
                   <div className="flex items-start justify-between gap-3">
@@ -836,6 +843,10 @@ export function FinderClient() {
                         {isPublished ? (
                           <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#EDF7EE] text-[#1E7E34] border border-[#CCE8CD] shrink-0">
                             In AILIB
+                          </span>
+                        ) : isPending ? (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FEF3C7] text-[#B45309] border border-[#FCD34D] shrink-0">
+                            Under Review
                           </span>
                         ) : (
                           <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#EEF5FD] text-[#0366D6] border border-[#CDE0F9] shrink-0">
@@ -853,10 +864,14 @@ export function FinderClient() {
                       </div>
                     </div>
 
-                    {/* TOP-RIGHT: Published badge OR checkbox */}
+                    {/* TOP-RIGHT: status icon OR checkbox */}
                     {isPublished ? (
                       <div className="w-6 h-6 rounded-lg bg-[#1E7E34] text-white flex items-center justify-center shrink-0 shadow-sm">
                         <Check className="w-3.5 h-3.5 stroke-[3]" />
+                      </div>
+                    ) : isPending ? (
+                      <div className="w-6 h-6 rounded-lg bg-[#FEF3C7] border border-[#FCD34D] text-[#B45309] flex items-center justify-center shrink-0">
+                        <Clock className="w-3.5 h-3.5" />
                       </div>
                     ) : (
                       <button
@@ -877,7 +892,7 @@ export function FinderClient() {
                     )}
                   </div>
 
-                  {/* Description OR Already Published Notice */}
+                  {/* Status notice OR description */}
                   {isPublished ? (
                     <div className="p-3 rounded-xl bg-[#EDF7EE] border border-[#CCE8CD] flex items-start gap-2.5">
                       <CheckCircle2 className="w-4 h-4 text-[#1E7E34] shrink-0 mt-0.5" />
@@ -888,11 +903,21 @@ export function FinderClient() {
                         </p>
                       </div>
                     </div>
+                  ) : isPending ? (
+                    <div className="p-3 rounded-xl bg-[#FEF3C7] border border-[#FCD34D] flex items-start gap-2.5">
+                      <Clock className="w-4 h-4 text-[#B45309] shrink-0 mt-0.5" />
+                      <div className="space-y-0.5">
+                        <p className="text-xs font-bold text-[#92400E]">Already in the submission queue</p>
+                        <p className="text-[11px] text-[#B45309] leading-relaxed">
+                          This tool has already been submitted and is pending review by our team. No action needed!
+                        </p>
+                      </div>
+                    </div>
                   ) : (
                     <p className="text-xs text-[#666B60] leading-relaxed line-clamp-3">{tool.description}</p>
                   )}
 
-                  {!isPublished && (
+                  {!isBlocked && (
                     <div className="p-3 rounded-xl bg-[#FBF9F5] border border-[#EAE6DC] text-xs text-[#141613] space-y-0.5">
                       <span className="text-[10px] font-bold text-[#0366D6] uppercase tracking-wider block">
                         Why It Matches:

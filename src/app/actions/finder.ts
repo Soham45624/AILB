@@ -36,6 +36,8 @@ export interface WebDiscoveredTool {
   is_in_library?: boolean;
   /** Slug to link to the tool's detail page when is_in_library is true */
   library_slug?: string;
+  /** Set to true when this tool is already in the pending submission queue */
+  is_pending?: boolean;
 }
 
 export interface FinderResponse {
@@ -817,7 +819,13 @@ async function getExistingToolCatalog(): Promise<{
   names: Set<string>;
   domains: Set<string>;
   nameList: string[];
-  slugMap: Map<string, string>;  // lowerName|domain -> slug
+  slugMap: Map<string, string>;
+  /** Names of tools that are live and published in the tools table */
+  libraryNames: Set<string>;
+  libraryDomains: Set<string>;
+  /** Names of tools that are in the pending submission queue (not rejected) */
+  pendingNames: Set<string>;
+  pendingDomains: Set<string>;
 }> {
   try {
     const supabase = await createClient();
@@ -830,11 +838,16 @@ async function getExistingToolCatalog(): Promise<{
     const domains = new Set<string>();
     const nameList: string[] = [];
     const slugMap = new Map<string, string>();
+    const libraryNames = new Set<string>();
+    const libraryDomains = new Set<string>();
+    const pendingNames = new Set<string>();
+    const pendingDomains = new Set<string>();
 
     (toolsRes.data || []).forEach((t: { name?: string; website_url?: string; slug?: string }) => {
       if (t.name) {
         const cleanName = t.name.trim().toLowerCase();
         names.add(cleanName);
+        libraryNames.add(cleanName);
         nameList.push(t.name.trim());
         if (t.slug) slugMap.set(cleanName, t.slug);
       }
@@ -843,6 +856,7 @@ async function getExistingToolCatalog(): Promise<{
         if (norm.canonicalDomain) {
           const domain = norm.canonicalDomain.toLowerCase();
           domains.add(domain);
+          libraryDomains.add(domain);
           if (t.slug) slugMap.set(domain, t.slug);
         }
       }
@@ -852,18 +866,27 @@ async function getExistingToolCatalog(): Promise<{
       if (s.tool_name) {
         const cleanName = s.tool_name.trim().toLowerCase();
         names.add(cleanName);
+        pendingNames.add(cleanName);
         nameList.push(s.tool_name.trim());
       }
       if (s.website_url) {
         const norm = normalizeToolUrl(s.website_url);
-        if (norm.canonicalDomain) domains.add(norm.canonicalDomain.toLowerCase());
+        if (norm.canonicalDomain) {
+          const domain = norm.canonicalDomain.toLowerCase();
+          domains.add(domain);
+          pendingDomains.add(domain);
+        }
       }
     });
 
-    return { names, domains, nameList, slugMap };
+    return { names, domains, nameList, slugMap, libraryNames, libraryDomains, pendingNames, pendingDomains };
   } catch (err) {
     console.error('[Web Discovery] Error fetching existing tool catalog:', err);
-    return { names: new Set(), domains: new Set(), nameList: [], slugMap: new Map() };
+    return {
+      names: new Set(), domains: new Set(), nameList: [], slugMap: new Map(),
+      libraryNames: new Set(), libraryDomains: new Set(),
+      pendingNames: new Set(), pendingDomains: new Set(),
+    };
   }
 }
 
@@ -1001,8 +1024,12 @@ JSON Schema:
       seenBatchNames.add(lowerName);
       seenBatchDomains.add(domain);
 
-      // Check if already in the live library — include it but flag it
-      const alreadyInLibrary = catalog.names.has(lowerName) || catalog.domains.has(domain);
+      // Determine precise state: live library, pending queue, or genuinely new
+      const alreadyInLibrary =
+        catalog.libraryNames.has(lowerName) || catalog.libraryDomains.has(domain);
+      const alreadyPending =
+        !alreadyInLibrary &&
+        (catalog.pendingNames.has(lowerName) || catalog.pendingDomains.has(domain));
       const librarySlug = catalog.slugMap.get(lowerName) || catalog.slugMap.get(domain);
 
       candidates.push({
@@ -1018,6 +1045,7 @@ JSON Schema:
         why_it_matches: item.why_it_matches || 'Matches your search requirements.',
         is_in_library: alreadyInLibrary,
         library_slug: librarySlug,
+        is_pending: alreadyPending,
       });
 
       if (candidates.length >= 8) break;
