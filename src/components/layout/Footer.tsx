@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Sparkles } from 'lucide-react';
+import { AILIBLogo } from '@/components/ui/AILIBLogo';
 
 export function Footer() {
   return (
@@ -9,9 +9,7 @@ export function Footer() {
           {/* Brand Col */}
           <div className="col-span-2 md:col-span-1 space-y-3">
             <Link href="/" className="flex items-center gap-2.5 font-bold text-sm text-[#141613]">
-              <div className="w-7 h-7 rounded-full bg-[#5A7840] text-white flex items-center justify-center shadow-sm">
-                <Sparkles className="w-3.5 h-3.5 fill-white text-white" />
-              </div>
+              <AILIBLogo size={28} />
               <span className="font-extrabold text-base tracking-tight text-[#141613]">
                 AILIB
               </span>

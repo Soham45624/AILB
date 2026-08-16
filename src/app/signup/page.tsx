@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Sparkles, UserPlus, Lock, Mail, User, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { signUpAction } from '@/app/actions/auth';
+import { AILIBLogo } from '@/components/ui/AILIBLogo';
 import { createClient } from '@/lib/supabase/client';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
@@ -85,8 +86,8 @@ function SignupForm() {
     <div className="w-full max-w-md p-8 rounded-3xl bg-white border border-[#EAE6DC] shadow-lg relative overflow-hidden">
       {/* Header */}
       <div className="text-center space-y-2 mb-6">
-        <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#5A7840] text-white shadow-sm mb-2">
-          <Sparkles className="w-6 h-6 fill-white" />
+        <div className="flex justify-center mb-2">
+          <AILIBLogo size={48} />
         </div>
         <h1 className="font-serif-heading text-2xl sm:text-3xl font-normal text-[#141613] tracking-tight">
           Create an Account

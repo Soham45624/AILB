@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { X, LogIn, UserPlus, AlertCircle, CheckCircle2, Lock, Mail, User } from 'lucide-react';
 import { signInAction, signUpAction } from '@/app/actions/auth';
 import { useRouter } from 'next/navigation';
+import { AILIBLogo } from '@/components/ui/AILIBLogo';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -76,9 +77,7 @@ export function AuthModal({
         {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-[#F2EFE8]">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-full bg-[#EDF7EE] text-[#1E7E34]">
-              {mode === 'signin' ? <LogIn className="w-4 h-4" /> : <UserPlus className="w-4 h-4" />}
-            </div>
+            <AILIBLogo size={32} />
             <div>
               <h3 className="text-base font-bold text-[#141613]">
                 {mode === 'signin' ? 'Sign In to AILIB' : 'Create Account'}

@@ -16,6 +16,7 @@ import {
   X,
 } from 'lucide-react';
 import { getCurrentUserAction, signOutAction } from '@/app/actions/auth';
+import { AILIBLogo } from '@/components/ui/AILIBLogo';
 
 // Client-side in-memory cache to persist user sessions across page transitions
 let cachedUser: any = null;
@@ -99,11 +100,9 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
         {/* Left: Brand Logo + Primary Nav Links */}
         <div className="flex items-center gap-8">
-          {/* Brand Logo with Olive Green Icon */}
+          {/* Brand Logo with Official 3-Books Emblem */}
           <Link href="/" className="flex items-center gap-2.5 group shrink-0">
-            <div className="w-8 h-8 rounded-full bg-[#5A7840] text-white flex items-center justify-center shadow-sm group-hover:bg-[#4E6837] transition-colors">
-              <Sparkles className="w-4 h-4 fill-white text-white" />
-            </div>
+            <AILIBLogo size={32} />
             <span className="font-extrabold text-base tracking-tight text-[#141613]">
               AILIB
             </span>
