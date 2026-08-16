@@ -32,6 +32,10 @@ export interface WebDiscoveredTool {
   suggested_tags: string[];
   source_url?: string;
   why_it_matches: string;
+  /** Set to true when this tool is already published in the AILIB library */
+  is_in_library?: boolean;
+  /** Slug to link to the tool's detail page when is_in_library is true */
+  library_slug?: string;
 }
 
 export interface FinderResponse {
@@ -813,27 +817,34 @@ async function getExistingToolCatalog(): Promise<{
   names: Set<string>;
   domains: Set<string>;
   nameList: string[];
+  slugMap: Map<string, string>;  // lowerName|domain -> slug
 }> {
   try {
     const supabase = await createClient();
     const [toolsRes, subRes] = await Promise.all([
-      supabase.from('tools').select('name, website_url'),
+      supabase.from('tools').select('name, website_url, slug'),
       supabase.from('submissions').select('tool_name, website_url').neq('status', 'rejected'),
     ]);
 
     const names = new Set<string>();
     const domains = new Set<string>();
     const nameList: string[] = [];
+    const slugMap = new Map<string, string>();
 
-    (toolsRes.data || []).forEach((t: { name?: string; website_url?: string }) => {
+    (toolsRes.data || []).forEach((t: { name?: string; website_url?: string; slug?: string }) => {
       if (t.name) {
         const cleanName = t.name.trim().toLowerCase();
         names.add(cleanName);
         nameList.push(t.name.trim());
+        if (t.slug) slugMap.set(cleanName, t.slug);
       }
       if (t.website_url) {
         const norm = normalizeToolUrl(t.website_url);
-        if (norm.canonicalDomain) domains.add(norm.canonicalDomain.toLowerCase());
+        if (norm.canonicalDomain) {
+          const domain = norm.canonicalDomain.toLowerCase();
+          domains.add(domain);
+          if (t.slug) slugMap.set(domain, t.slug);
+        }
       }
     });
 
@@ -849,10 +860,10 @@ async function getExistingToolCatalog(): Promise<{
       }
     });
 
-    return { names, domains, nameList };
+    return { names, domains, nameList, slugMap };
   } catch (err) {
     console.error('[Web Discovery] Error fetching existing tool catalog:', err);
-    return { names: new Set(), domains: new Set(), nameList: [] };
+    return { names: new Set(), domains: new Set(), nameList: [], slugMap: new Map() };
   }
 }
 
@@ -984,12 +995,15 @@ JSON Schema:
       const lowerName = cleanName.toLowerCase();
       const domain = norm.canonicalDomain.toLowerCase();
 
-      // Check if already in live tools or pending queue or current batch
-      if (catalog.names.has(lowerName) || catalog.domains.has(domain)) continue;
+      // Skip duplicates within this batch
       if (seenBatchNames.has(lowerName) || seenBatchDomains.has(domain)) continue;
 
       seenBatchNames.add(lowerName);
       seenBatchDomains.add(domain);
+
+      // Check if already in the live library — include it but flag it
+      const alreadyInLibrary = catalog.names.has(lowerName) || catalog.domains.has(domain);
+      const librarySlug = catalog.slugMap.get(lowerName) || catalog.slugMap.get(domain);
 
       candidates.push({
         id: `web-tool-${Date.now()}-${candidates.length}`,
@@ -1002,6 +1016,8 @@ JSON Schema:
         suggested_tags: Array.isArray(item.suggested_tags) ? item.suggested_tags.slice(0, 4) : [],
         source_url: item.source_url || item.website_url,
         why_it_matches: item.why_it_matches || 'Matches your search requirements.',
+        is_in_library: alreadyInLibrary,
+        library_slug: librarySlug,
       });
 
       if (candidates.length >= 8) break;

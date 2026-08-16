@@ -809,29 +809,39 @@ export function FinderClient() {
               const isSelected = Boolean(selectedWebToolIds[tool.id]);
               const webBrand = getBrandPalette(tool.name);
               const webInitials = getInitials(tool.name);
+              const isPublished = Boolean(tool.is_in_library);
 
               return (
                 <div
                   key={tool.id}
-                  onClick={() => handleToggleSelectWebTool(tool.id)}
-                  className={`relative flex flex-col justify-between rounded-2xl border overflow-hidden p-5 space-y-4 cursor-pointer transition-all duration-200 ${
-                    isSelected
-                      ? 'bg-[#FAFCF9] border-[#A3D1A9] shadow-[0_12px_40px_rgba(0,0,0,0.09)] -translate-y-1'
-                      : 'bg-white hover:border-[#D0C9BA] border-[#EAE6DC] hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:-translate-y-0.5'
+                  onClick={() => !isPublished && handleToggleSelectWebTool(tool.id)}
+                  className={`relative flex flex-col justify-between rounded-2xl border overflow-hidden p-5 space-y-4 transition-all duration-200 ${
+                    isPublished
+                      ? 'bg-[#F7F9F7] border-[#C8E6C9] cursor-default'
+                      : isSelected
+                      ? 'bg-[#FAFCF9] border-[#A3D1A9] shadow-[0_12px_40px_rgba(0,0,0,0.09)] -translate-y-1 cursor-pointer'
+                      : 'bg-white hover:border-[#D0C9BA] border-[#EAE6DC] hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 cursor-pointer'
                   }`}
                 >
-                  {/* ── TOP ACCENT BAR (appears on select, olive green) ── */}
+                  {/* ── TOP ACCENT BAR ── */}
                   <div
-                    style={{ backgroundColor: webBrand.bg }}
-                    className={`absolute inset-x-0 top-0 h-[3.5px] transition-opacity duration-200 ${isSelected ? 'opacity-100' : 'opacity-0'}`}
+                    style={{ backgroundColor: isPublished ? '#1E7E34' : webBrand.bg }}
+                    className={`absolute inset-x-0 top-0 h-[3.5px] transition-opacity duration-200 ${isSelected || isPublished ? 'opacity-100' : 'opacity-0'}`}
                   />
+
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
                         <h3 className="font-bold text-[#141613] text-sm truncate">{tool.name}</h3>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#EEF5FD] text-[#0366D6] border border-[#CDE0F9] shrink-0">
-                          Web
-                        </span>
+                        {isPublished ? (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#EDF7EE] text-[#1E7E34] border border-[#CCE8CD] shrink-0">
+                            In AILIB
+                          </span>
+                        ) : (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#EEF5FD] text-[#0366D6] border border-[#CDE0F9] shrink-0">
+                            Web
+                          </span>
+                        )}
                       </div>
 
                       <div className="flex items-center gap-2 mt-1 text-xs">
@@ -843,44 +853,76 @@ export function FinderClient() {
                       </div>
                     </div>
 
-                    {/* TOP-RIGHT CHECKBOX */}
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleToggleSelectWebTool(tool.id);
-                      }}
-                      className={`w-6 h-6 rounded-lg border flex items-center justify-center transition-all shrink-0 ${
-                        isSelected
-                          ? 'bg-[#1E7E34] text-white border-[#1E7E34] shadow-sm'
-                          : 'bg-white text-transparent border-[#D0C9BA] hover:border-[#141613]'
-                      }`}
-                      title={isSelected ? 'Deselect Tool' : 'Select for Submission'}
-                    >
-                      <Check className={`w-3.5 h-3.5 stroke-[3] transition-opacity ${isSelected ? 'opacity-100' : 'opacity-0'}`} />
-                    </button>
+                    {/* TOP-RIGHT: Published badge OR checkbox */}
+                    {isPublished ? (
+                      <div className="w-6 h-6 rounded-lg bg-[#1E7E34] text-white flex items-center justify-center shrink-0 shadow-sm">
+                        <Check className="w-3.5 h-3.5 stroke-[3]" />
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleToggleSelectWebTool(tool.id);
+                        }}
+                        className={`w-6 h-6 rounded-lg border flex items-center justify-center transition-all shrink-0 ${
+                          isSelected
+                            ? 'bg-[#1E7E34] text-white border-[#1E7E34] shadow-sm'
+                            : 'bg-white text-transparent border-[#D0C9BA] hover:border-[#141613]'
+                        }`}
+                        title={isSelected ? 'Deselect Tool' : 'Select for Submission'}
+                      >
+                        <Check className={`w-3.5 h-3.5 stroke-[3] transition-opacity ${isSelected ? 'opacity-100' : 'opacity-0'}`} />
+                      </button>
+                    )}
                   </div>
 
-                  <p className="text-xs text-[#666B60] leading-relaxed line-clamp-3">{tool.description}</p>
+                  {/* Description OR Already Published Notice */}
+                  {isPublished ? (
+                    <div className="p-3 rounded-xl bg-[#EDF7EE] border border-[#CCE8CD] flex items-start gap-2.5">
+                      <CheckCircle2 className="w-4 h-4 text-[#1E7E34] shrink-0 mt-0.5" />
+                      <div className="space-y-0.5">
+                        <p className="text-xs font-bold text-[#1E7E34]">Already published in AILIB</p>
+                        <p className="text-[11px] text-[#3D7A43] leading-relaxed">
+                          This tool is live in our library. You can view it, save it, and leave a review.
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-[#666B60] leading-relaxed line-clamp-3">{tool.description}</p>
+                  )}
 
-                  <div className="p-3 rounded-xl bg-[#FBF9F5] border border-[#EAE6DC] text-xs text-[#141613] space-y-0.5">
-                    <span className="text-[10px] font-bold text-[#0366D6] uppercase tracking-wider block">
-                      Why It Matches:
-                    </span>
-                    <p className="text-xs text-[#666B60] leading-relaxed">{tool.why_it_matches}</p>
-                  </div>
+                  {!isPublished && (
+                    <div className="p-3 rounded-xl bg-[#FBF9F5] border border-[#EAE6DC] text-xs text-[#141613] space-y-0.5">
+                      <span className="text-[10px] font-bold text-[#0366D6] uppercase tracking-wider block">
+                        Why It Matches:
+                      </span>
+                      <p className="text-xs text-[#666B60] leading-relaxed">{tool.why_it_matches}</p>
+                    </div>
+                  )}
 
                   <div className="pt-3 border-t border-[#F2EFE8] flex items-center justify-between text-xs">
-                    <a
-                      href={tool.website_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={(e) => e.stopPropagation()}
-                      className="px-3 py-1.5 rounded-full bg-[#F5F3ED] hover:bg-[#ECE8DF] border border-[#EAE6DC] text-[#141613] text-xs font-semibold flex items-center gap-1.5"
-                    >
-                      <span>Visit Website</span>
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
+                    {isPublished && tool.library_slug ? (
+                      <Link
+                        href={`/tools/${tool.library_slug}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="px-3 py-1.5 rounded-full bg-[#EDF7EE] hover:bg-[#DCF1DE] border border-[#CCE8CD] text-[#1E7E34] text-xs font-semibold flex items-center gap-1.5"
+                      >
+                        <span>View in AILIB</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </Link>
+                    ) : (
+                      <a
+                        href={tool.website_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="px-3 py-1.5 rounded-full bg-[#F5F3ED] hover:bg-[#ECE8DF] border border-[#EAE6DC] text-[#141613] text-xs font-semibold flex items-center gap-1.5"
+                      >
+                        <span>Visit Website</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    )}
 
                     <span className="text-[11px] text-[#94998E] truncate max-w-[180px]">
                       {tool.website_url.replace(/^https?:\/\//, '').replace(/\/$/, '')}
@@ -889,6 +931,7 @@ export function FinderClient() {
                 </div>
               );
             })}
+
           </div>
 
           {/* Submission Action Bar */}
