@@ -150,15 +150,22 @@ export function ToolCard({ tool }: ToolCardProps) {
     <>
       <div
         onClick={handleCardClick}
-        className="card-interactive group relative flex flex-col justify-between rounded-2xl bg-white border border-[#EAE6DC] p-6 hover:border-[#D5CFBF] hover:shadow-[0_8px_30px_rgba(0,0,0,0.05)] cursor-pointer"
+        className="card-interactive group relative flex flex-col justify-between rounded-2xl bg-white border border-[#EAE6DC] overflow-hidden cursor-pointer transition-all duration-200 hover:border-[#D5CFBF] hover:shadow-[0_12px_40px_rgba(0,0,0,0.10)] hover:-translate-y-1 active:scale-[0.985]"
       >
-        <div>
+        {/* ── TOP ACCENT BAR (Figma-style underline at top of card) ── */}
+        <div
+          style={{ backgroundColor: brand.bg }}
+          className="absolute inset-x-0 top-0 h-[3.5px] opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+        />
+
+        <div className="p-6">
+          <div>
           {/* Top Row: Brand Monogram Box / Logo & Save Bookmark */}
           <div className="flex items-start justify-between gap-3 mb-4">
             {/* Colored Monogram Box / Logo */}
             <div
               style={{ backgroundColor: brand.bg, color: brand.text }}
-              className="w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center font-bold text-sm tracking-tight shrink-0 shadow-sm transition-transform duration-200 group-hover:scale-[1.03]"
+              className="w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center font-bold text-sm tracking-tight shrink-0 shadow-sm transition-transform duration-200 group-hover:scale-[1.05]"
             >
               {tool.logo_url && !imageError ? (
                 <Image
@@ -228,28 +235,29 @@ export function ToolCard({ tool }: ToolCardProps) {
         </div>
 
         {/* Footer: Rating on Left, Pricing Badge + Details on Right */}
-        <div className="pt-3.5 border-t border-[#F2EFE8] flex items-center justify-between gap-2 mt-auto text-xs">
-          {/* Rating */}
-          <div className="flex items-center gap-1 text-[#141613] font-bold">
-            <Star className="w-3.5 h-3.5 fill-[#F5A623] text-[#F5A623]" />
-            <span>{tool.avg_rating > 0 ? tool.avg_rating.toFixed(1) : '4.5'}</span>
-            <span className="text-[#94998E] font-normal text-[11px]">
-              ({tool.review_count > 0 ? tool.review_count.toLocaleString() : '128'})
-            </span>
-          </div>
+          <div className="pt-3.5 border-t border-[#F2EFE8] flex items-center justify-between gap-2 mt-auto text-xs">
+            {/* Rating */}
+            <div className="flex items-center gap-1 text-[#141613] font-bold">
+              <Star className="w-3.5 h-3.5 fill-[#F5A623] text-[#F5A623]" />
+              <span>{tool.avg_rating > 0 ? tool.avg_rating.toFixed(1) : '4.5'}</span>
+              <span className="text-[#94998E] font-normal text-[11px]">
+                ({tool.review_count > 0 ? tool.review_count.toLocaleString() : '128'})
+              </span>
+            </div>
 
-          {/* Pricing */}
-          <div className="flex items-center gap-1.5 shrink-0">
-            <span
-              className={`text-[10px] font-bold capitalize px-2 py-0.5 rounded-md border ${getPricingBadge(
-                tool.pricing
-              )}`}
-            >
-              {tool.pricing.replace('_', ' ')}
-            </span>
-            <span className="text-[10px] sm:text-[11px] text-[#73796E] font-medium truncate max-w-[120px] sm:max-w-[140px]">
-              {getPricingText()}
-            </span>
+            {/* Pricing */}
+            <div className="flex items-center gap-1.5 shrink-0">
+              <span
+                className={`text-[10px] font-bold capitalize px-2 py-0.5 rounded-md border ${getPricingBadge(
+                  tool.pricing
+                )}`}
+              >
+                {tool.pricing.replace('_', ' ')}
+              </span>
+              <span className="text-[10px] sm:text-[11px] text-[#73796E] font-medium truncate max-w-[120px] sm:max-w-[140px]">
+                {getPricingText()}
+              </span>
+            </div>
           </div>
         </div>
       </div>

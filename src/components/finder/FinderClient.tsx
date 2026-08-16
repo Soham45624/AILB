@@ -807,17 +807,24 @@ export function FinderClient() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {discoveredTools.map((tool) => {
               const isSelected = Boolean(selectedWebToolIds[tool.id]);
+              const webBrand = getBrandPalette(tool.name);
+              const webInitials = getInitials(tool.name);
 
               return (
                 <div
                   key={tool.id}
                   onClick={() => handleToggleSelectWebTool(tool.id)}
-                  className={`relative flex flex-col justify-between rounded-2xl border p-5 space-y-4 cursor-pointer transition-all ${
+                  className={`relative flex flex-col justify-between rounded-2xl border overflow-hidden p-5 space-y-4 cursor-pointer transition-all duration-200 ${
                     isSelected
-                      ? 'bg-[#FAFCF9] border-[#A3D1A9] shadow-sm'
-                      : 'bg-white hover:border-[#D0C9BA] border-[#EAE6DC]'
+                      ? 'bg-[#FAFCF9] border-[#A3D1A9] shadow-[0_12px_40px_rgba(0,0,0,0.09)] -translate-y-1'
+                      : 'bg-white hover:border-[#D0C9BA] border-[#EAE6DC] hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:-translate-y-0.5'
                   }`}
                 >
+                  {/* ── TOP ACCENT BAR (appears on select, olive green) ── */}
+                  <div
+                    style={{ backgroundColor: webBrand.bg }}
+                    className={`absolute inset-x-0 top-0 h-[3.5px] transition-opacity duration-200 ${isSelected ? 'opacity-100' : 'opacity-0'}`}
+                  />
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
