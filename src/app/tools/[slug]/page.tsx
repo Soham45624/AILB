@@ -93,7 +93,7 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8 flex-1 w-full">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 pb-24 md:pb-12 space-y-8 flex-1 w-full">
         {/* Top Breadcrumb & Report Action */}
         <div className="flex items-center justify-between">
           <Link

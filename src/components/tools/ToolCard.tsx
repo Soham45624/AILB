@@ -239,7 +239,7 @@ export function ToolCard({ tool }: ToolCardProps) {
           </div>
 
           {/* Pricing */}
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 shrink-0">
             <span
               className={`text-[10px] font-bold capitalize px-2 py-0.5 rounded-md border ${getPricingBadge(
                 tool.pricing
@@ -247,7 +247,7 @@ export function ToolCard({ tool }: ToolCardProps) {
             >
               {tool.pricing.replace('_', ' ')}
             </span>
-            <span className="text-[11px] text-[#73796E] font-medium hidden sm:inline truncate max-w-[120px]">
+            <span className="text-[10px] sm:text-[11px] text-[#73796E] font-medium truncate max-w-[120px] sm:max-w-[140px]">
               {getPricingText()}
             </span>
           </div>

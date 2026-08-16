@@ -89,19 +89,19 @@ export default async function HomePage() {
     <div className="min-h-screen bg-[#FBF9F5] text-[#141613] flex flex-col justify-between selection:bg-[#ECE8DF] selection:text-[#141613]">
       <Navbar />
 
-      <main className="flex-1">
+      <main className="flex-1 pb-24 md:pb-12">
         {/* =========================================================================
             HERO SECTION
            ========================================================================= */}
-        <section className="relative pt-20 pb-16 md:pt-28 md:pb-24 px-4 sm:px-6">
-          <div className="max-w-4xl mx-auto text-center space-y-8">
+        <section className="relative pt-10 pb-12 sm:pt-20 sm:pb-16 md:pt-28 md:pb-24 px-4 sm:px-6">
+          <div className="max-w-4xl mx-auto text-center space-y-6 sm:space-y-8">
             {/* Main Editorial Serif Headline */}
-            <div className="space-y-4">
-              <h1 className="font-serif-heading text-4xl sm:text-6xl md:text-7xl font-normal tracking-tight text-[#141613] leading-[1.12]">
+            <div className="space-y-3 sm:space-y-4">
+              <h1 className="font-serif-heading text-3xl sm:text-6xl md:text-7xl font-normal tracking-tight text-[#141613] leading-[1.15] sm:leading-[1.12]">
                 Discover the right AI <br />
                 for what you build.
               </h1>
-              <p className="text-base sm:text-lg text-[#666B60] max-w-xl mx-auto leading-relaxed font-normal">
+              <p className="text-sm sm:text-lg text-[#666B60] max-w-xl mx-auto leading-relaxed font-normal px-2">
                 Explore AI tools or tell AILIB what you&apos;re trying to accomplish.
               </p>
             </div>
@@ -111,26 +111,26 @@ export default async function HomePage() {
               <form
                 action="/tools"
                 method="GET"
-                className="relative flex items-center bg-white rounded-full p-2 border border-[#E2DDD2] shadow-[0_8px_30px_rgba(0,0,0,0.06)] hover:border-[#D0C9BA] transition-all"
+                className="relative flex items-center bg-white rounded-full p-1.5 sm:p-2 border border-[#E2DDD2] shadow-[0_8px_30px_rgba(0,0,0,0.06)] hover:border-[#D0C9BA] transition-all"
               >
-                <Search className="w-5 h-5 text-[#9FA59A] ml-4 shrink-0 pointer-events-none" />
+                <Search className="w-4 h-4 sm:w-5 sm:h-5 text-[#9FA59A] ml-2.5 sm:ml-4 shrink-0 pointer-events-none" />
                 <input
                   type="text"
                   name="search"
                   placeholder="What are you trying to accomplish?"
-                  className="w-full bg-transparent px-3.5 py-2.5 text-sm text-[#141613] placeholder:text-[#94998E] focus:outline-none"
+                  className="w-full bg-transparent px-2.5 sm:px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm text-[#141613] placeholder:text-[#94998E] focus:outline-none min-w-0"
                 />
                 <button
                   type="submit"
-                  className="btn-interactive px-5 py-3 rounded-full bg-[#141613] hover:bg-[#2A2E27] text-white font-bold text-xs flex items-center gap-1.5 shrink-0 shadow-sm"
+                  className="btn-interactive px-3.5 sm:px-5 py-2 sm:py-3 rounded-full bg-[#141613] hover:bg-[#2A2E27] text-white font-bold text-[11px] sm:text-xs flex items-center gap-1 sm:gap-1.5 shrink-0 shadow-sm"
                 >
                   <span>Find Tools</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                 </button>
               </form>
 
               {/* Try prompt suggestions */}
-              <div className="pt-3 text-xs text-[#73796E] font-medium flex items-center justify-center flex-wrap gap-1">
+              <div className="pt-2.5 sm:pt-3 text-[11px] sm:text-xs text-[#73796E] font-medium flex items-center justify-center flex-wrap gap-1 px-2">
                 <span>Try:</span>
                 <Link
                   href="/tools?search=YouTube+videos"
@@ -149,19 +149,19 @@ export default async function HomePage() {
             </div>
 
             {/* Popular Categories Row */}
-            <div className="pt-6 space-y-3.5">
-              <div className="text-[11px] font-bold uppercase tracking-wider text-[#9FA59A]">
+            <div className="pt-4 sm:pt-6 space-y-3">
+              <div className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#9FA59A]">
                 Popular Categories
               </div>
 
-              <div className="flex flex-wrap items-center justify-center gap-2.5">
+              <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-2.5">
                 {popularCategoryBadges.map((cat) => {
                   const Icon = cat.icon;
                   return (
                     <Link
                       key={cat.slug}
                       href={`/tools?category=${cat.slug}`}
-                      className={`chip-interactive inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-white border border-[#E2DDD2] hover:border-[#D0C9BA] text-xs font-semibold text-[#141613] shadow-sm hover:shadow transition-all`}
+                      className={`chip-interactive inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-full bg-white border border-[#E2DDD2] hover:border-[#D0C9BA] text-[11px] sm:text-xs font-semibold text-[#141613] shadow-sm hover:shadow transition-all`}
                     >
                       <span className={`p-1 rounded-full ${cat.bg} ${cat.color}`}>
                         <Icon className="w-3.5 h-3.5" />

@@ -136,8 +136,8 @@ export function Navbar() {
         </div>
 
         {/* Right: Search, Library, + Add Tool, Avatar */}
-        <div className="flex items-center gap-3">
-          {/* Quick Search Toggle / Input */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* Quick Search Toggle / Input (Desktop/Tablet) */}
           {searchOpen ? (
             <form onSubmit={handleSearchSubmit} className="flex items-center relative animate-fade-in">
               <input
@@ -146,7 +146,7 @@ export function Navbar() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 autoFocus
-                className="w-48 sm:w-64 pl-8 pr-7 py-1.5 rounded-full bg-white border border-[#DDD7CB] text-xs text-[#141613] placeholder:text-[#94998E] focus:outline-none focus:border-[#141613] shadow-sm"
+                className="w-40 sm:w-64 pl-8 pr-7 py-1.5 rounded-full bg-white border border-[#DDD7CB] text-xs text-[#141613] placeholder:text-[#94998E] focus:outline-none focus:border-[#141613] shadow-sm"
               />
               <Search className="w-3.5 h-3.5 text-[#73796E] absolute left-3 pointer-events-none" />
               <button
@@ -161,7 +161,7 @@ export function Navbar() {
             <button
               type="button"
               onClick={() => setSearchOpen(true)}
-              className="p-2 rounded-full text-[#666B60] hover:text-[#141613] hover:bg-[#ECE8DF] transition-colors"
+              className="hidden sm:flex p-2 rounded-full text-[#666B60] hover:text-[#141613] hover:bg-[#ECE8DF] transition-colors"
               title="Search AI Tools"
             >
               <Search className="w-4 h-4" />
@@ -181,13 +181,14 @@ export function Navbar() {
             <span>Library</span>
           </Link>
 
-          {/* + Add Tool Solid Black Pill Button */}
+          {/* + Add Tool Solid Black Button (Round (+) on mobile, Pill (+ Add Tool) on desktop) */}
           <Link
             href="/submit"
-            className="btn-interactive flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#141613] hover:bg-[#2A2E27] text-white font-bold text-xs shadow-sm shrink-0"
+            className="btn-interactive flex items-center justify-center w-8 h-8 sm:w-auto sm:h-auto sm:px-4 sm:py-2 rounded-full bg-[#141613] hover:bg-[#2A2E27] text-white font-bold text-xs shadow-sm shrink-0 transition-all"
+            title="Submit AI Tool"
           >
-            <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
-            <span>Add Tool</span>
+            <Plus className="w-4 h-4 sm:w-3.5 sm:h-3.5 stroke-[2.5]" />
+            <span className="hidden sm:inline ml-1.5">Add Tool</span>
           </Link>
 
           {/* User Profile / Admin / Auth */}

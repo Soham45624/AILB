@@ -26,7 +26,7 @@ export default async function SubmitPage() {
     <div className="min-h-screen bg-[#FBF9F5] text-[#141613] selection:bg-[#ECE8DF] selection:text-[#141613] flex flex-col justify-between">
       <Navbar />
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1 w-full space-y-8">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 pb-24 md:pb-12 flex-1 w-full space-y-8">
         {/* Page Header */}
         <div className="text-center space-y-3 mb-8">
           <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#EDF7EE] border border-[#CCE8CD] text-[#1E7E34] text-xs font-bold uppercase tracking-wider">

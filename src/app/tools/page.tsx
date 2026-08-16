@@ -54,7 +54,7 @@ export default async function ToolsPage({ searchParams }: ToolsPageProps) {
     <div className="min-h-screen bg-[#FBF9F5] text-[#141613] selection:bg-[#ECE8DF] selection:text-[#141613] flex flex-col justify-between">
       <Navbar />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-10 flex-1 w-full space-y-6">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10 pb-24 md:pb-12 flex-1 w-full space-y-6">
         {/* Page Header */}
         <div className="space-y-1">
           <h1 className="text-2xl sm:text-4xl font-extrabold text-[#141613] tracking-tight">

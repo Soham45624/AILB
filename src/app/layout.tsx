@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Newsreader } from "next/font/google";
 import { Suspense } from "react";
 import { NavigationProgressBar } from "@/components/ui/NavigationProgressBar";
+import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import "./globals.css";
 import { baseUrl } from "@/lib/config";
 
@@ -99,6 +100,7 @@ export default function RootLayout({
           <NavigationProgressBar />
         </Suspense>
         {children}
+        <MobileBottomNav />
       </body>
     </html>
   );
