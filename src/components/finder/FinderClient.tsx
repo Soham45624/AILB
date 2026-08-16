@@ -20,6 +20,7 @@ import {
   Info,
   Globe,
   PlusCircle,
+  Check,
   CheckSquare,
   Square,
   ArrowRight,
@@ -43,6 +44,49 @@ import {
   setToolSavedState,
 } from '@/lib/savedToolsStore';
 import { AuthModal } from '@/components/auth/AuthModal';
+
+function getBrandPalette(name: string): { bg: string; text: string } {
+  const n = (name || '').toLowerCase();
+  if (n.includes('midjourney')) return { bg: '#2B3A4A', text: '#FFFFFF' };
+  if (n.includes('cursor')) return { bg: '#0D1929', text: '#FFFFFF' };
+  if (n.includes('perplexity')) return { bg: '#1D6D78', text: '#FFFFFF' };
+  if (n.includes('notion')) return { bg: '#191919', text: '#FFFFFF' };
+  if (n.includes('claude')) return { bg: '#855C3A', text: '#FFFFFF' };
+  if (n.includes('kling')) return { bg: '#A61749', text: '#FFFFFF' };
+  if (n.includes('github') || n.includes('copilot')) return { bg: '#1C2530', text: '#FFFFFF' };
+  if (n.includes('runway')) return { bg: '#22252A', text: '#FFFFFF' };
+  if (n.includes('gamma')) return { bg: '#6E3CE6', text: '#FFFFFF' };
+  if (n.includes('eleven')) return { bg: '#E64A19', text: '#FFFFFF' };
+  if (n.includes('chatgpt') || n.includes('openai')) return { bg: '#10A37F', text: '#FFFFFF' };
+  if (n.includes('suno')) return { bg: '#1E1E1E', text: '#FFFFFF' };
+
+  const colors = [
+    { bg: '#141A29', text: '#FFFFFF' },
+    { bg: '#2A4365', text: '#FFFFFF' },
+    { bg: '#1D6D78', text: '#FFFFFF' },
+    { bg: '#2D3748', text: '#FFFFFF' },
+    { bg: '#6B46C1', text: '#FFFFFF' },
+    { bg: '#855C3A', text: '#FFFFFF' },
+    { bg: '#319795', text: '#FFFFFF' },
+    { bg: '#C53030', text: '#FFFFFF' },
+    { bg: '#5A7840', text: '#FFFFFF' },
+    { bg: '#D97706', text: '#FFFFFF' },
+  ];
+  let hash = 0;
+  for (let i = 0; i < n.length; i++) {
+    hash = (hash + n.charCodeAt(i)) % colors.length;
+  }
+  return colors[hash];
+}
+
+function getInitials(name: string): string {
+  if (!name) return 'AI';
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+  return name.substring(0, 2).toUpperCase();
+}
 
 const SAMPLE_PROMPTS = [
   'Free AI for creating presentations with slides',
@@ -572,6 +616,8 @@ export function FinderClient() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {latestMatches.map(({ tool, matchPercentage, whyItMatches }) => {
               const isSaved = Boolean(savedToolMap[tool.id]);
+              const brand = getBrandPalette(tool.name);
+              const initials = getInitials(tool.name);
 
               return (
                 <div
@@ -581,7 +627,10 @@ export function FinderClient() {
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-12 h-12 rounded-xl bg-[#141613] text-white overflow-hidden flex items-center justify-center font-bold text-sm shrink-0 shadow-sm">
+                      <div
+                        style={{ backgroundColor: brand.bg, color: brand.text }}
+                        className="w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center font-bold text-sm shrink-0 shadow-sm"
+                      >
                         {tool.logo_url ? (
                           <Image
                             src={tool.logo_url}
@@ -591,7 +640,7 @@ export function FinderClient() {
                             className="object-cover w-full h-full"
                           />
                         ) : (
-                          <span>{tool.name.substring(0, 2).toUpperCase()}</span>
+                          <span>{initials}</span>
                         )}
                       </div>
 
@@ -765,7 +814,7 @@ export function FinderClient() {
                   onClick={() => handleToggleSelectWebTool(tool.id)}
                   className={`relative flex flex-col justify-between rounded-2xl border p-5 space-y-4 cursor-pointer transition-all ${
                     isSelected
-                      ? 'bg-white border-[#141613] shadow-md ring-1 ring-[#141613]'
+                      ? 'bg-[#FAFCF9] border-[#A3D1A9] shadow-sm'
                       : 'bg-white hover:border-[#D0C9BA] border-[#EAE6DC]'
                   }`}
                 >
@@ -781,7 +830,7 @@ export function FinderClient() {
                       <div className="flex items-center gap-2 mt-1 text-xs">
                         <span className="text-[#666B60] font-medium">{tool.category_name}</span>
                         <span className="text-[#DDD7CB]">•</span>
-                        <span className="uppercase text-[10px] font-bold px-2 py-0.2 rounded bg-[#F5F3ED] text-[#666B60]">
+                        <span className="uppercase text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#F5F3ED] text-[#666B60]">
                           {tool.pricing}
                         </span>
                       </div>
@@ -794,14 +843,14 @@ export function FinderClient() {
                         e.stopPropagation();
                         handleToggleSelectWebTool(tool.id);
                       }}
-                      className={`p-1.5 rounded-md border transition-all shrink-0 ${
+                      className={`w-6 h-6 rounded-lg border flex items-center justify-center transition-all shrink-0 ${
                         isSelected
-                          ? 'bg-[#141613] text-white border-[#141613]'
-                          : 'bg-white text-[#9FA59A] border-[#D0C9BA] hover:text-[#141613]'
+                          ? 'bg-[#1E7E34] text-white border-[#1E7E34] shadow-sm'
+                          : 'bg-white text-transparent border-[#D0C9BA] hover:border-[#141613]'
                       }`}
                       title={isSelected ? 'Deselect Tool' : 'Select for Submission'}
                     >
-                      {isSelected ? <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4" />}
+                      <Check className={`w-3.5 h-3.5 stroke-[3] transition-opacity ${isSelected ? 'opacity-100' : 'opacity-0'}`} />
                     </button>
                   </div>
 
