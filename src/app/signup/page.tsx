@@ -3,12 +3,14 @@
 import { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Sparkles, UserPlus, Lock, Mail, User, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Sparkles, UserPlus, Lock, Mail, User, AlertCircle, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import { signUpAction } from '@/app/actions/auth';
 import { AILIBLogo } from '@/components/ui/AILIBLogo';
 import { createClient } from '@/lib/supabase/client';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
+import { PasswordRequirements } from '@/components/auth/PasswordRequirements';
+import { isPasswordValid } from '@/lib/passwordValidation';
 
 function SignupForm() {
   const router = useRouter();
@@ -19,6 +21,7 @@ function SignupForm() {
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -200,25 +203,37 @@ function SignupForm() {
 
         <div>
           <label className="block text-xs font-bold uppercase tracking-wider text-[#73796E] mb-1.5">
-            Password (min 6 characters)
+            Password
           </label>
           <div className="relative">
             <Lock className="w-4 h-4 text-[#9FA59A] absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               required
-              minLength={6}
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-full bg-white border border-[#E2DDD2] text-xs sm:text-sm text-[#141613] placeholder:text-[#94998E] focus:outline-none focus:border-[#141613]"
+              className="w-full pl-10 pr-10 py-2.5 rounded-full bg-white border border-[#E2DDD2] text-xs sm:text-sm text-[#141613] placeholder:text-[#94998E] focus:outline-none focus:border-[#141613]"
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#9FA59A] hover:text-[#141613] transition-colors p-0.5"
+              tabIndex={-1}
+            >
+              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
+          </div>
+
+          {/* Password Requirements Checklist & Strength Bar */}
+          <div className="mt-2.5">
+            <PasswordRequirements password={password} />
           </div>
         </div>
 
         <button
           type="submit"
-          disabled={loading || success}
+          disabled={loading || success || !isPasswordValid(password)}
           className="btn-interactive w-full py-3 rounded-full bg-[#141613] hover:bg-[#2A2E27] text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-1.5 disabled:opacity-50 mt-2"
         >
           {loading ? (

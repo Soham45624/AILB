@@ -1,10 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { X, LogIn, UserPlus, AlertCircle, CheckCircle2, Lock, Mail, User } from 'lucide-react';
+import { X, LogIn, UserPlus, AlertCircle, CheckCircle2, Lock, Mail, User, Eye, EyeOff } from 'lucide-react';
 import { signInAction, signUpAction } from '@/app/actions/auth';
 import { useRouter } from 'next/navigation';
 import { AILIBLogo } from '@/components/ui/AILIBLogo';
+import { PasswordRequirements } from '@/components/auth/PasswordRequirements';
+import { isPasswordValid } from '@/lib/passwordValidation';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -23,6 +25,7 @@ export function AuthModal({
   const [mode, setMode] = useState<'signin' | 'signup'>(initialMode);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -157,20 +160,34 @@ export function AuthModal({
             <div className="relative">
               <Lock className="w-3.5 h-3.5 text-[#9FA59A] absolute left-3 top-1/2 -translate-y-1/2" />
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 required
-                minLength={6}
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 rounded-full bg-white border border-[#E2DDD2] text-xs text-[#141613] placeholder:text-[#94998E] focus:outline-none focus:border-[#141613]"
+                className="w-full pl-9 pr-9 py-2 rounded-full bg-white border border-[#E2DDD2] text-xs text-[#141613] placeholder:text-[#94998E] focus:outline-none focus:border-[#141613]"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9FA59A] hover:text-[#141613] transition-colors p-0.5"
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+              </button>
             </div>
+
+            {/* In Signup mode, show the 5 password conditions checklist */}
+            {mode === 'signup' && (
+              <div className="mt-2">
+                <PasswordRequirements password={password} />
+              </div>
+            )}
           </div>
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || (mode === 'signup' && !isPasswordValid(password))}
             className="btn-interactive w-full py-2.5 rounded-full bg-[#141613] hover:bg-[#2A2E27] text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-1.5 disabled:opacity-50 mt-1"
           >
             {loading ? (

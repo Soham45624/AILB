@@ -3,6 +3,7 @@ import { Plus_Jakarta_Sans, Newsreader } from "next/font/google";
 import { Suspense } from "react";
 import { NavigationProgressBar } from "@/components/ui/NavigationProgressBar";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
+import { InactivityListener } from "@/components/auth/InactivityListener";
 import "./globals.css";
 import { baseUrl } from "@/lib/config";
 
@@ -99,6 +100,7 @@ export default function RootLayout({
         <Suspense fallback={null}>
           <NavigationProgressBar />
         </Suspense>
+        <InactivityListener />
         {children}
         <MobileBottomNav />
       </body>

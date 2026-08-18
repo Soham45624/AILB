@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { Profile } from '@/lib/types';
 import { revalidatePath } from 'next/cache';
 import { baseUrl } from '@/lib/config';
+import { validatePassword } from '@/lib/passwordValidation';
 
 export interface AuthResponse {
   success: boolean;
@@ -89,8 +90,9 @@ export async function signUpAction(formData: FormData): Promise<AuthResponse> {
     return { success: false, error: 'Email and password are required.' };
   }
 
-  if (password.length < 6) {
-    return { success: false, error: 'Password must be at least 6 characters.' };
+  const passwordValidation = validatePassword(password);
+  if (!passwordValidation.isValid) {
+    return { success: false, error: passwordValidation.error };
   }
 
   try {
@@ -150,8 +152,9 @@ export async function resetPasswordAction(formData: FormData): Promise<{ success
 export async function updatePasswordAction(formData: FormData): Promise<{ success: boolean; error?: string }> {
   const password = formData.get('password') as string;
 
-  if (!password || password.length < 6) {
-    return { success: false, error: 'Password must be at least 6 characters.' };
+  const passwordValidation = validatePassword(password);
+  if (!passwordValidation.isValid) {
+    return { success: false, error: passwordValidation.error };
   }
 
   try {

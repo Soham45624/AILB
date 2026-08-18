@@ -3,7 +3,7 @@
 import { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Sparkles, LogIn, Lock, Mail, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Sparkles, LogIn, Lock, Mail, AlertCircle, CheckCircle2, Clock } from 'lucide-react';
 import { signInAction } from '@/app/actions/auth';
 import { createClient } from '@/lib/supabase/client';
 import { AILIBLogo } from '@/components/ui/AILIBLogo';
@@ -15,6 +15,7 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const redirect = searchParams.get('redirect') || '/dashboard';
   const urlError = searchParams.get('error');
+  const urlReason = searchParams.get('reason');
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -93,6 +94,16 @@ function LoginForm() {
           Sign in to your account to save tools, manage your library, and post reviews.
         </p>
       </div>
+
+      {/* Session Expired Notice */}
+      {urlReason === 'session_expired' && !error && (
+        <div className="mb-5 p-3.5 rounded-xl bg-[#FFF8E6] border border-[#F3E2B8] text-[#8C6D1F] text-xs flex items-start gap-2.5 animate-fade-in">
+          <Clock className="w-4 h-4 shrink-0 mt-0.5" />
+          <span className="leading-relaxed">
+            Your session expired due to 24 hours of inactivity for account security. Please sign in again.
+          </span>
+        </div>
+      )}
 
       {/* Error Alert */}
       {error && (
