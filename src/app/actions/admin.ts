@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { UserRole } from '@/lib/types';
+import { sanitizePostgrestFilter } from '@/lib/security';
 
 export interface AdminUserSession {
   id: string;
@@ -289,11 +290,11 @@ export async function getAdminToolsAction(search?: string, categorySlug?: string
       .order('created_at', { ascending: false });
 
     if (search) {
-      const cleanSearch = search.trim();
+      const cleanSearch = sanitizePostgrestFilter(search);
       const numVal = parseInt(cleanSearch.replace(/^#/, ''), 10);
       if (!isNaN(numVal)) {
         query = query.or(`tool_code.eq.${numVal},name.ilike.%${cleanSearch}%,description.ilike.%${cleanSearch}%`);
-      } else {
+      } else if (cleanSearch) {
         query = query.or(`name.ilike.%${cleanSearch}%,description.ilike.%${cleanSearch}%`);
       }
     }
@@ -503,7 +504,10 @@ export async function getAdminUsersAction(search?: string) {
       .order('created_at', { ascending: false });
 
     if (search) {
-      query = query.or(`username.ilike.%${search}%,display_name.ilike.%${search}%`);
+      const cleanSearch = sanitizePostgrestFilter(search);
+      if (cleanSearch) {
+        query = query.or(`username.ilike.%${cleanSearch}%,display_name.ilike.%${cleanSearch}%`);
+      }
     }
 
     const { data: profiles, error } = await query;

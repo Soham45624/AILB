@@ -112,22 +112,20 @@ export function Navbar() {
           <nav className="hidden md:flex items-center gap-2">
             <Link
               href="/tools"
-              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
-                pathname.startsWith('/tools')
+              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${pathname.startsWith('/tools')
                   ? 'bg-[#ECE8DF] text-[#141613]'
                   : 'text-[#666B60] hover:text-[#141613] hover:bg-[#F2EFE8]'
-              }`}
+                }`}
             >
               Explore
             </Link>
 
             <Link
               href="/finder"
-              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
-                pathname === '/finder'
+              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${pathname === '/finder'
                   ? 'bg-[#ECE8DF] text-[#141613]'
                   : 'text-[#666B60] hover:text-[#141613] hover:bg-[#F2EFE8]'
-              }`}
+                }`}
             >
               AI Finder
             </Link>
@@ -170,11 +168,10 @@ export function Navbar() {
           {/* Library Link with Bookmark */}
           <Link
             href="/dashboard/my-library"
-            className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
-              pathname === '/dashboard/my-library'
+            className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${pathname === '/dashboard/my-library'
                 ? 'bg-[#ECE8DF] text-[#141613]'
                 : 'text-[#666B60] hover:text-[#141613] hover:bg-[#F2EFE8]'
-            }`}
+              }`}
           >
             <Bookmark className="w-3.5 h-3.5" />
             <span>Library</span>
@@ -207,11 +204,10 @@ export function Navbar() {
 
               <Link
                 href="/dashboard"
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border transition-colors shadow-sm ${
-                  pathname.startsWith('/dashboard')
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border transition-colors shadow-sm ${pathname.startsWith('/dashboard')
                     ? 'bg-[#141613] text-white border-[#141613]'
                     : 'bg-[#ECE8DF] text-[#141613] border-[#DDD7CB] hover:bg-[#E2DDD2]'
-                }`}
+                  }`}
                 title={user.username || user.email}
               >
                 {(user.username || user.email || 'U')[0].toUpperCase()}

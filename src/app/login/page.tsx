@@ -9,11 +9,12 @@ import { createClient } from '@/lib/supabase/client';
 import { AILIBLogo } from '@/components/ui/AILIBLogo';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
+import { sanitizeRedirectUrl } from '@/lib/security';
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirect = searchParams.get('redirect') || '/dashboard';
+  const redirect = sanitizeRedirectUrl(searchParams.get('redirect'), '/dashboard');
   const urlError = searchParams.get('error');
   const urlReason = searchParams.get('reason');
 

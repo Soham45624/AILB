@@ -11,11 +11,12 @@ import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { PasswordRequirements } from '@/components/auth/PasswordRequirements';
 import { isPasswordValid } from '@/lib/passwordValidation';
+import { sanitizeRedirectUrl } from '@/lib/security';
 
 function SignupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirect = searchParams.get('redirect') || '/dashboard';
+  const redirect = sanitizeRedirectUrl(searchParams.get('redirect'), '/dashboard');
 
   const [username, setUsername] = useState('');
   const [displayName, setDisplayName] = useState('');

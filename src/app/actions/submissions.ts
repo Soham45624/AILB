@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { normalizeToolUrl } from '@/lib/urlHelper';
 import { revalidatePath } from 'next/cache';
+import { sanitizePostgrestFilter } from '@/lib/security';
 
 export interface SubmitToolResponse {
   success: boolean;
@@ -34,6 +35,9 @@ export async function checkDuplicateToolAction(rawUrl: string, toolName?: string
     return { isDuplicate: false };
   }
 
+  const cleanDomain = sanitizePostgrestFilter(norm.canonicalDomain);
+  const cleanName = sanitizePostgrestFilter(toolName || '');
+
   try {
     const supabase = await createClient();
 
@@ -41,7 +45,7 @@ export async function checkDuplicateToolAction(rawUrl: string, toolName?: string
     const { data: liveTools } = await supabase
       .from('tools')
       .select('id, name, slug, website_url, status')
-      .or(`website_url.ilike.%${norm.canonicalDomain}%,name.ilike.${toolName?.trim() || '___none___'}`);
+      .or(`website_url.ilike.%${cleanDomain}%,name.ilike.${cleanName || '___none___'}`);
 
     if (liveTools && liveTools.length > 0) {
       const match = liveTools.find(
@@ -66,7 +70,7 @@ export async function checkDuplicateToolAction(rawUrl: string, toolName?: string
       .from('submissions')
       .select('id, tool_name, website_url, status')
       .in('status', ['pending', 'changes_requested'])
-      .or(`website_url.ilike.%${norm.canonicalDomain}%,tool_name.ilike.${toolName?.trim() || '___none___'}`);
+      .or(`website_url.ilike.%${cleanDomain}%,tool_name.ilike.${cleanName || '___none___'}`);
 
     if (subTools && subTools.length > 0) {
       const match = subTools.find(
