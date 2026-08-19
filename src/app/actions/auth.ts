@@ -33,6 +33,16 @@ export async function getCurrentUserAction(): Promise<AuthResponse> {
       .eq('id', user.id)
       .single();
 
+    if (profile?.is_suspended) {
+      await supabase.auth.signOut();
+      return {
+        success: false,
+        user: null,
+        profile: null,
+        error: 'Your account has been suspended. Please contact the administrator for assistance.',
+      };
+    }
+
     return {
       success: true,
       user: {
@@ -65,6 +75,21 @@ export async function signInAction(formData: FormData): Promise<AuthResponse> {
     if (error) {
       console.error('Supabase signIn error:', error);
       return { success: false, error: error.message };
+    }
+
+    // Verify account suspension status
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('id, is_suspended')
+      .eq('id', data.user.id)
+      .single();
+
+    if (profile?.is_suspended) {
+      await supabase.auth.signOut();
+      return {
+        success: false,
+        error: 'Your account has been suspended. Please contact the administrator for assistance.',
+      };
     }
 
     return {

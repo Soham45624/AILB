@@ -35,12 +35,14 @@ export default async function AdminLayout({
                 <span className="text-sm font-bold text-slate-100">Control Center</span>
                 <span
                   className={`text-[10px] uppercase tracking-wider font-extrabold px-2 py-0.5 rounded-full border ${
-                    auth.role === 'admin'
+                    auth.role === 'superadmin'
+                      ? 'bg-amber-500/15 border-amber-500/30 text-amber-300'
+                      : auth.role === 'admin'
                       ? 'bg-rose-500/15 border-rose-500/30 text-rose-300'
                       : 'bg-indigo-500/15 border-indigo-500/30 text-indigo-300'
                   }`}
                 >
-                  {auth.role}
+                  {auth.role === 'superadmin' ? '👑 superadmin' : auth.role}
                 </span>
               </div>
               <p className="text-[11px] text-slate-400 hidden sm:block">

@@ -113,8 +113,8 @@ export function Navbar() {
             <Link
               href="/tools"
               className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${pathname.startsWith('/tools')
-                  ? 'bg-[#ECE8DF] text-[#141613]'
-                  : 'text-[#666B60] hover:text-[#141613] hover:bg-[#F2EFE8]'
+                ? 'bg-[#ECE8DF] text-[#141613]'
+                : 'text-[#666B60] hover:text-[#141613] hover:bg-[#F2EFE8]'
                 }`}
             >
               Explore
@@ -123,8 +123,8 @@ export function Navbar() {
             <Link
               href="/finder"
               className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${pathname === '/finder'
-                  ? 'bg-[#ECE8DF] text-[#141613]'
-                  : 'text-[#666B60] hover:text-[#141613] hover:bg-[#F2EFE8]'
+                ? 'bg-[#ECE8DF] text-[#141613]'
+                : 'text-[#666B60] hover:text-[#141613] hover:bg-[#F2EFE8]'
                 }`}
             >
               AI Finder
@@ -169,8 +169,8 @@ export function Navbar() {
           <Link
             href="/dashboard/my-library"
             className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${pathname === '/dashboard/my-library'
-                ? 'bg-[#ECE8DF] text-[#141613]'
-                : 'text-[#666B60] hover:text-[#141613] hover:bg-[#F2EFE8]'
+              ? 'bg-[#ECE8DF] text-[#141613]'
+              : 'text-[#666B60] hover:text-[#141613] hover:bg-[#F2EFE8]'
               }`}
           >
             <Bookmark className="w-3.5 h-3.5" />
@@ -192,7 +192,7 @@ export function Navbar() {
             <div className="w-8 h-8 rounded-full bg-[#ECE8DF] animate-pulse" />
           ) : user ? (
             <div className="flex items-center gap-1.5">
-              {user.role === 'admin' && (
+              {(user.role === 'admin' || user.role === 'superadmin') && (
                 <Link
                   href="/admin"
                   className="p-2 rounded-full bg-white hover:bg-[#ECE8DF] text-[#141613] border border-[#DDD7CB] transition-colors shadow-sm"
@@ -205,8 +205,8 @@ export function Navbar() {
               <Link
                 href="/dashboard"
                 className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border transition-colors shadow-sm ${pathname.startsWith('/dashboard')
-                    ? 'bg-[#141613] text-white border-[#141613]'
-                    : 'bg-[#ECE8DF] text-[#141613] border-[#DDD7CB] hover:bg-[#E2DDD2]'
+                  ? 'bg-[#141613] text-white border-[#141613]'
+                  : 'bg-[#ECE8DF] text-[#141613] border-[#DDD7CB] hover:bg-[#E2DDD2]'
                   }`}
                 title={user.username || user.email}
               >

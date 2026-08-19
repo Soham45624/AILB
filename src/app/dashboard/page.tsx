@@ -41,6 +41,11 @@ export default async function DashboardPage() {
     profile = newProfile;
   }
 
+  if (profile?.is_suspended) {
+    await supabase.auth.signOut();
+    redirect('/login?error=account_suspended');
+  }
+
   // Fetch user submissions
   const { data: userSubmissions } = await supabase
     .from('submissions')

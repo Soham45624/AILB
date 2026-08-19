@@ -20,6 +20,18 @@ export default async function SubmitPage() {
     redirect('/login?redirect=/submit');
   }
 
+  // Check if account is suspended
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('is_suspended')
+    .eq('id', user.id)
+    .single();
+
+  if (profile?.is_suspended) {
+    await supabase.auth.signOut();
+    redirect('/login?error=account_suspended');
+  }
+
   const [categories, tags] = await Promise.all([getCategories(), getTags()]);
 
   return (

@@ -17,16 +17,21 @@ import {
   Calendar,
   User,
   Trash2,
+  Crown,
+  Lock,
 } from 'lucide-react';
 
 interface AdminUsersClientProps {
   initialUsers: any[];
+  currentUserRole?: UserRole;
 }
 
-export function AdminUsersClient({ initialUsers }: AdminUsersClientProps) {
+export function AdminUsersClient({ initialUsers, currentUserRole = 'admin' }: AdminUsersClientProps) {
   const [users, setUsers] = useState<any[]>(initialUsers);
   const [search, setSearch] = useState('');
   const [processingId, setProcessingId] = useState<string | null>(null);
+
+  const isSuperAdmin = currentUserRole === 'superadmin';
 
   const filtered = users.filter((u) => {
     if (!search) return true;
@@ -93,16 +98,25 @@ export function AdminUsersClient({ initialUsers }: AdminUsersClientProps) {
 
   return (
     <div className="space-y-6">
-      {/* Search Input */}
-      <div className="relative max-w-md">
-        <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-        <input
-          type="text"
-          placeholder="Search by username or display name..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-cyan-500/60"
-        />
+      {/* Top Search & Permission Notice */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="relative max-w-md w-full">
+          <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            placeholder="Search by username or display name..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-cyan-500/60"
+          />
+        </div>
+
+        {!isSuperAdmin && (
+          <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs">
+            <Lock className="w-3.5 h-3.5 shrink-0 text-amber-400" />
+            <span>Role modification is restricted exclusively to the <strong>SuperAdmin</strong>.</span>
+          </div>
+        )}
       </div>
 
       {/* Users Table */}
@@ -128,6 +142,7 @@ export function AdminUsersClient({ initialUsers }: AdminUsersClientProps) {
             ) : (
               filtered.map((u) => {
                 const isProcessing = processingId === u.id;
+                const userRole = (u.role || 'user').toLowerCase();
 
                 return (
                   <tr key={u.id} className="hover:bg-slate-900/90 transition-colors">
@@ -140,30 +155,55 @@ export function AdminUsersClient({ initialUsers }: AdminUsersClientProps) {
                         <div>
                           <div className="font-bold text-slate-100 flex items-center gap-1.5">
                             <span>{u.display_name || u.username}</span>
+                            {userRole === 'superadmin' && (
+                              <Crown className="w-3.5 h-3.5 text-amber-400 fill-amber-400/20" />
+                            )}
                           </div>
                           <div className="text-[11px] text-slate-500">@{u.username}</div>
                         </div>
                       </div>
                     </td>
 
-                    {/* Role Dropdown */}
+                    {/* Role Column: Active Select for SuperAdmin, Read-only Locked Badge for Admin */}
                     <td className="py-4 px-4">
-                      <select
-                        value={u.role || 'user'}
-                        disabled={isProcessing}
-                        onChange={(e) => handleRoleChange(u.id, e.target.value as UserRole)}
-                        className={`px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider border focus:outline-none transition-colors ${
-                          u.role === 'admin'
-                            ? 'bg-rose-500/15 border-rose-500/30 text-rose-300'
-                            : u.role === 'editor'
-                            ? 'bg-indigo-500/15 border-indigo-500/30 text-indigo-300'
-                            : 'bg-slate-950 border-slate-800 text-slate-300'
-                        }`}
-                      >
-                        <option value="user">USER</option>
-                        <option value="editor">EDITOR</option>
-                        <option value="admin">ADMIN</option>
-                      </select>
+                      {isSuperAdmin ? (
+                        <select
+                          value={userRole}
+                          disabled={isProcessing}
+                          onChange={(e) => handleRoleChange(u.id, e.target.value as UserRole)}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider border focus:outline-none transition-colors cursor-pointer ${
+                            userRole === 'superadmin'
+                              ? 'bg-amber-500/15 border-amber-500/40 text-amber-300'
+                              : userRole === 'admin'
+                              ? 'bg-rose-500/15 border-rose-500/30 text-rose-300'
+                              : userRole === 'editor'
+                              ? 'bg-indigo-500/15 border-indigo-500/30 text-indigo-300'
+                              : 'bg-slate-950 border-slate-800 text-slate-300'
+                          }`}
+                        >
+                          <option value="user">USER</option>
+                          <option value="editor">EDITOR</option>
+                          <option value="admin">ADMIN</option>
+                          <option value="superadmin">👑 SUPERADMIN</option>
+                        </select>
+                      ) : (
+                        <div
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider border select-none ${
+                            userRole === 'superadmin'
+                              ? 'bg-amber-500/15 border-amber-500/30 text-amber-300'
+                              : userRole === 'admin'
+                              ? 'bg-rose-500/15 border-rose-500/30 text-rose-300'
+                              : userRole === 'editor'
+                              ? 'bg-indigo-500/15 border-indigo-500/30 text-indigo-300'
+                              : 'bg-slate-950 border-slate-800 text-slate-400'
+                          }`}
+                          title="Role modification requires SuperAdmin privileges"
+                        >
+                          {userRole === 'superadmin' && <Crown className="w-3 h-3 text-amber-400" />}
+                          <span>{userRole}</span>
+                          <Lock className="w-2.5 h-2.5 opacity-50 ml-0.5" />
+                        </div>
+                      )}
                     </td>
 
                     {/* Submissions count */}

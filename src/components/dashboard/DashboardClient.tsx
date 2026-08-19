@@ -15,6 +15,7 @@ import {
   Save,
   LogOut,
   ArrowRight,
+  Crown,
 } from 'lucide-react';
 import { Profile } from '@/lib/types';
 import { updateProfileAction, signOutAction } from '@/app/actions/auth';
@@ -44,7 +45,8 @@ export function DashboardClient({
   const pathname = usePathname();
   const [activeTab, setActiveTab] = useState<'profile' | 'reviews'>('profile');
 
-  const isAdminOrEditor = profile?.role === 'admin' || profile?.role === 'editor';
+  const isAdminOrEditor =
+    profile?.role === 'admin' || profile?.role === 'editor' || profile?.role === 'superadmin';
 
   // Profile Form state
   const [username, setUsername] = useState(profile?.username || '');
@@ -108,14 +110,20 @@ export function DashboardClient({
               </h1>
               <span
                 className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 border ${
-                  profile?.role === 'admin'
+                  profile?.role === 'superadmin'
+                    ? 'bg-[#FEF7EC] text-[#B45309] border-[#FDE68A]'
+                    : profile?.role === 'admin'
                     ? 'bg-[#FDF0F2] text-[#D73A49] border-[#F8D2D7]'
                     : profile?.role === 'editor'
                     ? 'bg-[#F3EFFB] text-[#5C42A6] border-[#DDD2F5]'
                     : 'bg-[#F5F3ED] text-[#666B60] border-[#EAE6DC]'
                 }`}
               >
-                <Shield className="w-3 h-3" />
+                {profile?.role === 'superadmin' ? (
+                  <Crown className="w-3 h-3 text-[#B45309]" />
+                ) : (
+                  <Shield className="w-3 h-3" />
+                )}
                 {profile?.role || 'User'}
               </span>
             </div>

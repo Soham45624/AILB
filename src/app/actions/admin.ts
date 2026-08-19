@@ -17,7 +17,9 @@ export interface AdminUserSession {
  * Validates active session and confirms user has EDITOR or ADMIN role.
  * Throws or returns null if unauthorized.
  */
-export async function verifyAdminOrEditor(requiredRole: 'editor' | 'admin' = 'editor'): Promise<AdminUserSession | null> {
+export async function verifyAdminOrEditor(
+  requiredRole: 'editor' | 'admin' | 'superadmin' = 'editor'
+): Promise<AdminUserSession | null> {
   const supabase = await createClient();
 
   const {
@@ -41,11 +43,15 @@ export async function verifyAdminOrEditor(requiredRole: 'editor' | 'admin' = 'ed
 
   const userRole = (profile.role || 'user').toLowerCase() as UserRole;
 
-  if (requiredRole === 'admin' && userRole !== 'admin') {
+  if (requiredRole === 'superadmin' && userRole !== 'superadmin') {
     return null;
   }
 
-  if (userRole !== 'admin' && userRole !== 'editor') {
+  if (requiredRole === 'admin' && userRole !== 'admin' && userRole !== 'superadmin') {
+    return null;
+  }
+
+  if (userRole !== 'admin' && userRole !== 'editor' && userRole !== 'superadmin') {
     return null;
   }
 
@@ -132,19 +138,24 @@ export async function getAdminSubmissionsAction(statusFilter: string = 'all') {
     const { data: submissions, error } = await query;
     if (error) throw error;
 
-    // Fetch submitter usernames
+    // Fetch submitter usernames and suspension status
     const userIds = Array.from(new Set(submissions?.map((s: any) => s.submitted_by) || []));
     const { data: profiles } = await supabase
       .from('profiles')
-      .select('id, username, display_name')
+      .select('id, username, display_name, is_suspended')
       .in('id', userIds);
 
-    const profileMap = new Map(profiles?.map((p: any) => [p.id, p.display_name || p.username]));
+    const profileMap = new Map(profiles?.map((p: any) => [p.id, p]));
 
-    const enriched = (submissions || []).map((s: any) => ({
-      ...s,
-      submitter_name: profileMap.get(s.submitted_by) || 'Community Member',
-    }));
+    const enriched = (submissions || []).map((s: any) => {
+      const p = profileMap.get(s.submitted_by);
+      return {
+        ...s,
+        submitter_name: p?.display_name || p?.username || 'Community Member',
+        submitter_username: p?.username || 'user',
+        submitter_is_suspended: Boolean(p?.is_suspended),
+      };
+    });
 
     return { success: true, submissions: enriched };
   } catch (err: any) {
@@ -162,6 +173,35 @@ export async function approveSubmissionAction(
 
   try {
     const supabase = await createClient();
+
+    // 1. Fetch submission details and submitter profile
+    const { data: submission, error: subError } = await supabase
+      .from('submissions')
+      .select('id, tool_name, submitted_by')
+      .eq('id', submissionId)
+      .single();
+
+    if (subError || !submission) {
+      return { success: false, error: 'Submission not found.' };
+    }
+
+    // 2. Security Check: Block approval if the submitter account is suspended
+    if (submission.submitted_by) {
+      const { data: submitterProfile } = await supabase
+        .from('profiles')
+        .select('id, username, display_name, is_suspended')
+        .eq('id', submission.submitted_by)
+        .single();
+
+      if (submitterProfile?.is_suspended) {
+        return {
+          success: false,
+          error: `Cannot accept this submission: The submitter account (@${
+            submitterProfile.username || 'user'
+          }) has been suspended for security policy violations. The tool submitted may contain malicious links or unsafe content and cannot be approved to the live directory.`,
+        };
+      }
+    }
 
     const { data: toolId, error } = await supabase.rpc('approve_tool_submission', {
       p_submission_id: submissionId,
@@ -513,6 +553,24 @@ export async function getAdminUsersAction(search?: string) {
     const { data: profiles, error } = await query;
     if (error) throw error;
 
+    // Auto-promote @Soham_12 / Soham Ranj if no SuperAdmin currently exists
+    const hasSuperAdmin = (profiles || []).some((p: any) => p.role === 'superadmin');
+    if (!hasSuperAdmin) {
+      const sohamProfile = (profiles || []).find(
+        (p: any) =>
+          p.username?.toLowerCase() === 'soham_12' ||
+          p.display_name?.toLowerCase().includes('soham ranj') ||
+          p.full_name?.toLowerCase().includes('soham ranj')
+      );
+      if (sohamProfile) {
+        await supabase
+          .from('profiles')
+          .update({ role: 'superadmin', updated_at: new Date().toISOString() })
+          .eq('id', sohamProfile.id);
+        sohamProfile.role = 'superadmin';
+      }
+    }
+
     // Get submission counts per user
     const { data: submissions } = await supabase.from('submissions').select('submitted_by');
     const subCountMap = new Map<string, number>();
@@ -525,27 +583,62 @@ export async function getAdminUsersAction(search?: string) {
       submission_count: subCountMap.get(p.id) || 0,
     }));
 
-    return { success: true, users: enriched };
+    return { success: true, users: enriched, callerRole: auth.role };
   } catch (err: any) {
-    return { success: false, users: [], error: err.message };
+    return { success: false, users: [], callerRole: auth?.role || 'editor', error: err.message };
   }
 }
 
 export async function updateUserRoleAction(userId: string, newRole: UserRole) {
-  const auth = await verifyAdminOrEditor('admin');
-  if (!auth) return { success: false, error: 'Admin privileges required to alter roles' };
+  const auth = await verifyAdminOrEditor('superadmin');
+  if (!auth) {
+    return { success: false, error: 'Only SuperAdmin has permission to modify user roles.' };
+  }
 
   try {
     const supabase = await createClient();
 
-    const { error } = await supabase
+    // 1. Fetch current role of the target user
+    const { data: targetProfile, error: targetError } = await supabase
+      .from('profiles')
+      .select('id, role, username')
+      .eq('id', userId)
+      .single();
+
+    if (targetError || !targetProfile) {
+      return { success: false, error: 'Target user profile not found.' };
+    }
+
+    const currentRole = (targetProfile.role || 'user').toLowerCase();
+
+    // 2. Last SuperAdmin Protection: If demoting a SuperAdmin, ensure at least 1 other active SuperAdmin remains
+    if (currentRole === 'superadmin' && newRole !== 'superadmin') {
+      const { count: superAdminCount, error: countError } = await supabase
+        .from('profiles')
+        .select('id', { count: 'exact', head: true })
+        .eq('role', 'superadmin')
+        .eq('is_suspended', false);
+
+      if (countError) throw countError;
+
+      if ((superAdminCount || 0) <= 1) {
+        return {
+          success: false,
+          error: 'Cannot demote the only remaining SuperAdmin. You must promote another user to SuperAdmin first.',
+        };
+      }
+    }
+
+    // 3. Update the role
+    const { error: updateError } = await supabase
       .from('profiles')
       .update({ role: newRole, updated_at: new Date().toISOString() })
       .eq('id', userId);
 
-    if (error) throw error;
+    if (updateError) throw updateError;
 
     revalidatePath('/admin/users');
+    revalidatePath('/admin');
     return { success: true };
   } catch (err: any) {
     return { success: false, error: err.message };

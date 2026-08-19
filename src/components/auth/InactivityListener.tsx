@@ -44,6 +44,27 @@ export function InactivityListener() {
           return;
         }
 
+        // Live check: if the active account is suspended, log out immediately
+        if (session.user?.id) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('is_suspended')
+            .eq('id', session.user.id)
+            .single();
+
+          if (profile?.is_suspended) {
+            isLoggingOutRef.current = true;
+            try {
+              localStorage.removeItem(ACTIVITY_STORAGE_KEY);
+            } catch {}
+
+            await supabase.auth.signOut();
+            router.push('/login?error=account_suspended');
+            router.refresh();
+            return;
+          }
+        }
+
         const stored = localStorage.getItem(ACTIVITY_STORAGE_KEY);
         const now = Date.now();
 

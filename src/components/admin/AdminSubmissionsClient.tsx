@@ -25,6 +25,7 @@ import {
   Calendar,
   Globe,
   ArrowRight,
+  ShieldAlert,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -244,6 +245,12 @@ export function AdminSubmissionsClient({
 
                       <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400 mt-1">
                         <span>Submitted by <strong className="text-slate-300">{sub.submitter_name}</strong></span>
+                        {sub.submitter_is_suspended && (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                            <ShieldAlert className="w-3 h-3 text-rose-400" />
+                            Submitter Suspended
+                          </span>
+                        )}
                         <span>•</span>
                         <span>{new Date(sub.created_at).toLocaleDateString()}</span>
                         <span>•</span>
@@ -336,6 +343,21 @@ export function AdminSubmissionsClient({
                   </div>
                 )}
 
+                {/* Security Warning for Suspended Submitters */}
+                {sub.submitter_is_suspended && (
+                  <div className="p-3.5 rounded-xl bg-rose-950/30 border border-rose-500/40 text-xs text-rose-300 flex items-start gap-2.5">
+                    <ShieldAlert className="w-5 h-5 shrink-0 text-rose-400 mt-0.5" />
+                    <div>
+                      <span className="font-bold text-rose-200 block text-xs mb-0.5">
+                        ⚠️ Security Alert: Submitter Account Suspended
+                      </span>
+                      <span>
+                        This AI tool cannot be approved or published because the submitter account is suspended. Submissions from suspended accounts are blocked from approval to prevent publishing potential malicious links or unsafe content.
+                      </span>
+                    </div>
+                  </div>
+                )}
+
                 {/* Moderation Controls (if Pending or Changes Requested) */}
                 {(sub.status === 'pending' || sub.status === 'changes_requested') && (
                   <div className="pt-3 border-t border-slate-800/80 space-y-3">
@@ -417,15 +439,27 @@ export function AdminSubmissionsClient({
                         Request Changes
                       </button>
 
-                      <button
-                        type="button"
-                        disabled={isProcessing}
-                        onClick={() => handleApprove(sub)}
-                        className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 text-xs font-extrabold shadow-md shadow-emerald-500/20 transition-all hover:scale-105 disabled:opacity-50"
-                      >
-                        <Check className="w-3.5 h-3.5 stroke-[3]" />
-                        {isProcessing ? 'Publishing...' : 'Approve & Publish to Directory'}
-                      </button>
+                      {sub.submitter_is_suspended ? (
+                        <button
+                          type="button"
+                          disabled
+                          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-rose-950/40 border border-rose-500/30 text-rose-400 text-xs font-bold cursor-not-allowed opacity-75"
+                          title="Approval is blocked because the submitter account is suspended"
+                        >
+                          <ShieldAlert className="w-3.5 h-3.5" />
+                          Approval Blocked (Suspended Submitter)
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          disabled={isProcessing}
+                          onClick={() => handleApprove(sub)}
+                          className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 text-xs font-extrabold shadow-md shadow-emerald-500/20 transition-all hover:scale-105 disabled:opacity-50"
+                        >
+                          <Check className="w-3.5 h-3.5 stroke-[3]" />
+                          {isProcessing ? 'Publishing...' : 'Approve & Publish to Directory'}
+                        </button>
+                      )}
                     </div>
                   </div>
                 )}

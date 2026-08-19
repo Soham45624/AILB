@@ -1,6 +1,6 @@
 export type PricingType = 'free' | 'freemium' | 'paid' | 'free_trial' | 'contact';
 export type ToolStatus = 'draft' | 'pending' | 'approved' | 'rejected' | 'archived';
-export type UserRole = 'user' | 'editor' | 'admin';
+export type UserRole = 'user' | 'editor' | 'admin' | 'superadmin';
 
 export type PlatformType = 'Web' | 'Windows' | 'macOS' | 'Linux' | 'Android' | 'iOS' | 'API';
 

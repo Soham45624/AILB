@@ -46,7 +46,7 @@ export default async function AdminUsersPage() {
         </div>
       </div>
 
-      <AdminUsersClient initialUsers={users || []} />
+      <AdminUsersClient initialUsers={users || []} currentUserRole={auth.role} />
     </div>
   );
 }

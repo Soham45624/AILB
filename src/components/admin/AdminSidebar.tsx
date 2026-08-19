@@ -79,7 +79,7 @@ export function AdminSidebar({ userRole, username }: AdminSidebarProps) {
         {/* Navigation */}
         <nav className="space-y-1">
           {navItems.map((item) => {
-            if (item.adminOnly && userRole !== 'admin') return null;
+            if (item.adminOnly && userRole !== 'admin' && userRole !== 'superadmin') return null;
 
             const Icon = item.icon;
             const isActive = item.exact

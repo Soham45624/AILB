@@ -25,6 +25,8 @@ function LoginForm() {
   const [error, setError] = useState<string | null>(
     urlError === 'auth_callback_failed'
       ? 'Authentication callback failed. Please try again.'
+      : urlError === 'account_suspended'
+      ? 'Your account has been suspended. Please contact the administrator for assistance.'
       : null
   );
 
