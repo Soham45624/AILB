@@ -17,7 +17,6 @@ import {
   Calendar,
   User,
   Trash2,
-  Crown,
   Lock,
 } from 'lucide-react';
 
@@ -155,9 +154,6 @@ export function AdminUsersClient({ initialUsers, currentUserRole = 'admin' }: Ad
                         <div>
                           <div className="font-bold text-slate-100 flex items-center gap-1.5">
                             <span>{u.display_name || u.username}</span>
-                            {userRole === 'superadmin' && (
-                              <Crown className="w-3.5 h-3.5 text-amber-400 fill-amber-400/20" />
-                            )}
                           </div>
                           <div className="text-[11px] text-slate-500">@{u.username}</div>
                         </div>
@@ -184,7 +180,7 @@ export function AdminUsersClient({ initialUsers, currentUserRole = 'admin' }: Ad
                           <option value="user">USER</option>
                           <option value="editor">EDITOR</option>
                           <option value="admin">ADMIN</option>
-                          <option value="superadmin">👑 SUPERADMIN</option>
+                          <option value="superadmin">SUPERADMIN</option>
                         </select>
                       ) : (
                         <div
@@ -199,7 +195,6 @@ export function AdminUsersClient({ initialUsers, currentUserRole = 'admin' }: Ad
                           }`}
                           title="Role modification requires SuperAdmin privileges"
                         >
-                          {userRole === 'superadmin' && <Crown className="w-3 h-3 text-amber-400" />}
                           <span>{userRole}</span>
                           <Lock className="w-2.5 h-2.5 opacity-50 ml-0.5" />
                         </div>

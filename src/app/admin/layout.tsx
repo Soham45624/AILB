@@ -42,7 +42,7 @@ export default async function AdminLayout({
                       : 'bg-indigo-500/15 border-indigo-500/30 text-indigo-300'
                   }`}
                 >
-                  {auth.role === 'superadmin' ? '👑 superadmin' : auth.role}
+                  {auth.role}
                 </span>
               </div>
               <p className="text-[11px] text-slate-400 hidden sm:block">

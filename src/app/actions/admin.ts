@@ -553,31 +553,39 @@ export async function getAdminUsersAction(search?: string) {
     const { data: profiles, error } = await query;
     if (error) throw error;
 
-    // Auto-promote @Soham_12 and ensure display_name / full_name is 'Soham Rank'
-    const sohamProfile = (profiles || []).find(
-      (p: any) =>
-        p.username?.toLowerCase() === 'soham_12' ||
-        p.display_name?.toLowerCase().includes('soham ran') ||
-        p.full_name?.toLowerCase().includes('soham ran')
+    // 1. Ensure @Soham_12 is the SuperAdmin and has display_name 'Soham Rank'
+    const actualSoham = (profiles || []).find(
+      (p: any) => p.username?.toLowerCase() === 'soham_12'
     );
-    if (sohamProfile) {
+    if (actualSoham) {
       const updates: any = {};
-      if (sohamProfile.role !== 'superadmin') {
+      if (actualSoham.role !== 'superadmin') {
         updates.role = 'superadmin';
-        sohamProfile.role = 'superadmin';
+        actualSoham.role = 'superadmin';
       }
-      if (sohamProfile.display_name !== 'Soham Rank' || sohamProfile.full_name !== 'Soham Rank') {
+      if (actualSoham.display_name !== 'Soham Rank' || actualSoham.full_name !== 'Soham Rank') {
         updates.display_name = 'Soham Rank';
         updates.full_name = 'Soham Rank';
-        sohamProfile.display_name = 'Soham Rank';
-        sohamProfile.full_name = 'Soham Rank';
+        actualSoham.display_name = 'Soham Rank';
+        actualSoham.full_name = 'Soham Rank';
       }
       if (Object.keys(updates).length > 0) {
         updates.updated_at = new Date().toISOString();
         await supabase
           .from('profiles')
           .update(updates)
-          .eq('id', sohamProfile.id);
+          .eq('id', actualSoham.id);
+      }
+    }
+
+    // 2. Revert any other accounts that accidentally got superadmin back to user
+    for (const p of profiles || []) {
+      if (p.username?.toLowerCase() !== 'soham_12' && p.role === 'superadmin') {
+        await supabase
+          .from('profiles')
+          .update({ role: 'user', updated_at: new Date().toISOString() })
+          .eq('id', p.id);
+        p.role = 'user';
       }
     }
 

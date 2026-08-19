@@ -15,7 +15,6 @@ import {
   Save,
   LogOut,
   ArrowRight,
-  Crown,
 } from 'lucide-react';
 import { Profile } from '@/lib/types';
 import { updateProfileAction, signOutAction } from '@/app/actions/auth';
@@ -119,11 +118,7 @@ export function DashboardClient({
                     : 'bg-[#F5F3ED] text-[#666B60] border-[#EAE6DC]'
                 }`}
               >
-                {profile?.role === 'superadmin' ? (
-                  <Crown className="w-3 h-3 text-[#B45309]" />
-                ) : (
-                  <Shield className="w-3 h-3" />
-                )}
+                <Shield className="w-3 h-3" />
                 {profile?.role || 'User'}
               </span>
             </div>
