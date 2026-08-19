@@ -553,21 +553,31 @@ export async function getAdminUsersAction(search?: string) {
     const { data: profiles, error } = await query;
     if (error) throw error;
 
-    // Auto-promote @Soham_12 / Soham Ranj if no SuperAdmin currently exists
-    const hasSuperAdmin = (profiles || []).some((p: any) => p.role === 'superadmin');
-    if (!hasSuperAdmin) {
-      const sohamProfile = (profiles || []).find(
-        (p: any) =>
-          p.username?.toLowerCase() === 'soham_12' ||
-          p.display_name?.toLowerCase().includes('soham ranj') ||
-          p.full_name?.toLowerCase().includes('soham ranj')
-      );
-      if (sohamProfile) {
+    // Auto-promote @Soham_12 and ensure display_name / full_name is 'Soham Rank'
+    const sohamProfile = (profiles || []).find(
+      (p: any) =>
+        p.username?.toLowerCase() === 'soham_12' ||
+        p.display_name?.toLowerCase().includes('soham ran') ||
+        p.full_name?.toLowerCase().includes('soham ran')
+    );
+    if (sohamProfile) {
+      const updates: any = {};
+      if (sohamProfile.role !== 'superadmin') {
+        updates.role = 'superadmin';
+        sohamProfile.role = 'superadmin';
+      }
+      if (sohamProfile.display_name !== 'Soham Rank' || sohamProfile.full_name !== 'Soham Rank') {
+        updates.display_name = 'Soham Rank';
+        updates.full_name = 'Soham Rank';
+        sohamProfile.display_name = 'Soham Rank';
+        sohamProfile.full_name = 'Soham Rank';
+      }
+      if (Object.keys(updates).length > 0) {
+        updates.updated_at = new Date().toISOString();
         await supabase
           .from('profiles')
-          .update({ role: 'superadmin', updated_at: new Date().toISOString() })
+          .update(updates)
           .eq('id', sohamProfile.id);
-        sohamProfile.role = 'superadmin';
       }
     }
 
