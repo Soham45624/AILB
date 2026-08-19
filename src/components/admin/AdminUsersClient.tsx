@@ -205,36 +205,52 @@ export function AdminUsersClient({ initialUsers, currentUserRole = 'admin' }: Ad
                     {/* Actions */}
                     <td className="py-4 px-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <button
-                          type="button"
-                          disabled={isProcessing}
-                          onClick={() => handleToggleSuspend(u)}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
-                            u.is_suspended
-                              ? 'bg-slate-950 hover:bg-emerald-950/40 text-emerald-400 border-slate-800 hover:border-emerald-500/30'
-                              : 'bg-slate-950 hover:bg-rose-950/40 text-slate-400 hover:text-rose-400 border border-slate-800 hover:border-rose-500/30'
-                          }`}
-                        >
-                          {u.is_suspended ? (
-                            <span className="flex items-center gap-1">
-                              <UserCheck className="w-3.5 h-3.5" /> Reinstate
-                            </span>
-                          ) : (
-                            <span className="flex items-center gap-1">
-                              <UserX className="w-3.5 h-3.5" /> Suspend
-                            </span>
-                          )}
-                        </button>
+                        {(() => {
+                          const isTargetSuperAdmin = (u.role || '').toLowerCase() === 'superadmin';
+                          const canManageTarget = isSuperAdmin || !isTargetSuperAdmin;
 
-                        <button
-                          type="button"
-                          disabled={isProcessing}
-                          onClick={() => handleDeleteUser(u)}
-                          className="p-1.5 rounded-xl bg-slate-950 hover:bg-rose-950/50 text-rose-500 hover:text-rose-400 border border-slate-800 hover:border-rose-500/30 transition-all flex items-center justify-center"
-                          title="Delete User Account"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                          return (
+                            <>
+                              <button
+                                type="button"
+                                disabled={isProcessing || !canManageTarget}
+                                onClick={() => handleToggleSuspend(u)}
+                                title={!canManageTarget ? 'SuperAdmin accounts can only be suspended by another SuperAdmin' : undefined}
+                                className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                                  !canManageTarget
+                                    ? 'opacity-40 cursor-not-allowed bg-slate-950 text-slate-500 border-slate-800'
+                                    : u.is_suspended
+                                    ? 'bg-slate-950 hover:bg-emerald-950/40 text-emerald-400 border-slate-800 hover:border-emerald-500/30'
+                                    : 'bg-slate-950 hover:bg-rose-950/40 text-slate-400 hover:text-rose-400 border border-slate-800 hover:border-rose-500/30'
+                                }`}
+                              >
+                                {u.is_suspended ? (
+                                  <span className="flex items-center gap-1">
+                                    <UserCheck className="w-3.5 h-3.5" /> Reinstate
+                                  </span>
+                                ) : (
+                                  <span className="flex items-center gap-1">
+                                    <UserX className="w-3.5 h-3.5" /> Suspend
+                                  </span>
+                                )}
+                              </button>
+
+                              <button
+                                type="button"
+                                disabled={isProcessing || !canManageTarget}
+                                onClick={() => handleDeleteUser(u)}
+                                className={`p-1.5 rounded-xl border transition-all flex items-center justify-center ${
+                                  !canManageTarget
+                                    ? 'opacity-40 cursor-not-allowed bg-slate-950 text-slate-600 border-slate-800'
+                                    : 'bg-slate-950 hover:bg-rose-950/50 text-rose-500 hover:text-rose-400 border-slate-800 hover:border-rose-500/30'
+                                }`}
+                                title={!canManageTarget ? 'SuperAdmin accounts can only be deleted by another SuperAdmin' : 'Delete User Account'}
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </>
+                          );
+                        })()}
                       </div>
                     </td>
                   </tr>

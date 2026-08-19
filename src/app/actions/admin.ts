@@ -670,6 +670,46 @@ export async function toggleUserSuspensionAction(userId: string, isSuspended: bo
   try {
     const supabase = await createClient();
 
+    // Check target user role
+    const { data: targetProfile, error: targetError } = await supabase
+      .from('profiles')
+      .select('id, username, role, is_suspended')
+      .eq('id', userId)
+      .single();
+
+    if (targetError || !targetProfile) {
+      return { success: false, error: 'Target user not found.' };
+    }
+
+    const targetRole = (targetProfile.role || 'user').toLowerCase();
+    const callerRole = (auth.role || 'user').toLowerCase();
+
+    // 1. If target is SuperAdmin, only another SuperAdmin can suspend them
+    if (targetRole === 'superadmin') {
+      if (callerRole !== 'superadmin') {
+        return {
+          success: false,
+          error: 'Permission denied: SuperAdmin accounts can only be suspended by another SuperAdmin.',
+        };
+      }
+
+      // 2. If suspending a SuperAdmin, ensure at least one active SuperAdmin remains
+      if (isSuspended) {
+        const { count: activeSuperAdminCount } = await supabase
+          .from('profiles')
+          .select('id', { count: 'exact', head: true })
+          .eq('role', 'superadmin')
+          .eq('is_suspended', false);
+
+        if ((activeSuperAdminCount || 0) <= 1) {
+          return {
+            success: false,
+            error: 'Cannot suspend the only remaining active SuperAdmin.',
+          };
+        }
+      }
+    }
+
     const { error } = await supabase
       .from('profiles')
       .update({ is_suspended: isSuspended, updated_at: new Date().toISOString() })
@@ -756,6 +796,38 @@ export async function deleteUserAction(userId: string): Promise<{ success: boole
 
   try {
     const supabase = await createClient();
+
+    // Check target user role
+    const { data: targetProfile } = await supabase
+      .from('profiles')
+      .select('id, role')
+      .eq('id', userId)
+      .single();
+
+    const targetRole = (targetProfile?.role || 'user').toLowerCase();
+    const callerRole = (auth.role || 'user').toLowerCase();
+
+    if (targetRole === 'superadmin') {
+      if (callerRole !== 'superadmin') {
+        return {
+          success: false,
+          error: 'Permission denied: SuperAdmin accounts can only be deleted by another SuperAdmin.',
+        };
+      }
+
+      const { count: superAdminCount } = await supabase
+        .from('profiles')
+        .select('id', { count: 'exact', head: true })
+        .eq('role', 'superadmin');
+
+      if ((superAdminCount || 0) <= 1) {
+        return {
+          success: false,
+          error: 'Cannot delete the only remaining SuperAdmin.',
+        };
+      }
+    }
+
     const { error } = await supabase.rpc('delete_user_by_id', { p_user_id: userId });
     
     if (error) throw error;
