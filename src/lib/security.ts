@@ -67,3 +67,77 @@ export function sanitizePostgrestFilter(input: string | null | undefined): strin
     .trim()
     .replace(/\s+/g, ' ');
 }
+
+/**
+ * Validates username format (alphanumeric and underscores only, 3-30 chars)
+ */
+export function validateUsername(username: string | null | undefined): { isValid: boolean; error?: string } {
+  if (!username) {
+    return { isValid: false, error: 'Username is required.' };
+  }
+  const clean = username.trim();
+  if (clean.length < 3) {
+    return { isValid: false, error: 'Username must be at least 3 characters long.' };
+  }
+  if (clean.length > 30) {
+    return { isValid: false, error: 'Username cannot exceed 30 characters.' };
+  }
+  if (!/^[a-zA-Z0-9_]+$/.test(clean)) {
+    return { isValid: false, error: 'Username can only contain letters, numbers, and underscores.' };
+  }
+  return { isValid: true };
+}
+
+/**
+ * Validates that an external URL begins with http:// or https:// and has a valid domain
+ */
+export function isValidHttpUrl(url: string | null | undefined): boolean {
+  if (!url || typeof url !== 'string') return false;
+  try {
+    const parsed = new URL(url.trim());
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Verifies that the current request has an authenticated session AND that the account is NOT suspended.
+ * If suspended, immediately terminates the session and returns a standardized error.
+ */
+export async function getAuthenticatedActiveUser(supabase: any): Promise<{
+  user: any | null;
+  profile: any | null;
+  error?: string;
+}> {
+  try {
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return { user: null, profile: null, error: 'Please sign in to continue.' };
+    }
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('id, username, display_name, role, is_suspended')
+      .eq('id', user.id)
+      .single();
+
+    if (profile?.is_suspended) {
+      await supabase.auth.signOut();
+      return {
+        user: null,
+        profile: null,
+        error: 'Your account has been suspended. Please contact the administrator for assistance.',
+      };
+    }
+
+    return { user, profile };
+  } catch {
+    return { user: null, profile: null, error: 'An unexpected authentication error occurred.' };
+  }
+}
+

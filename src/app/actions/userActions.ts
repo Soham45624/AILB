@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
+import { getAuthenticatedActiveUser } from '@/lib/security';
 
 /**
  * Toggles bookmark/favorite status of an AI tool for the authenticated user
@@ -14,13 +15,10 @@ export async function toggleSaveToolAction(toolId: string): Promise<{
 }> {
   try {
     const supabase = await createClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+    const { user, profile, error: authError } = await getAuthenticatedActiveUser(supabase);
 
     if (authError || !user) {
-      return { success: false, error: 'Please sign in to save tools to your library.' };
+      return { success: false, error: authError || 'Please sign in to save tools to your library.' };
     }
 
     // Check if already favorited
@@ -120,17 +118,30 @@ export async function submitReviewAction(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const supabase = await createClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+    const { user, profile, error: authError } = await getAuthenticatedActiveUser(supabase);
 
     if (authError || !user) {
-      return { success: false, error: 'Please sign in to write a review.' };
+      return { success: false, error: authError || 'Please sign in to write a review.' };
     }
 
     if (!rating || rating < 1 || rating > 5) {
       return { success: false, error: 'Please select a rating between 1 and 5 stars.' };
+    }
+
+    if (content && content.trim().length > 1000) {
+      return { success: false, error: 'Review content cannot exceed 1,000 characters.' };
+    }
+
+    // Rate Limiting: Max 15 review actions per hour per user
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const { count: recentReviewsCount } = await supabase
+      .from('reviews')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .gte('updated_at', oneHourAgo);
+
+    if (recentReviewsCount && recentReviewsCount >= 15) {
+      return { success: false, error: 'Review submission rate limit reached. Please try again later.' };
     }
 
     // Insert or update existing user review (1 active review per user per tool)
@@ -188,24 +199,45 @@ export async function submitReportAction(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const supabase = await createClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+    const { user, profile, error: authError } = await getAuthenticatedActiveUser(supabase);
 
     if (authError || !user) {
-      return { success: false, error: 'Please sign in to submit a report.' };
+      return { success: false, error: authError || 'Please sign in to submit a report.' };
     }
 
-    if (!reason?.trim()) {
+    const cleanReason = reason?.trim();
+    if (!cleanReason) {
       return { success: false, error: 'Please specify a reason for the report.' };
+    }
+    if (cleanReason.length > 200) {
+      return { success: false, error: 'Reason cannot exceed 200 characters.' };
+    }
+
+    const cleanDetails = details?.trim() || null;
+    if (cleanDetails && cleanDetails.length > 1000) {
+      return { success: false, error: 'Details cannot exceed 1,000 characters.' };
+    }
+
+    // Rate Limiting: Max 5 reports per hour per user
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const { count: recentReportsCount } = await supabase
+      .from('reports')
+      .select('id', { count: 'exact', head: true })
+      .eq('reporter_id', user.id)
+      .gte('created_at', oneHourAgo);
+
+    if (recentReportsCount && recentReportsCount >= 5) {
+      return {
+        success: false,
+        error: 'Report submission rate limit reached (maximum 5 reports per hour). Please try again later.',
+      };
     }
 
     const payload: any = {
       reporter_id: user.id,
       report_type: reportType,
-      reason: reason.trim(),
-      details: details?.trim() || null,
+      reason: cleanReason,
+      details: cleanDetails,
       status: 'open',
     };
 

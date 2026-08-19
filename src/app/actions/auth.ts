@@ -5,6 +5,7 @@ import { Profile } from '@/lib/types';
 import { revalidatePath } from 'next/cache';
 import { baseUrl } from '@/lib/config';
 import { validatePassword } from '@/lib/passwordValidation';
+import { getAuthenticatedActiveUser, validateUsername } from '@/lib/security';
 
 export interface AuthResponse {
   success: boolean;
@@ -205,30 +206,46 @@ export async function updateProfileAction(formData: FormData): Promise<{
 }> {
   try {
     const supabase = await createClient();
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
+    const { user, profile: activeProfile, error: authError } = await getAuthenticatedActiveUser(supabase);
 
-    if (userError || !user) {
-      return { success: false, error: 'Unauthorized. Please sign in.' };
+    if (authError || !user) {
+      return { success: false, error: authError || 'Unauthorized. Please sign in.' };
     }
 
-    const username = formData.get('username') as string;
-    const displayName = formData.get('displayName') as string;
-    const bio = formData.get('bio') as string;
-    const website = formData.get('website') as string;
-    const avatarUrl = formData.get('avatarUrl') as string;
+    const usernameRaw = formData.get('username') as string;
+    const displayName = (formData.get('displayName') as string)?.trim() || null;
+    const bio = (formData.get('bio') as string)?.trim() || null;
+    const website = (formData.get('website') as string)?.trim() || null;
+    const avatarUrl = (formData.get('avatarUrl') as string)?.trim() || null;
+
+    if (usernameRaw) {
+      const uVal = validateUsername(usernameRaw);
+      if (!uVal.isValid) {
+        return { success: false, error: uVal.error };
+      }
+    }
+
+    if (displayName && displayName.length > 60) {
+      return { success: false, error: 'Display name cannot exceed 60 characters.' };
+    }
+
+    if (bio && bio.length > 300) {
+      return { success: false, error: 'Bio cannot exceed 300 characters.' };
+    }
+
+    if (website && website.length > 200) {
+      return { success: false, error: 'Website URL cannot exceed 200 characters.' };
+    }
 
     const { data: updatedProfile, error } = await supabase
       .from('profiles')
       .update({
-        username: username?.trim() || undefined,
-        display_name: displayName?.trim() || null,
-        full_name: displayName?.trim() || null,
-        bio: bio?.trim() || null,
-        website: website?.trim() || null,
-        avatar_url: avatarUrl?.trim() || null,
+        username: usernameRaw?.trim() || undefined,
+        display_name: displayName,
+        full_name: displayName,
+        bio: bio,
+        website: website,
+        avatar_url: avatarUrl,
         updated_at: new Date().toISOString(),
       })
       .eq('id', user.id)

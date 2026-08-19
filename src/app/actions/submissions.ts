@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { normalizeToolUrl } from '@/lib/urlHelper';
 import { revalidatePath } from 'next/cache';
-import { sanitizePostgrestFilter } from '@/lib/security';
+import { sanitizePostgrestFilter, getAuthenticatedActiveUser, isValidHttpUrl } from '@/lib/security';
 
 export interface SubmitToolResponse {
   success: boolean;
@@ -103,22 +103,18 @@ export async function submitToolAction(formData: FormData): Promise<SubmitToolRe
   try {
     const supabase = await createClient();
 
-    // 1. Verify user authentication
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
+    // 1. Verify user authentication & active status
+    const { user, profile, error: authError } = await getAuthenticatedActiveUser(supabase);
     if (authError || !user) {
       return {
         success: false,
-        error: 'You must be signed in to submit an AI tool to the community library.',
+        error: authError || 'You must be signed in to submit an AI tool to the community library.',
       };
     }
 
     // 2. Rate-limiting & Abuse Prevention: Max 10 submissions per user in the last 1 hour
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-    const { count: recentSubmissionsCount, error: countError } = await supabase
+    const { count: recentSubmissionsCount } = await supabase
       .from('submissions')
       .select('id', { count: 'exact', head: true })
       .eq('submitted_by', user.id)
@@ -142,9 +138,15 @@ export async function submitToolAction(formData: FormData): Promise<SubmitToolRe
     if (!toolName || toolName.length < 2) {
       return { success: false, error: 'Tool name is required (minimum 2 characters).' };
     }
+    if (toolName.length > 80) {
+      return { success: false, error: 'Tool name cannot exceed 80 characters.' };
+    }
 
     if (!rawUrl) {
       return { success: false, error: 'Website URL is required.' };
+    }
+    if (!isValidHttpUrl(rawUrl)) {
+      return { success: false, error: 'Please enter a valid website URL starting with http:// or https://.' };
     }
 
     const normUrl = normalizeToolUrl(rawUrl);
@@ -154,6 +156,9 @@ export async function submitToolAction(formData: FormData): Promise<SubmitToolRe
 
     if (!description || description.length < 10) {
       return { success: false, error: 'Please provide a descriptive overview (minimum 10 characters).' };
+    }
+    if (description.length > 2000) {
+      return { success: false, error: 'Overview cannot exceed 2000 characters.' };
     }
 
     // 4. Check for duplicates before insert
