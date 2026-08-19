@@ -145,10 +145,10 @@ export async function getAdminSubmissionsAction(statusFilter: string = 'all') {
       .select('id, username, display_name, is_suspended')
       .in('id', userIds);
 
-    const profileMap = new Map(profiles?.map((p: any) => [p.id, p]));
+    const profileMap = new Map<string, any>(profiles?.map((p: any) => [p.id, p]));
 
     const enriched = (submissions || []).map((s: any) => {
-      const p = profileMap.get(s.submitted_by);
+      const p: any = profileMap.get(s.submitted_by);
       return {
         ...s,
         submitter_name: p?.display_name || p?.username || 'Community Member',
