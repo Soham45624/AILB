@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
-import { sanitizeRedirectUrl } from '@/lib/security';
+import { cookies } from 'next/headers';
+import { sanitizeRedirectUrl, createActiveSession, SESSION_COOKIE_NAME } from '@/lib/security';
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -25,6 +26,27 @@ export async function GET(request: Request) {
         if (profile?.is_suspended) {
           await supabase.auth.signOut();
           return NextResponse.redirect(`${origin}/login?error=account_suspended`);
+        }
+
+        // Enforce 3-device limit on OAuth login
+        const userAgent = request.headers.get('user-agent') || 'Unknown Device';
+        const sessionRes = await createActiveSession(supabase, user.id, userAgent);
+
+        if (!sessionRes.success) {
+          await supabase.auth.signOut();
+          return NextResponse.redirect(`${origin}/login?error=max_devices_reached`);
+        }
+
+        // Set session ID cookie
+        if (sessionRes.sessionToken) {
+          const cookieStore = await cookies();
+          cookieStore.set(SESSION_COOKIE_NAME, sessionRes.sessionToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 60 * 60 * 24 * 30,
+            path: '/',
+          });
         }
       }
 

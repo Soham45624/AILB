@@ -101,14 +101,109 @@ export function isValidHttpUrl(url: string | null | undefined): boolean {
   }
 }
 
+import crypto from 'crypto';
+
+export const SESSION_COOKIE_NAME = 'ailib_session_id';
+export const MAX_CONCURRENT_DEVICES = 3;
+export const ROLLING_INACTIVITY_LIMIT_MS = 24 * 60 * 60 * 1000; // 24 hours
+
 /**
- * Verifies that the current request has an authenticated session AND that the account is NOT suspended.
- * If suspended, immediately terminates the session and returns a standardized error.
+ * Generates a SHA-256 hash of a session token for secure database storage.
  */
-export async function getAuthenticatedActiveUser(supabase: any): Promise<{
+export function hashSessionToken(token: string): string {
+  return crypto.createHash('sha256').update(token).digest('hex');
+}
+
+/**
+ * Creates a new active session for a user, enforcing the 3-device concurrent login limit.
+ * If 3 devices are already active within the last 24h, blocks session creation.
+ */
+export async function createActiveSession(
+  supabase: any,
+  userId: string,
+  userAgent?: string | null
+): Promise<{
+  success: boolean;
+  sessionToken?: string;
+  error?: string;
+}> {
+  try {
+    const twentyFourHoursAgo = new Date(Date.now() - ROLLING_INACTIVITY_LIMIT_MS).toISOString();
+
+    // 1. Fetch currently active, unrevoked sessions within the rolling 24-hour window
+    const { data: activeSessions, error: countError } = await supabase
+      .from('user_sessions')
+      .select('id, last_active_at')
+      .eq('user_id', userId)
+      .eq('is_revoked', false)
+      .gte('last_active_at', twentyFourHoursAgo);
+
+    if (countError) {
+      console.warn('user_sessions table query error (table may need migration):', countError);
+    }
+
+    // 2. Enforce 3-device limit
+    if (activeSessions && activeSessions.length >= MAX_CONCURRENT_DEVICES) {
+      return {
+        success: false,
+        error:
+          'You have reached the maximum limit of 3 active devices. To sign in on this device, please log out from one of your previous devices.',
+      };
+    }
+
+    // 3. Generate 256-bit cryptographically secure token
+    const sessionToken = crypto.randomUUID() + '-' + crypto.randomBytes(16).toString('hex');
+    const tokenHash = hashSessionToken(sessionToken);
+
+    // 4. Save session record with SHA-256 hash
+    await supabase.from('user_sessions').insert({
+      user_id: userId,
+      session_token_hash: tokenHash,
+      user_agent: userAgent ? userAgent.substring(0, 500) : null,
+      last_active_at: new Date().toISOString(),
+      created_at: new Date().toISOString(),
+      is_revoked: false,
+    });
+
+    return { success: true, sessionToken };
+  } catch (err: any) {
+    console.error('Exception creating active session:', err);
+    return { success: false, error: err.message || 'Failed to establish active device session.' };
+  }
+}
+
+/**
+ * Revokes a specific session (single-device logout).
+ */
+export async function revokeActiveSession(supabase: any, sessionToken: string): Promise<void> {
+  if (!sessionToken) return;
+  try {
+    const tokenHash = hashSessionToken(sessionToken);
+    await supabase
+      .from('user_sessions')
+      .update({ is_revoked: true, updated_at: new Date().toISOString() })
+      .eq('session_token_hash', tokenHash);
+  } catch (err) {
+    console.error('Error revoking session:', err);
+  }
+}
+
+/**
+ * Verifies that the current request has an authenticated session, that the account is NOT suspended,
+ * and that the rolling 24-hour Session ID is valid and active.
+ *
+ * - Resets the 24-hour inactivity timer on active usage (sliding window).
+ * - Expires and signs out if idle for > 24 hours.
+ */
+export async function getAuthenticatedActiveUser(
+  supabase: any,
+  cookieToken?: string | null
+): Promise<{
   user: any | null;
   profile: any | null;
+  sessionToken?: string | null;
   error?: string;
+  isExpired?: boolean;
 }> {
   try {
     const {
@@ -120,6 +215,7 @@ export async function getAuthenticatedActiveUser(supabase: any): Promise<{
       return { user: null, profile: null, error: 'Please sign in to continue.' };
     }
 
+    // Check account suspension status
     const { data: profile } = await supabase
       .from('profiles')
       .select('id, username, display_name, role, is_suspended')
@@ -135,9 +231,56 @@ export async function getAuthenticatedActiveUser(supabase: any): Promise<{
       };
     }
 
-    return { user, profile };
-  } catch {
-    return { user: null, profile: null, error: 'An unexpected authentication error occurred.' };
+    // If session token cookie is provided, validate rolling 24-hour activity
+    if (cookieToken) {
+      const tokenHash = hashSessionToken(cookieToken);
+      const { data: session } = await supabase
+        .from('user_sessions')
+        .select('id, user_id, last_active_at, is_revoked')
+        .eq('session_token_hash', tokenHash)
+        .maybeSingle();
+
+      if (session) {
+        if (session.is_revoked) {
+          await supabase.auth.signOut();
+          return {
+            user: null,
+            profile: null,
+            isExpired: true,
+            error: 'Your session has been signed out on this device. Please sign in again.',
+          };
+        }
+
+        const lastActiveMs = new Date(session.last_active_at).getTime();
+        const nowMs = Date.now();
+
+        // Expired after 24 hours of continuous inactivity
+        if (nowMs - lastActiveMs > ROLLING_INACTIVITY_LIMIT_MS) {
+          await supabase
+            .from('user_sessions')
+            .update({ is_revoked: true })
+            .eq('id', session.id);
+          await supabase.auth.signOut();
+
+          return {
+            user: null,
+            profile: null,
+            isExpired: true,
+            error: 'Your session has expired due to 24 hours of inactivity. Please sign in again.',
+          };
+        }
+
+        // Active within 24h -> Slide rolling window forward
+        await supabase
+          .from('user_sessions')
+          .update({ last_active_at: new Date().toISOString() })
+          .eq('id', session.id);
+      }
+    }
+
+    return { user, profile, sessionToken: cookieToken };
+  } catch (err: any) {
+    return { user: null, profile: null, error: err?.message || 'An unexpected authentication error occurred.' };
   }
 }
 

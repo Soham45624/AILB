@@ -27,6 +27,10 @@ function LoginForm() {
       ? 'Authentication callback failed. Please try again.'
       : urlError === 'account_suspended'
       ? 'Your account has been suspended. Please contact the administrator for assistance.'
+      : urlError === 'max_devices_reached'
+      ? 'You have reached the maximum limit of 3 active devices. To sign in on this device, please log out from one of your previous devices.'
+      : urlError === 'session_expired'
+      ? 'Your session has expired due to 24 hours of inactivity. Please sign in again.'
       : null
   );
 

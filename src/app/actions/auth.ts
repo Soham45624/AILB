@@ -4,8 +4,15 @@ import { createClient } from '@/lib/supabase/server';
 import { Profile } from '@/lib/types';
 import { revalidatePath } from 'next/cache';
 import { baseUrl } from '@/lib/config';
+import { cookies, headers } from 'next/headers';
 import { validatePassword } from '@/lib/passwordValidation';
-import { getAuthenticatedActiveUser, validateUsername } from '@/lib/security';
+import {
+  getAuthenticatedActiveUser,
+  validateUsername,
+  createActiveSession,
+  revokeActiveSession,
+  SESSION_COOKIE_NAME,
+} from '@/lib/security';
 
 export interface AuthResponse {
   success: boolean;
@@ -18,30 +25,16 @@ export interface AuthResponse {
 export async function getCurrentUserAction(): Promise<AuthResponse> {
   try {
     const supabase = await createClient();
-    const {
-      data: { user },
-      error,
-    } = await supabase.auth.getUser();
+    const cookieStore = await cookies();
+    const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME)?.value;
+
+    const { user, profile, isExpired, error } = await getAuthenticatedActiveUser(supabase, sessionCookie);
 
     if (error || !user) {
-      return { success: false, user: null, profile: null };
-    }
-
-    // Fetch associated profile
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .single();
-
-    if (profile?.is_suspended) {
-      await supabase.auth.signOut();
-      return {
-        success: false,
-        user: null,
-        profile: null,
-        error: 'Your account has been suspended. Please contact the administrator for assistance.',
-      };
+      if (isExpired) {
+        cookieStore.delete(SESSION_COOKIE_NAME);
+      }
+      return { success: false, user: null, profile: null, error };
     }
 
     return {
@@ -91,6 +84,31 @@ export async function signInAction(formData: FormData): Promise<AuthResponse> {
         success: false,
         error: 'Your account has been suspended. Please contact the administrator for assistance.',
       };
+    }
+
+    // Enforce maximum 3 active devices limit & create session
+    const headerList = await headers();
+    const userAgent = headerList.get('user-agent') || 'Unknown Device';
+    const sessionRes = await createActiveSession(supabase, data.user.id, userAgent);
+
+    if (!sessionRes.success) {
+      await supabase.auth.signOut();
+      return {
+        success: false,
+        error: sessionRes.error || 'You have reached the maximum limit of 3 active devices. To sign in on this device, please log out from one of your previous devices.',
+      };
+    }
+
+    // Store session ID in HttpOnly Secure cookie
+    if (sessionRes.sessionToken) {
+      const cookieStore = await cookies();
+      cookieStore.set(SESSION_COOKIE_NAME, sessionRes.sessionToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 30,
+        path: '/',
+      });
     }
 
     return {
@@ -267,6 +285,14 @@ export async function updateProfileAction(formData: FormData): Promise<{
 export async function signOutAction(): Promise<{ success: boolean }> {
   try {
     const supabase = await createClient();
+    const cookieStore = await cookies();
+    const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME)?.value;
+
+    if (sessionCookie) {
+      await revokeActiveSession(supabase, sessionCookie);
+      cookieStore.delete(SESSION_COOKIE_NAME);
+    }
+
     await supabase.auth.signOut();
     return { success: true };
   } catch (err) {
