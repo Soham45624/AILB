@@ -1,6 +1,7 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { revalidatePath } from 'next/cache';
 import { UserRole } from '@/lib/types';
 import { sanitizePostgrestFilter } from '@/lib/security';
@@ -552,23 +553,44 @@ export async function getAdminUsersAction(search?: string) {
   try {
     const supabase = await createClient();
 
-    let query = supabase
-      .from('profiles')
-      .select('*')
-      .order('created_at', { ascending: false });
+    let profiles: any[] = [];
 
-    if (search) {
-      const cleanSearch = sanitizePostgrestFilter(search);
-      if (cleanSearch) {
-        query = query.or(`username.ilike.%${cleanSearch}%,display_name.ilike.%${cleanSearch}%`);
+    // 1. Try fast RPC that joins profiles + auth.users email
+    const { data: rpcProfiles, error: rpcError } = await supabase.rpc('get_admin_user_list');
+    
+    if (!rpcError && Array.isArray(rpcProfiles)) {
+      profiles = rpcProfiles;
+      if (search) {
+        const q = search.toLowerCase();
+        profiles = profiles.filter(
+          (p: any) =>
+            (p.username && p.username.toLowerCase().includes(q)) ||
+            (p.display_name && p.display_name.toLowerCase().includes(q)) ||
+            (p.email && p.email.toLowerCase().includes(q)) ||
+            (p.id && p.id.toLowerCase().includes(q))
+        );
       }
+    } else {
+      // Fallback to direct profiles table
+      let query = supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (search) {
+        const cleanSearch = sanitizePostgrestFilter(search);
+        if (cleanSearch) {
+          query = query.or(`username.ilike.%${cleanSearch}%,display_name.ilike.%${cleanSearch}%`);
+        }
+      }
+
+      const { data: directProfiles, error: directError } = await query;
+      if (directError) throw directError;
+      profiles = directProfiles || [];
     }
 
-    const { data: profiles, error } = await query;
-    if (error) throw error;
-
-    // 1. Ensure @Soham_12 is the SuperAdmin and has display_name 'Soham Rank'
-    const actualSoham = (profiles || []).find(
+    // 2. Ensure @Soham_12 is the SuperAdmin and has display_name 'Soham Rank'
+    const actualSoham = profiles.find(
       (p: any) => p.username?.toLowerCase() === 'soham_12'
     );
     if (actualSoham) {
@@ -592,8 +614,8 @@ export async function getAdminUsersAction(search?: string) {
       }
     }
 
-    // 2. Revert any other accounts that accidentally got superadmin back to user
-    for (const p of profiles || []) {
+    // 3. Revert any other accounts that accidentally got superadmin back to user
+    for (const p of profiles) {
       if (p.username?.toLowerCase() !== 'soham_12' && p.role === 'superadmin') {
         await supabase
           .from('profiles')
@@ -603,15 +625,16 @@ export async function getAdminUsersAction(search?: string) {
       }
     }
 
-    // Get submission counts per user
+    // 4. Get submission counts per user
     const { data: submissions } = await supabase.from('submissions').select('submitted_by');
     const subCountMap = new Map<string, number>();
     submissions?.forEach((s: any) => {
       subCountMap.set(s.submitted_by, (subCountMap.get(s.submitted_by) || 0) + 1);
     });
 
-    const enriched = (profiles || []).map((p: any) => ({
+    const enriched = profiles.map((p: any) => ({
       ...p,
+      email: p.email || null,
       submission_count: subCountMap.get(p.id) || 0,
     }));
 

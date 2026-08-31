@@ -54,6 +54,7 @@ export function AdminUsersClient({ initialUsers, currentUserRole = 'admin' }: Ad
   // Selected user for detailed inspector modal
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
   const [copiedId, setCopiedId] = useState(false);
+  const [copiedEmail, setCopiedEmail] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -79,6 +80,7 @@ export function AdminUsersClient({ initialUsers, currentUserRole = 'admin' }: Ad
     return (
       (u.username && u.username.toLowerCase().includes(q)) ||
       (u.display_name && u.display_name.toLowerCase().includes(q)) ||
+      (u.email && u.email.toLowerCase().includes(q)) ||
       (u.id && u.id.toLowerCase().includes(q))
     );
   });
@@ -150,6 +152,12 @@ export function AdminUsersClient({ initialUsers, currentUserRole = 'admin' }: Ad
     navigator.clipboard.writeText(text);
     setCopiedId(true);
     setTimeout(() => setCopiedId(false), 2000);
+  };
+
+  const copyEmailToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedEmail(true);
+    setTimeout(() => setCopiedEmail(false), 2000);
   };
 
   return (
@@ -393,6 +401,39 @@ export function AdminUsersClient({ initialUsers, currentUserRole = 'admin' }: Ad
                 </div>
                 <div className="font-mono text-xs text-slate-300 break-all select-all">
                   {selectedUser.id}
+                </div>
+              </div>
+
+              {/* Account Email */}
+              <div className="p-3 rounded-2xl bg-slate-950 border border-slate-800/80 space-y-1">
+                <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <Mail className="w-3 h-3 text-cyan-400" /> Account Email
+                  </span>
+                  {selectedUser.email && (
+                    <button
+                      type="button"
+                      onClick={() => copyEmailToClipboard(selectedUser.email)}
+                      className="flex items-center gap-1 text-cyan-400 hover:text-cyan-300 font-semibold text-[10px] transition-colors"
+                    >
+                      {copiedEmail ? (
+                        <>
+                          <Check className="w-3 h-3 text-emerald-400" />
+                          <span className="text-emerald-400">Copied</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3 h-3" />
+                          <span>Copy Email</span>
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
+                <div className="font-mono text-xs text-slate-300 break-all select-all">
+                  {selectedUser.email || (
+                    <span className="text-slate-500 italic font-sans text-xs">No email linked or email private</span>
+                  )}
                 </div>
               </div>
 
