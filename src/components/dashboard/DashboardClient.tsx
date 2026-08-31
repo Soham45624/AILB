@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   User,
   Library,
@@ -12,9 +12,10 @@ import {
   Plus,
   Compass,
   AlertCircle,
+  AlertTriangle,
   Save,
   LogOut,
-  ArrowRight,
+  X,
 } from 'lucide-react';
 import { Profile } from '@/lib/types';
 import { updateProfileAction, signOutAction } from '@/app/actions/auth';
@@ -54,12 +55,78 @@ export function DashboardClient({
   const [website, setWebsite] = useState(profile?.website || '');
   const [avatarUrl, setAvatarUrl] = useState(profile?.avatar_url || '');
 
+  // Track pristine/saved state
+  const [savedData, setSavedData] = useState({
+    username: profile?.username || '',
+    displayName: profile?.display_name || profile?.full_name || '',
+    bio: profile?.bio || '',
+    website: profile?.website || '',
+    avatarUrl: profile?.avatar_url || '',
+  });
+
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
-  const handleProfileSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Unsaved changes navigation guard state
+  const [showUnsavedModal, setShowUnsavedModal] = useState(false);
+  const [pendingNavigation, setPendingNavigation] = useState<string | (() => void) | null>(null);
+
+  // Check if form has unsaved modifications
+  const isDirty =
+    username !== savedData.username ||
+    displayName !== savedData.displayName ||
+    bio !== savedData.bio ||
+    website !== savedData.website ||
+    avatarUrl !== savedData.avatarUrl;
+
+  // Browser reload / tab close guard
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isDirty) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [isDirty]);
+
+  // Browser back / forward button guard
+  useEffect(() => {
+    if (!isDirty) return;
+
+    window.history.pushState({ guard: true }, '', window.location.href);
+
+    const handlePopState = (e: PopStateEvent) => {
+      if (isDirty) {
+        window.history.pushState({ guard: true }, '', window.location.href);
+        setPendingNavigation('__BROWSER_BACK__');
+        setShowUnsavedModal(true);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [isDirty]);
+
+  // Intercept navigation if form is dirty
+  const handleGuardedNavigation = (target: string | (() => void)) => {
+    if (isDirty) {
+      setPendingNavigation(typeof target === 'string' ? target : () => target());
+      setShowUnsavedModal(true);
+    } else {
+      if (typeof target === 'string') {
+        router.push(target);
+      } else {
+        target();
+      }
+    }
+  };
+
+  // Perform actual profile save
+  const executeSaveProfile = async (): Promise<boolean> => {
     setSaving(true);
     setSaveSuccess(false);
     setSaveError(null);
@@ -76,18 +143,84 @@ export function DashboardClient({
       if (!res.success) {
         setSaveError(res.error || 'Failed to update profile.');
         setSaving(false);
-        return;
+        return false;
       }
+
+      // Update saved pristine state
+      setSavedData({
+        username,
+        displayName,
+        bio,
+        website,
+        avatarUrl,
+      });
+
       setSaveSuccess(true);
       setSaving(false);
       setTimeout(() => setSaveSuccess(false), 3000);
+      return true;
     } catch (err: any) {
       setSaveError(err.message || 'An unexpected error occurred.');
       setSaving(false);
+      return false;
+    }
+  };
+
+  const handleProfileSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await executeSaveProfile();
+  };
+
+  // Modal Action 1: Discard & Proceed
+  const handleDiscardAndLeave = () => {
+    // Reset inputs back to saved pristine values
+    setUsername(savedData.username);
+    setDisplayName(savedData.displayName);
+    setBio(savedData.bio);
+    setWebsite(savedData.website);
+    setAvatarUrl(savedData.avatarUrl);
+
+    setShowUnsavedModal(false);
+
+    const nav = pendingNavigation;
+    setPendingNavigation(null);
+
+    if (nav === '__BROWSER_BACK__') {
+      window.history.go(-2);
+    } else if (typeof nav === 'string') {
+      router.push(nav);
+    } else if (typeof nav === 'function') {
+      nav();
+    }
+  };
+
+  // Modal Action 2: Save & Proceed
+  const handleSaveAndLeave = async () => {
+    const success = await executeSaveProfile();
+    if (success) {
+      setShowUnsavedModal(false);
+      const nav = pendingNavigation;
+      setPendingNavigation(null);
+
+      if (nav === '__BROWSER_BACK__') {
+        window.history.go(-2);
+      } else if (typeof nav === 'string') {
+        router.push(nav);
+      } else if (typeof nav === 'function') {
+        nav();
+      }
     }
   };
 
   const handleSignOut = async () => {
+    if (isDirty) {
+      handleGuardedNavigation(async () => {
+        await signOutAction();
+        router.push('/');
+        router.refresh();
+      });
+      return;
+    }
     await signOutAction();
     router.push('/');
     router.refresh();
@@ -121,6 +254,13 @@ export function DashboardClient({
                 <Shield className="w-3 h-3" />
                 {profile?.role || 'User'}
               </span>
+
+              {isDirty && (
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FEF7EC] text-[#B45309] border border-[#FDE68A] flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#B45309] animate-pulse" />
+                  Unsaved Changes
+                </span>
+              )}
             </div>
 
             <p className="text-xs text-[#73796E]">
@@ -132,21 +272,21 @@ export function DashboardClient({
         {/* Action Buttons */}
         <div className="flex items-center gap-2 flex-wrap">
           {isAdminOrEditor && (
-            <Link
-              href="/admin"
-              className="px-4 py-2 rounded-full bg-[#FAF3E6] border border-[#F0E2C8] text-[#8C4E05] font-bold text-xs shadow-sm transition-colors flex items-center gap-1.5"
+            <button
+              onClick={() => handleGuardedNavigation('/admin')}
+              className="px-4 py-2 rounded-full bg-[#FAF3E6] border border-[#F0E2C8] text-[#8C4E05] font-bold text-xs shadow-sm transition-colors flex items-center gap-1.5 hover:bg-[#F5ECD7]"
             >
               <ShieldCheck className="w-4 h-4" />
               <span>Admin Panel</span>
-            </Link>
+            </button>
           )}
 
-          <Link
-            href="/submit"
+          <button
+            onClick={() => handleGuardedNavigation('/submit')}
             className="btn-interactive px-4 py-2 rounded-full bg-[#141613] hover:bg-[#2A2E27] text-white font-bold text-xs transition-colors flex items-center gap-1.5 shadow-sm"
           >
             <Plus className="w-3.5 h-3.5" /> <span>Submit AI Tool</span>
-          </Link>
+          </button>
 
           <button
             onClick={handleSignOut}
@@ -168,7 +308,11 @@ export function DashboardClient({
           return (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
+              onClick={() => {
+                if (tab.id !== activeTab) {
+                  handleGuardedNavigation(() => setActiveTab(tab.id as any));
+                }
+              }}
               className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-colors ${
                 isActive
                   ? 'bg-[#141613] text-white shadow-sm'
@@ -190,8 +334,8 @@ export function DashboardClient({
           );
         })}
 
-        <Link
-          href="/dashboard/my-library"
+        <button
+          onClick={() => handleGuardedNavigation('/dashboard/my-library')}
           className="flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap text-[#666B60] hover:text-[#141613] hover:bg-[#F5F3ED] transition-colors"
         >
           <Library className="w-3.5 h-3.5" />
@@ -201,10 +345,10 @@ export function DashboardClient({
               {savedCount}
             </span>
           )}
-        </Link>
+        </button>
 
-        <Link
-          href="/dashboard/submissions"
+        <button
+          onClick={() => handleGuardedNavigation('/dashboard/submissions')}
           className="flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap text-[#666B60] hover:text-[#141613] hover:bg-[#F5F3ED] transition-colors"
         >
           <Send className="w-3.5 h-3.5" />
@@ -214,7 +358,7 @@ export function DashboardClient({
               {submissions.length}
             </span>
           )}
-        </Link>
+        </button>
       </div>
 
       {/* TAB CONTENT: PROFILE */}
@@ -228,27 +372,27 @@ export function DashboardClient({
               </h3>
 
               <div className="space-y-3">
-                <Link
-                  href="/dashboard/my-library"
-                  className="flex items-center justify-between p-3 rounded-xl bg-[#FBF9F5] border border-[#EAE6DC] hover:border-[#D0C9BA] transition-colors"
+                <button
+                  onClick={() => handleGuardedNavigation('/dashboard/my-library')}
+                  className="w-full flex items-center justify-between p-3 rounded-xl bg-[#FBF9F5] border border-[#EAE6DC] hover:border-[#D0C9BA] transition-colors text-left"
                 >
                   <div className="flex items-center gap-2.5 text-xs text-[#141613] font-semibold">
                     <Library className="w-4 h-4 text-[#5A7840]" />
                     <span>Saved in Library</span>
                   </div>
                   <span className="text-sm font-bold text-[#141613]">{savedCount}</span>
-                </Link>
+                </button>
 
-                <Link
-                  href="/dashboard/submissions"
-                  className="flex items-center justify-between p-3 rounded-xl bg-[#FBF9F5] border border-[#EAE6DC] hover:border-[#D0C9BA] transition-colors"
+                <button
+                  onClick={() => handleGuardedNavigation('/dashboard/submissions')}
+                  className="w-full flex items-center justify-between p-3 rounded-xl bg-[#FBF9F5] border border-[#EAE6DC] hover:border-[#D0C9BA] transition-colors text-left"
                 >
                   <div className="flex items-center gap-2.5 text-xs text-[#141613] font-semibold">
                     <Send className="w-4 h-4 text-[#0366D6]" />
                     <span>Tool Submissions</span>
                   </div>
                   <span className="text-sm font-bold text-[#141613]">{submissions.length}</span>
-                </Link>
+                </button>
 
                 <div className="flex items-center justify-between p-3 rounded-xl bg-[#FBF9F5] border border-[#EAE6DC]">
                   <div className="flex items-center gap-2.5 text-xs text-[#141613] font-semibold">
@@ -267,9 +411,16 @@ export function DashboardClient({
               onSubmit={handleProfileSubmit}
               className="p-6 rounded-3xl bg-white border border-[#EAE6DC] space-y-5 shadow-sm"
             >
-              <div className="border-b border-[#F2EFE8] pb-3">
-                <h3 className="text-base font-bold text-[#141613]">Public Profile Details</h3>
-                <p className="text-xs text-[#73796E]">Update your profile information visible across AILIB</p>
+              <div className="flex items-center justify-between border-b border-[#F2EFE8] pb-3">
+                <div>
+                  <h3 className="text-base font-bold text-[#141613]">Public Profile Details</h3>
+                  <p className="text-xs text-[#73796E]">Update your profile information visible across AILIB</p>
+                </div>
+                {isDirty && (
+                  <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#FEF7EC] text-[#B45309] border border-[#FDE68A]">
+                    Unsaved Edits
+                  </span>
+                )}
               </div>
 
               {saveSuccess && (
@@ -338,11 +489,30 @@ export function DashboardClient({
                 />
               </div>
 
-              <div className="pt-2 flex justify-end">
+              <div className="pt-2 flex items-center justify-between gap-3">
+                {isDirty ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setUsername(savedData.username);
+                      setDisplayName(savedData.displayName);
+                      setBio(savedData.bio);
+                      setWebsite(savedData.website);
+                      setAvatarUrl(savedData.avatarUrl);
+                      setSaveError(null);
+                    }}
+                    className="text-xs font-semibold text-[#73796E] hover:text-[#D73A49] transition-colors"
+                  >
+                    Discard Changes
+                  </button>
+                ) : (
+                  <div />
+                )}
+
                 <button
                   type="submit"
-                  disabled={saving}
-                  className="btn-interactive px-6 py-2.5 rounded-full bg-[#141613] hover:bg-[#2A2E27] text-white font-bold text-xs flex items-center gap-1.5 shadow-sm disabled:opacity-50"
+                  disabled={saving || !isDirty}
+                  className="btn-interactive px-6 py-2.5 rounded-full bg-[#141613] hover:bg-[#2A2E27] text-white font-bold text-xs flex items-center gap-1.5 shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   <Save className="w-3.5 h-3.5" />
                   <span>{saving ? 'Saving...' : 'Save Profile'}</span>
@@ -371,6 +541,72 @@ export function DashboardClient({
           >
             <Compass className="w-3.5 h-3.5" /> Explore &amp; Review Tools
           </Link>
+        </div>
+      )}
+
+      {/* UNSAVED CHANGES MODAL */}
+      {showUnsavedModal && (
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white rounded-3xl border border-[#EAE6DC] shadow-2xl max-w-md w-full p-6 space-y-5">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-[#FEF7EC] text-[#B45309] border border-[#FDE68A] flex items-center justify-center flex-shrink-0">
+                  <AlertTriangle className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-[#141613]">Unsaved Changes</h3>
+                  <p className="text-xs text-[#73796E] mt-0.5">
+                    You have unsaved changes to your profile.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => {
+                  setShowUnsavedModal(false);
+                  setPendingNavigation(null);
+                }}
+                className="p-1 rounded-full text-[#73796E] hover:text-[#141613] hover:bg-[#F5F3ED] transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <p className="text-xs text-[#666B60] leading-relaxed">
+              If you leave without saving, your modifications will be discarded and reset to your current saved profile.
+            </p>
+
+            <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2 pt-2 border-t border-[#F2EFE8]">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowUnsavedModal(false);
+                  setPendingNavigation(null);
+                }}
+                className="px-4 py-2.5 rounded-full text-xs font-semibold text-[#73796E] hover:text-[#141613] hover:bg-[#F5F3ED] transition-colors"
+              >
+                Keep Editing
+              </button>
+
+              <button
+                type="button"
+                onClick={handleDiscardAndLeave}
+                className="px-4 py-2.5 rounded-full text-xs font-semibold text-[#D73A49] bg-[#FDF0F2] hover:bg-[#FCE3E7] border border-[#F8D2D7] transition-colors"
+              >
+                Discard &amp; Leave
+              </button>
+
+              <button
+                type="button"
+                onClick={handleSaveAndLeave}
+                disabled={saving}
+                className="btn-interactive px-5 py-2.5 rounded-full bg-[#141613] hover:bg-[#2A2E27] text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm disabled:opacity-50"
+              >
+                <Save className="w-3.5 h-3.5" />
+                <span>{saving ? 'Saving...' : 'Save & Continue'}</span>
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
