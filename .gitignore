@@ -57,3 +57,8 @@ next-env.d.ts
 
 # Agents & Built-in caches
 .agents/
+
+# Document files & Project docs
+1NPDPRO5.DOC
+*.doc
+*.docx
